@@ -109,7 +109,7 @@ additional settings.  The properties are loaded using [Giulius](http://github.co
 and follow its rules for what overrides what.
 
 _Note:_ Since Netty and Acteur are asynchronous, threads are used much more efficiently - a single
-thread can simultaneously service many connections.
+thread can simultaneously service hundreds or thousands of connections.
 
 
 Build and Run
