@@ -2,14 +2,16 @@ Meta Update Server
 ------------------
 
 A simple standalone update server for [NetBeans](http://netbeans.org) and 
-[NetBeans Platform](http://platform.netbeans.org) plugins.  You can deploy
-this server by running it with ``java -jar`` and use it to serve plugins
-and updates to existing plugins.
+[NetBeans Platform](http://platform.netbeans.org) plugins.  Just run it
+using ``java -jar`` and use it to serve plugins and updates to existing plugins.
 
 Download the latest build [from timboudreau.com](http://timboudreau.com/builds/job/meta-update-server/).
+Usage fairly self-explanatory - start it and navigate to it in a browser.
 
 It serves NBM (NetBeans module) files with appropriate metadata so that the
-NetBeans update center (Tools | Plugins) can download updated and new plugins from it.
+NetBeans update center (Tools | Plugins) can download plugins from it.  So if you
+are building NBM files, you have a way to distribute updates which automatically
+updates itself.
 
 You give it URLs where those NBM files live on the web, and it takes
 care of automatically checking for updates.  The server can either direct callers
@@ -158,7 +160,7 @@ configuration, you would want to start the server with ``--hostname my.host.name
 so that generated URLs will be correct.
 
 Here is an example set of arguments for a [Debian](http://debian.org) launch
-script:
+script (start from ``/etc/init.d/skeleton``):
 
 ```
 DAEMON_ARGS="-jar 
@@ -196,6 +198,10 @@ of each file is the SHA-1 hash of the nbm file's bits.
 The version of the module served is the one with the highest specification version in
 its manifest.  If there is more than one build of the same version, the most recently
 downloaded is used.
+
+``Caveat:`` The above algorithm does mean that if you add url-to-nbm A pointing to
+com.foo.mymodule 1.2 and later you add url-to-nbm B pointing to com.foo.mymodule 1.0,
+the version served will be 1.2.
 
 The server honors the ``If-Modified-Since`` and ``If-None-Match`` headers to reduce
 server load.
