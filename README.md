@@ -6,10 +6,13 @@ A simple standalone update server for [NetBeans](http://netbeans.org) and
 this server by running it with ``java -jar`` and use it to serve plugins
 and updates to existing plugins.
 
+Download the latest build [from timboudreau.com](http://timboudreau.com/builds/job/meta-update-server/).
+
 It serves NBM (NetBeans module) files with appropriate metadata so that the
-NetBeans update center can download updated and/or new plugins from it.
-You simply give it URLs where those NBM files live on the web, and it takes
-care of automatically updating them.  The server can either direct callers
+NetBeans update center (Tools | Plugins) can download updated and new plugins from it.
+
+You give it URLs where those NBM files live on the web, and it takes
+care of automatically checking for updates.  The server can either direct callers
 to those remote NBMs, or serve its own copies - this can be set on a file-by-file
 basis.
 
