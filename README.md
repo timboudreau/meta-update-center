@@ -1,5 +1,5 @@
-Meta Update Server
-------------------
+NetBeans Meta Update Server
+===========================
 
 A simple standalone update server for [NetBeans](http://netbeans.org) and 
 [NetBeans Platform](http://platform.netbeans.org) plugins.  Just run it
@@ -13,10 +13,13 @@ NetBeans update center (Tools | Plugins) can download plugins from it.  So if yo
 are building NBM files, you have a way to distribute updates which automatically
 updates itself.
 
-You give it URLs where those NBM files live on the web, and it takes
-care of automatically checking for updates.  The server can either direct callers
-to those remote NBMs, or serve its own copies - this can be set on a file-by-file
-basis.
+Features
+--------
+
+ * You give it URLs where those NBM files live on the web.  
+ * It downloads them and serves them.  
+ * It checks for new versions and updates what it is serving automatically.
+ * It processes metadata in downloaded NBM files and uses that to figure out the rest.
 
 Plugins are added to the server by adding remote URLs to an NBM file.  The
 primary use-case is wanting to distribute some modules built by a continuous
