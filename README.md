@@ -85,7 +85,7 @@ arguments override them all.
 The following are useful properties
 
  * ``nbm.dir`` - where the files are stored
- * port - the port to run on
+ * ``port`` - the port to run on
  * ``external.port`` - if you are running it behind a reverse proxy such 
 as [NginX](http://nginx.org), this sets what port URLs to files this server is 
 serving should have - the module catalogue it serves includes download URLs, 
