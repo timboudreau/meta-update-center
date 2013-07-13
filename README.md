@@ -116,6 +116,7 @@ Build and Run
 -------------
 
 Build with Maven and run the JAR.  Builds can be downloaded [here](http://timboudreau.com/builds).
+_Requires JDK 7 or greater._
 
 
 Security & Reverse Proxy Setup
