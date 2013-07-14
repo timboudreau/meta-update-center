@@ -4,7 +4,7 @@ NetBeans Meta Update Server
 A simple standalone update server for [NetBeans](http://netbeans.org) and 
 [NetBeans Platform application](http://platform.netbeans.org) plugins.  
 
-Just run it using ``java -jar``. It will serve whatever plugins you tell it about,
+Just run it using ``java -jar``. It will serve whatever plugins you tell it about, and
 automatically check for updates.  Download it [from timboudreau.com](http://timboudreau.com/builds/job/meta-update-server/).
 
 Your users can simply get updates using Tools | Plugins, with no additional
@@ -137,7 +137,7 @@ uses ``/tmp/nbmserver`` or OS-specific equivalent.
  * ``download.threads`` - how many concurrent downloads from remote update/build servers should be attempted simultaneously
     * See note below
  * ``poll.interval.minutes`` - the interval in minutes between checks of remote servers for newer 
-versions of the NBMs served
+versions of the NBMs served.  The default is hourly.
  * ``admin.user.name`` - sets the user name expected for basic authentication for adding modules.  The default is ``admin``.
 
 See the documentation for [Acteur](http://github.com/timboudreau/acteur) for 
