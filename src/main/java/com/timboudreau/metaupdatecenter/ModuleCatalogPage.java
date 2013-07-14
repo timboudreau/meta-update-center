@@ -68,13 +68,6 @@ public class ModuleCatalogPage extends Page {
 
         @Inject
         ModuleListSender(ModuleSet set, Event evt, ObjectMapper mapper, final PathFactory factory) throws JsonProcessingException {
-            
-            System.out.println("PAREMETER: " + evt.getParametersAsMap());
-            for ( String s : ((DefaultHttpRequest) evt.getRequest()).headers().names()){
-                System.out.println(s + ": " + ((DefaultHttpRequest) evt.getRequest()).headers().getAll(s));
-            }
-            System.out.println("ADDR " + evt.getRemoteAddress());
-            
             final Iterator<ModuleItem> items = set.iterator();
             final DateTime lm = set.getNewestDownloaded();
             setChunked(false);

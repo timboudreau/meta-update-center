@@ -23,7 +23,7 @@ Features
  * It periodically checks for new versions and updates what it is serving automatically.
  * Automatically generates and serves a NetBeans plugin which registers your server as an update server - your users install that, and from then on the IDE/application will automatically check your server for updates
 
-Usage fairly self-explanatory - start it and navigate to it in a browser.  Try the [demo server](http://be.mine.nu) to see what it does.
+Usage fairly self-explanatory - start it and navigate to it in a browser.  Try the [demo server](http://be.mine.nu/modules) to see what it does.
 
 It serves NBM (NetBeans module) files with appropriate metadata so that the
 NetBeans update center (Tools | Plugins) can download plugins from it.  It 
