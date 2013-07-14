@@ -34,9 +34,9 @@ at the same URL will make the new version automatically available to your users.
 Use Case
 --------
 
-This was written to scratch an itch - I have a [Jenkins](http://timboudreau.com/builds) 
-continuous integration server which builds modules;  I want to publish them to users,
-and I want to make it easy for them to get updates and automatic for me to provide them.
+This was written to scratch an itch.  I have a [Jenkins](http://timboudreau.com/builds) 
+continuous integration server which builds modules.  I want to publish them to users
+so it is easy for them to get updates.  And I want no manual steps for me to provide them.
 
 I briefly considered writing a Jenkins extension like its Maven Repository plugin,
 which would serve this stuff. Then I thought, why be tied to Jenkins at all?  This solution
@@ -93,6 +93,12 @@ remote URL of an NBM file
    * This call requires HTTP Basic authentication
  * An HTTP GET to ``/download/$CODE_NAME/$HASH.nbm`` will download the cached
 copy of an NBM file
+
+There is one caveat:  If the URL to an NBM incorporates the version number of that
+NBM, and an update will have a different version number, then you will need to manually
+add the new URL every time you publish an update.  For automatic updates, 
+change your build script not to do that.  HTTP does not do wild-cards, so 
+there really is no other fix.
 
 
 Configuring The Server
