@@ -15,6 +15,7 @@ Features
  * It downloads them and serves them.  
  * It processes metadata in downloaded NBM files and uses that to figure out the rest.
  * It checks for new versions and updates what it is serving automatically.
+ * Automatically generates and serves a NetBeans plugin which registers your server as an update server - your users install that, and from then on the IDE/application will automatically check your server for updates
 
 Download the latest build [from timboudreau.com](http://timboudreau.com/builds/job/meta-update-server/).
 Usage fairly self-explanatory - start it and navigate to it in a browser.
@@ -123,6 +124,34 @@ and follow its rules for what overrides what.
 _Note:_ Since Netty and Acteur are asynchronous, threads are used much more efficiently - a single
 thread can simultaneously service hundreds or thousands of connections.
 
+If you use files instead of command-line arguments, the server periodically checks and reloads these.  To guarantee changes are picked up, restart the server (it starts very fast!).
+
+
+The Generated Update Center Module
+----------------------------------
+
+On startup, the server generates a NetBeans module on-the-fly which can be 
+installed and will register your server as an update server.  Once a user has
+done that, NetBeans will automatically check back with your server for updates.
+
+Some care is taken to ensure the generated module is not updated unless something has
+changed, but is if something has:
+
+ * The implementation version is a SHA-1 hash of the sorted keys and values used to generate it
+ * The package name and module code name are derived from the server's update catalogue URL, so multiple servers can be hosted on one domain but will generate unique modules
+ * The module's specification version incorporates
+   * The version of the server
+   * A munged timestamp from the first time the server was run
+   * A number which is incremented every time the generated bits differ from the preceding run
+
+This does mean you should take some care choosing your host name and base path, as the module will not know if you change them later (a new one will be generated, but the old one will be broken).
+
+The following settings can be set as described above, and affect only the module:
+
+ * ``update.url.https`` - use https for the update URL
+ * ``serverDisplayName`` - what the server is called in descriptions (e.g. "Joe Blow's modules")
+ * ``module.author`` - the name to show for the module author;  uses ``System.getProperty("user.name")`` if unset
+
 
 Build and Run
 -------------
@@ -215,3 +244,12 @@ the version served will be 1.2.
 
 The server honors the ``If-Modified-Since`` and ``If-None-Match`` headers to reduce
 server load.
+
+
+To-Dos
+------
+
+ * Repack jars using pack200
+ * Automatically sign JARs if a certificate is provided
+ * More admin UI for configuring some of the settings described above
+
