@@ -271,6 +271,20 @@ The server honors the ``If-Modified-Since`` and ``If-None-Match`` headers to red
 server load.
 
 
+Stats
+-----
+
+The server logs simple stats as lines of JSON to ``stats.log`` in the folder NBMs are
+served from.  The activity can be identified by the combination of property names.
+
+ * ``{"ref"="-", "addr"="/0:0:0:0:0:0:0:1:51328", "time"="Sun, 14 Jul 2013 06:46:31 GMT"}`` - an index page hit with referrer
+ * ``{"id"="abcd", "addr"="/0:0:0:0:0:0:0:1:51328", "time"="Sun, 14 Jul 2013 06:46:39 GMT"}`` - a
+request for the NBM catalog, possibly with an installation ID identifying a unique user
+ * ``{"pth"="com.foo.bar/sha1-hash.nbm", "addr"="/0:0:0:0:0:0:0:1:51288", "time"="Sun, 14 Jul 2013 06:37:29 GMT"}`` - a download of an NBM
+
+Server start and shutdown events are also logged.
+
+
 To-Dos
 ------
 
