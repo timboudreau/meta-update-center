@@ -5,11 +5,13 @@ A simple standalone update server for [NetBeans](http://netbeans.org) and
 [NetBeans Platform application](http://platform.netbeans.org) plugins.  
 
 Just run it using ``java -jar``. It will serve whatever plugins you tell it about,
-automatically check for updates.
+automatically check for updates.  Download it [from timboudreau.com](http://timboudreau.com/builds/job/meta-update-server/).
 
 Your users can simply get updates using Tools | Plugins, with no additional
-steps.  You get a plugin which registers your server with Tools | Plugins
-in NetBeans generated for you.
+steps.
+
+The server will generate and serve a plugin which registers it with Tools | Plugins
+in NetBeans.  That's generated for you on startup and is always-up-to-date.
 
 
 Features
@@ -17,11 +19,10 @@ Features
 
  * You give it URLs where your plugin (NBM) files live on the web.  
  * It downloads them and serves them.  
- * It processes metadata in downloaded NBM files and uses that to figure out the rest.
- * It checks for new versions and updates what it is serving automatically.
+ * It processes metadata in the downloaded NBM files and uses that to figure out the rest.
+ * It periodically checks for new versions and updates what it is serving automatically.
  * Automatically generates and serves a NetBeans plugin which registers your server as an update server - your users install that, and from then on the IDE/application will automatically check your server for updates
 
-Download the latest build [from timboudreau.com](http://timboudreau.com/builds/job/meta-update-server/).
 Usage fairly self-explanatory - start it and navigate to it in a browser.  Try the [demo server](http://be.mine.nu) to see what it does.
 
 It serves NBM (NetBeans module) files with appropriate metadata so that the
@@ -29,12 +30,17 @@ NetBeans update center (Tools | Plugins) can download plugins from it.  It
 give you a way to distribute updates, where simply publishing a new version
 at the same URL will make the new version automatically available to your users.
 
+
 Use Case
 --------
 
 This was written to scratch an itch - I have a [Jenkins](http://timboudreau.com/builds) 
 continuous integration server which builds modules;  I want to publish them to users,
 and I want to make it easy for them to get updates and automatic for me to provide them.
+
+I briefly considered writing a Jenkins extension like its Maven Repository plugin,
+which would serve this stuff. Then I thought, why be tied to Jenkins at all?  This solution
+will serve whatever you want, wherever it is.
 
 
 Usage
