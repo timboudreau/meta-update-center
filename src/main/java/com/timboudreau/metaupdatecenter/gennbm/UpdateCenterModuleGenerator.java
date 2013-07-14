@@ -6,6 +6,7 @@ import com.mastfrog.acteur.server.PathFactory;
 import com.mastfrog.settings.Settings;
 import com.mastfrog.url.Path;
 import com.mastfrog.url.URL;
+import com.mastfrog.util.ConfigurationError;
 import com.mastfrog.util.Streams;
 import com.mastfrog.util.streams.HashingOutputStream;
 import com.timboudreau.metaupdatecenter.InfoFile;
@@ -131,6 +132,26 @@ public final class UpdateCenterModuleGenerator {
                 day = (String) m.get("day");
                 month = (String) m.get("month");
             }
+        } else {
+            if (!f.createNewFile()) {
+                throw new ConfigurationError("Could not create " + f.getAbsolutePath());
+            }
+            String currHash = getImplementationVersion(getSubstitutions());
+            Map<String, Object> m = new HashMap<>();
+            m.put("hash", currHash);
+            m.put("version", version);
+            // Record the current date, so on restart we can generate an
+            // identical NBM
+            m.put("year", DateTime.now().getYear() + "");
+            m.put("month", DateTime.now().getMonthOfYear() + "");
+            m.put("day", DateTime.now().getDayOfMonth() + "");
+            year = (String) m.get("year");
+            day = (String) m.get("day");
+            month = (String) m.get("month");
+            substs = null;
+            currHash = getImplementationVersion(getSubstitutions());
+            m.put("hash", currHash);
+            mapper.writeValue(f, m);
         }
     }
 
@@ -238,7 +259,8 @@ public final class UpdateCenterModuleGenerator {
         return result;
     }
 
-    private Map<String,String> substs;
+    private Map<String, String> substs;
+
     private Map<String, String> getSubstitutions() {
         if (substs != null) {
             return substs;
@@ -282,9 +304,9 @@ public final class UpdateCenterModuleGenerator {
     public static final String CODE_NAME_SLASHES = "codeNameSlashes";
     public static final String CODE_NAME_UNDERSCORES = "codeNameUnderscores";
     public static final String CODE_NAME_DASHES = "codeNameDashes";
-    
+
     private String hash;
-    
+
     public String getHash() {
         if (hash == null) {
             throw new IllegalStateException("Call getNbmInputStream first");

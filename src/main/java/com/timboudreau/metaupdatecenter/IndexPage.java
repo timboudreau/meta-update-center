@@ -59,7 +59,11 @@ public class IndexPage extends Page {
                 sb.append("  <td>").append(item.getDescription()).append("</td>\n");
                 sb.append("  <td>").append(item.getVersion()).append("</td>\n");
                 sb.append("  <td>").append(item.getDownloaded()).append("</td>\n");
-                sb.append("  <td><a href=\"").append(item.getFrom()).append("\">").append("Link to Original").append("</a>").append(" &middot; \n");
+                if (!UpdateCenterServer.DUMMY_URL.equals(item.getFrom())) {
+                    sb.append("  <td><a href=\"").append(item.getFrom()).append("\">").append("Link to Original").append("</a>").append(" &middot; \n");
+                } else {
+                    sb.append("  <td>\n");
+                }
                 URL u = paths.constructURL(Path.builder().add("download").add(item.getCodeNameBase()).add(item.getHash() + ".nbm").create(), false);
                 sb.append("<a href=\"").append(u).append("\">").append("Cached Copy").append("</a>").append("</td></tr>\n");
             }
