@@ -4,10 +4,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.inject.util.Providers;
 import com.mastfrog.acteur.server.PathFactory;
+import com.mastfrog.settings.Settings;
+import com.mastfrog.settings.SettingsBuilder;
 import com.mastfrog.url.Path;
 import com.mastfrog.url.PathElement;
 import com.mastfrog.util.AbstractBuilder;
+import com.mastfrog.util.Streams;
+import com.timboudreau.metaupdatecenter.gennbm.UpdateCenterModuleGenerator;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -29,17 +34,19 @@ import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 public class AppTest {
-    
+
     @Test
     public void testDlRex() {
         Pattern p = Pattern.compile(DownloadPage.DOWNLOAD_REGEX);
         Matcher m = p.matcher("download/com.timboudreau.netbeans.mongodb/fmcer18v7npq1cso8w61m0u8rx18luad5.nbm");
         assertTrue(m.find());
-        
+
     }
 
     @Test
     public void test() throws SAXException, ParserConfigurationException, IOException, XPathExpressionException, TransformerException {
+
+        System.out.println("NOW: " + DateTime.now().getMillis());
 
         File tmp = new File(System.getProperty("java.io.tmpdir"));
         assertTrue(tmp.isDirectory());
@@ -89,14 +96,37 @@ public class AppTest {
         assertTrue (dt.isAfter(info.getDownloaded()));
         assertEquals(res.toString(), info.getFrom());
         assertEquals("test-hash", info.getHash());
-        
+
         System.out.println("-------------XML--------------------");
         System.out.println(info.toXML(new X(), "download"));
-        
+
         assertNotNull(info.getVersion());
         assertEquals(new SpecificationVersion("1.3.1"), info.getVersion());
+
+        testGeneration(new X(), set);
     }
-    
+
+    private void testGeneration(X x, ModuleSet set) throws IOException {
+        Settings settings = new SettingsBuilder()
+                .add("hostname", "foo.com")
+                .add("module.author", "Joe Blow")
+                .add("basepath", "121/final/modules")
+                .add("serverDisplayName", "The Foo Collection")
+                .build();
+        UpdateCenterModuleGenerator gen = new UpdateCenterModuleGenerator(set, settings, x, new ObjectMapper());
+        gen.version = 6;
+
+        File f = new File(new File(System.getProperty("java.io.tmpdir")), "test.nbm");
+        if (!f.exists()) {
+            f.createNewFile();
+        }
+        try (InputStream in = gen.getNbmInputStream()) {
+            try (FileOutputStream out = new FileOutputStream(f)) {
+                Streams.copy(in, out);
+            }
+        }
+    }
+
     private static class X implements PathFactory {
 
         @Override

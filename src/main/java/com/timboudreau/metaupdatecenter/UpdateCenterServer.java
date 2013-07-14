@@ -3,6 +3,7 @@ package com.timboudreau.metaupdatecenter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
+import com.google.inject.name.Names;
 import com.mastfrog.acteur.ActeurFactory;
 import com.mastfrog.acteur.Application;
 import com.mastfrog.acteur.ImplicitBindings;
@@ -21,10 +22,14 @@ import com.mastfrog.settings.MutableSettings;
 import com.mastfrog.settings.Settings;
 import com.mastfrog.settings.SettingsBuilder;
 import com.mastfrog.util.GUIDFactory;
+import com.timboudreau.metaupdatecenter.gennbm.UpdateCenterModuleGenerator;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import javax.xml.parsers.ParserConfigurationException;
 import org.openide.util.Exceptions;
+import org.xml.sax.SAXException;
 
 @ImplicitBindings(ModuleItem.class)
 @Defaults(namespace = @Namespace("nbmserver"), value = {
@@ -33,8 +38,15 @@ import org.openide.util.Exceptions;
 })
 public class UpdateCenterServer extends Application {
 
+    public static final String SETTINGS_KEY_SERVER_VERSION = "serverVersion";
+    public static final int VERSION = 1;
+
+    private static final String SERVER_NAME = " Tim Boudreau's Update Aggregator " + VERSION + " - " + "https://github.com/timboudreau/meta-update-center";
+
+    public static final String DUMMY_URL = "http://GENERATED.MODULE";
+
     @Inject
-    UpdateCenterServer(ModuleSet set) {
+    UpdateCenterServer(ModuleSet set, UpdateCenterModuleGenerator gen) throws IOException, ParserConfigurationException, SAXException {
         add(ModuleCatalogPage.class);
         add(PutModulePage.class);
         add(DownloadPage.class);
@@ -47,10 +59,21 @@ public class UpdateCenterServer extends Application {
             e.printStackTrace();
             System.exit(1);
         }
+
+        InputStream nbm = gen.getNbmInputStream();
+        InfoFile nbmInfo = gen.getInfoFile();
+        String hash = gen.getHash();
+        set.add(nbmInfo, nbm, DUMMY_URL, hash, false);
+
         System.out.println("Serving the following modules:");
         for (ModuleItem i : set) {
             System.out.println("  " + i);
         }
+    }
+
+    @Override
+    public String getName() {
+        return SERVER_NAME;
     }
 
     public static void main(String[] args) {
@@ -60,7 +83,6 @@ public class UpdateCenterServer extends Application {
 
             // Compression is broken in Netty 4.0-CR10 - turning it off for now
 //            settings.setBoolean("httpCompression", false);
-
             settings.setString(BYTEBUF_ALLOCATOR_SETTINGS_KEY, POOLED_ALLOCATOR);
             String path = settings.getString("nbm.dir");
             if (path == null) {
@@ -126,9 +148,10 @@ public class UpdateCenterServer extends Application {
             ModuleSet set = new ModuleSet(base, binder().getProvider(ObjectMapper.class));
             bind(ModuleSet.class).toInstance(set);
             int downloadThreads = settings.getInt("download.threads", 4);
-            bind(HttpClient.class).toInstance(HttpClient.builder().followRedirects().threadCount(downloadThreads).maxChunkSize(16384).build());
+            bind(HttpClient.class).toInstance(HttpClient.builder().setUserAgent(SERVER_NAME).followRedirects().threadCount(downloadThreads).maxChunkSize(16384).build());
             bind(Authenticator.class).to(AuthenticatorImpl.class);
             bind(Poller.class).asEagerSingleton();
+            bind(Integer.class).annotatedWith(Names.named(SETTINGS_KEY_SERVER_VERSION)).toInstance(VERSION);
         }
     }
 }

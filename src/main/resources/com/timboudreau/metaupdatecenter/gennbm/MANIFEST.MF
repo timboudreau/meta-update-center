@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Ant-Version: Apache Ant 1.9.1
+Created-By: 1.7.0_25-b15 (Oracle Corporation)
+OpenIDE-Module-Public-Packages: -
+OpenIDE-Module-Module-Dependencies: org.netbeans.modules.autoupdate.se
+ rvices > 1.3
+OpenIDE-Module-Java-Dependencies: Java > 1.6
+OpenIDE-Module-Implementation-Version: ${implementationVersion}
+AutoUpdate-Show-In-Client: true
+OpenIDE-Module: ${codeNameBase}
+OpenIDE-Module-Layer: ${codeNameSlashes}/layer.xml
+OpenIDE-Module-Localizing-Bundle: ${codeNameSlashes}/Bundle.properties
+OpenIDE-Module-Specification-Version: ${specificationVersion}
+OpenIDE-Module-Requires: org.openide.modules.ModuleFormat1
+

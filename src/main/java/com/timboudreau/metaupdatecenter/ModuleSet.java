@@ -32,11 +32,15 @@ import org.openide.util.Exceptions;
  * @author Tim Boudreau
  */
 @Singleton
-public class ModuleSet implements Iterable<ModuleItem> {
+public final class ModuleSet implements Iterable<ModuleItem> {
 
     private final File dir;
     private final Provider<ObjectMapper> mapper;
     private final Set<ModuleItem> items = new ConcurrentSet<>();
+    
+    public File getStorageDir() {
+        return dir;
+    }
 
     @Override
     public Iterator<ModuleItem> iterator() {

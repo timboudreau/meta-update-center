@@ -62,6 +62,9 @@ public class Poller implements Runnable {
         try {
             for (final ModuleItem item : set) {
                 try {
+                    if (UpdateCenterServer.DUMMY_URL.equals(item.getFrom())) {
+                        continue;
+                    }
                     downloader.download(item.getDownloaded(), item.getFrom(), new DownloadHandler() {
 
                         @Override

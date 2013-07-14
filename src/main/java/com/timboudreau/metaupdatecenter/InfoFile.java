@@ -26,7 +26,7 @@ public class InfoFile implements Comparable<InfoFile> {
     private Element module;
     private Element manifest;
 
-    InfoFile(Document doc) {
+    public InfoFile(Document doc) {
         this.doc = doc;
     }
 
