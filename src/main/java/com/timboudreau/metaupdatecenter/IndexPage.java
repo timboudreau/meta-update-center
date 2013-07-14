@@ -4,6 +4,7 @@ import com.google.common.net.MediaType;
 import com.google.inject.Inject;
 import com.mastfrog.acteur.Acteur;
 import com.mastfrog.acteur.ActeurFactory;
+import com.mastfrog.acteur.Event;
 import com.mastfrog.acteur.Page;
 import com.mastfrog.acteur.server.PathFactory;
 import com.mastfrog.acteur.util.CacheControlTypes;
@@ -23,6 +24,7 @@ public class IndexPage extends Page {
     @Inject
     IndexPage(ActeurFactory af, DateTime serverStartTime) {
         add(af.matchMethods(Method.GET));
+        add(LogActeur.class);
         add(af.sendNotModifiedIfIfModifiedSinceHeaderMatches());
 //        getReponseHeaders().addCacheControl(CacheControlTypes.Public);
 //        getReponseHeaders().addCacheControl(CacheControlTypes.must_revalidate);
@@ -34,6 +36,14 @@ public class IndexPage extends Page {
         getReponseHeaders().setContentType(MediaType.HTML_UTF_8);
         getReponseHeaders().setLastModified(serverStartTime);
         add(IndexActeur.class);
+    }
+    
+    private static class LogActeur extends Acteur {
+        @Inject
+        LogActeur(Stats stats, Event evt) {
+            stats.logWebHit(evt);
+            setState(new ConsumedLockedState());
+        }
     }
 
     private static class IndexActeur extends Acteur {

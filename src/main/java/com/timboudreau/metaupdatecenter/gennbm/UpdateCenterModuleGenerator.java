@@ -193,7 +193,7 @@ public final class UpdateCenterModuleGenerator {
         // + "?unique={$netbeans.hash.code}"
         URL base = paths.constructURL(Path.parse("modules"), updateUrlHttps);
 //        base = base.withParameter("unique", "{$netbeans.hash.code}");
-        return base.toString() + "?unique={$netbeans.hash.code}";
+        return base.toString() + "?{$netbeans.hash.code}";
     }
 
     private String getServerDisplayName() {

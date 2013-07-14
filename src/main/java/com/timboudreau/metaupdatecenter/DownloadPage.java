@@ -7,6 +7,7 @@ import com.mastfrog.acteur.ActeurFactory;
 import com.mastfrog.acteur.Event;
 import com.mastfrog.acteur.Page;
 import com.mastfrog.acteur.ResponseWriter;
+import com.mastfrog.acteur.util.CacheControlTypes;
 import com.mastfrog.acteur.util.Headers;
 import com.mastfrog.acteur.util.Method;
 import com.mastfrog.url.Path;
@@ -14,6 +15,7 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import org.joda.time.DateTime;
+import org.joda.time.Duration;
 
 /**
  *
@@ -30,6 +32,9 @@ public class DownloadPage extends Page {
         add(af.matchMethods(Method.GET, Method.HEAD));
         add(af.matchPath(DOWNLOAD_REGEX));
         add(FindModuleItem.class);
+        getReponseHeaders().addCacheControl(CacheControlTypes.Public);
+        getReponseHeaders().addCacheControl(CacheControlTypes.max_age, Duration.standardDays(120));
+        getReponseHeaders().addCacheControl(CacheControlTypes.must_revalidate);
         add(af.sendNotModifiedIfIfModifiedSinceHeaderMatches());
         add(af.sendNotModifiedIfETagHeaderMatches());
 //        add(af.exactPathLength(3));
@@ -39,7 +44,7 @@ public class DownloadPage extends Page {
     private static class FindModuleItem extends Acteur {
 
         @Inject
-        FindModuleItem(ModuleSet ms, Event evt, Page page) {
+        FindModuleItem(ModuleSet ms, Event evt, Page page, Stats stats) {
             Path pth = evt.getPath();
             String codeName = pth.getElement(1).toString();
             String hash = pth.getElement(2).toString();
@@ -53,6 +58,7 @@ public class DownloadPage extends Page {
                 page.getReponseHeaders().setETag(hash);
             }
             setState(new ConsumedLockedState(item));
+            stats.logDownload(evt);
         }
     }
 
@@ -64,7 +70,6 @@ public class DownloadPage extends Page {
             String codeName = pth.getElement(1).toString();
             String hash = pth.getElement(2).toString();
             final File file = ms.getNBM(codeName, hash);
-            System.out.println("check for " + file);
             setChunked(false);
             if (!file.exists()) {
                 setState(new RespondWith(404, "No such file " + file));
@@ -72,7 +77,6 @@ public class DownloadPage extends Page {
                 add(Headers.CONTENT_TYPE, MediaType.OCTET_STREAM);
                 add(Headers.LAST_MODIFIED, new DateTime(file.lastModified()));
                 add(Headers.CONTENT_LENGTH, file.length());
-
                 ok();
                 if (evt.getMethod() != Method.HEAD) {
                     setResponseWriter(new ResponseWriter() {

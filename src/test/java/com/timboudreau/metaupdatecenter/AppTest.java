@@ -69,7 +69,7 @@ public class AppTest {
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
 
-        ModuleSet set = new ModuleSet(dir, Providers.of(mapper));
+        ModuleSet set = new ModuleSet(dir, Providers.of(mapper), Providers.of(new Stats(null, null)));
 
         URL res = AppTest.class.getResource("org-netbeans-modules-fisheye.nbm");
         set.add(moduleInfo, nbmIn, res.toString(), "test-hash", false);

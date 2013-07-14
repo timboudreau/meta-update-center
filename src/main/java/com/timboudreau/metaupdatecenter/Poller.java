@@ -1,6 +1,7 @@
 package com.timboudreau.metaupdatecenter;
 
 import com.google.inject.Inject;
+import com.mastfrog.acteur.util.Headers;
 import com.mastfrog.giulius.ShutdownHookRegistry;
 import com.mastfrog.guicy.annotations.Defaults;
 import com.mastfrog.guicy.annotations.Namespace;
@@ -58,7 +59,9 @@ public class Poller implements Runnable {
 
     @Override
     public void run() {
-        Thread.currentThread().setName("Poll NBMs at " + DateTime.now());
+        String msg = "Poll NBMs at " + Headers.toISO2822Date(DateTime.now());
+        Thread.currentThread().setName(msg);
+        System.out.println(msg);
         try {
             for (final ModuleItem item : set) {
                 try {
@@ -69,7 +72,6 @@ public class Poller implements Runnable {
 
                         @Override
                         public boolean onResponse(HttpResponseStatus status, HttpHeaders headers) {
-                            System.out.println("Response " + status + " for " + item.getCodeNameBase());
                             return OK.equals(status);
                         }
 

@@ -43,12 +43,13 @@ public class ModuleCatalogPage extends Page {
     private static final class SetupLastModified extends Acteur {
 
         @Inject
-        SetupLastModified(Page page, ModuleSet set, Event evt) {
+        SetupLastModified(Page page, ModuleSet set, Event evt, Stats stats) {
+            stats.logHit(evt);
             page.getReponseHeaders().setLastModified(set.getNewestDownloaded());
             page.getReponseHeaders().setContentType("true".equals(evt.getParameter("json")) ? MediaType.JSON_UTF_8 : MediaType.XML_UTF_8);
             page.getReponseHeaders().addCacheControl(CacheControlTypes.Public);
             page.getReponseHeaders().addCacheControl(CacheControlTypes.must_revalidate);
-            page.getReponseHeaders().addCacheControl(CacheControlTypes.max_age, Duration.standardDays(1));
+            page.getReponseHeaders().addCacheControl(CacheControlTypes.max_age, Duration.standardHours(1));
             page.getReponseHeaders().addVaryHeader(Headers.CONTENT_ENCODING);
             setState(new ConsumedLockedState());
         }

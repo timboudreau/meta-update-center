@@ -76,10 +76,12 @@ public final class ModuleSet implements Iterable<ModuleItem> {
         return result;
     }
 
+    private final Provider<Stats> stats;
     @Inject
-    ModuleSet(File dir, Provider<ObjectMapper> mapper) {
+    ModuleSet(File dir, Provider<ObjectMapper> mapper, Provider<Stats> stats) {
         this.dir = dir;
         this.mapper = mapper;
+        this.stats = stats;
         if (!dir.exists()) {
             if (!dir.mkdirs()) {
                 throw new ConfigurationError("Could not create " + dir);
@@ -180,6 +182,7 @@ public final class ModuleSet implements Iterable<ModuleItem> {
             if (old != null) {
                 this.items.remove(old);
             }
+            stats.get().logIngest(item);
             return item;
         } catch (Exception e) {
             if (mdFile.exists()) {

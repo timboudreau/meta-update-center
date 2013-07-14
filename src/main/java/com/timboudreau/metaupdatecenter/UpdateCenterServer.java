@@ -145,7 +145,7 @@ public class UpdateCenterServer extends Application {
 
         @Override
         protected void configure() {
-            ModuleSet set = new ModuleSet(base, binder().getProvider(ObjectMapper.class));
+            ModuleSet set = new ModuleSet(base, binder().getProvider(ObjectMapper.class), binder().getProvider(Stats.class));
             bind(ModuleSet.class).toInstance(set);
             int downloadThreads = settings.getInt("download.threads", 4);
             bind(HttpClient.class).toInstance(HttpClient.builder().setUserAgent(SERVER_NAME).followRedirects().threadCount(downloadThreads).maxChunkSize(16384).build());
