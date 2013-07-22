@@ -104,7 +104,7 @@ public final class ModuleItem implements Comparable<ModuleItem> {
         if (result == null) {
             result = (String) getManifest().get("OpenIDE-Module-Short-Description");
         }
-        return result == null ? "(undefined)" : "<undefined>".equals(result) ? "(undefined)" : result;
+        return result == null ? "" : "<undefined>".equals(result) ? "" : result;
     }
 
     @Override
