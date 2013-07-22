@@ -74,7 +74,8 @@ If no directory path is passed to it, it will store and serve data from
 ``/tmp/nbmserver``
 
 In a web browser, navigate to ``/`` to see a web page containing a list of
-all modules served and an upload form (to upload, either pass ``--password``
+all modules served and an upload form. Uploading requires HTTP basic
+authentication - for the password, either pass ``--password``
 on the command line, or make a note of the generated password logged on
 startup.
 
@@ -120,7 +121,8 @@ arguments override them all.
 
 The following are useful properties
 
- * ``nbm.dir`` - where the files are stored
+ * ``nbm.dir`` - the path to the folder to store NBM files in.  Will be created if non-existent.  If not set,
+uses ``/tmp/nbmserver`` or OS-specific equivalent.
  * ``port`` - the port to run on
  * ``external.port`` - if you are running it behind a reverse proxy such 
 as [NginX](http://nginx.org), this sets what port URLs to files this server is 
@@ -128,8 +130,6 @@ serving should have - the module catalogue it serves includes download URLs,
 which must be canonicalized.
  * ``password`` - the password used to authenticate the administrator (needed to
 add URLs to the system).  If not set, a random one is generated on startup and logged.
- * ``nbm.dir`` - the path to the folder to store NBM files in.  Will be created if non-existent.  If not set,
-uses ``/tmp/nbmserver`` or OS-specific equivalent.
  * ``hostname`` - the host name to use in external URLs in the module catalog
  * ``basepath`` - path to prepend to all URLs served and in the module catalog
  * ``workerThreads``, ``backgroundThreads`` - control the size of thread pools used for servicing events and background tasks
