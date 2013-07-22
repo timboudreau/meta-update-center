@@ -291,4 +291,6 @@ To-Dos
  * Repack jars using pack200
  * Automatically sign JARs if a certificate is provided
  * More admin UI for configuring some of the settings described above
+ * Auto-generate version numbers and repack (and possibly re-sign) NBM bits 
+[as described here](http://wiki.netbeans.org/AggregatingUC#Version-aware_push) so that even if the remote bits version didn't change, if the bits did, it increments
 
