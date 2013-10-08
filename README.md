@@ -62,7 +62,8 @@ files which are available elsewhere via HTTP.  It has a small HTTP web api which
 lets you add new NBMs.
 
 The server uses [Acteur](http://github.com/timboudreau/acteur), an asynchronous
-server framework based on [Netty](http://netty.io).
+server framework based on [Netty](http://netty.io).  HTTP downloads from
+remote servers are also asynchronous - meaning that this tiny web application can serve **a lot** of traffic while consuming minimal system resources.
 
 
 Running The Server
