@@ -46,7 +46,7 @@ will serve whatever you want, wherever it is.
 Usage
 -----
 
-Plugins are added to the server by adding remote URLs to an NBM file.  The
+Plugins are added to the server by adding remote URLs to NBM files via a web form on the home page the server serves.  The
 primary use-case is wanting to distribute some modules built by a continuous
 build.
 
