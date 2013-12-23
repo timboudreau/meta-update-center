@@ -7,6 +7,7 @@ import com.google.inject.Inject;
 import com.mastfrog.acteur.Acteur;
 import com.mastfrog.acteur.ActeurFactory;
 import com.mastfrog.acteur.Event;
+import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.Page;
 import com.mastfrog.acteur.ResponseWriter;
 import com.mastfrog.acteur.auth.AuthenticateBasicActeur;
@@ -41,16 +42,16 @@ public class PutModulePage extends Page {
         add(af.requireParameters("url"));
         add(AuthenticateBasicActeur.class);
         add(AddModuleActeur.class);
-        getReponseHeaders().addCacheControl(CacheControlTypes.no_cache);
-        getReponseHeaders().addCacheControl(CacheControlTypes.no_store);
-        getReponseHeaders().setExpires(DateTime.now().minus(Duration.standardDays(30)));
-        getReponseHeaders().setContentType(MediaType.PLAIN_TEXT_UTF_8);
+        getResponseHeaders().addCacheControl(CacheControlTypes.no_cache);
+        getResponseHeaders().addCacheControl(CacheControlTypes.no_store);
+        getResponseHeaders().setExpires(DateTime.now().minus(Duration.standardDays(30)));
+        getResponseHeaders().setContentType(MediaType.PLAIN_TEXT_UTF_8);
     }
 
     private static class AddModuleActeur extends Acteur {
 
         @Inject
-        AddModuleActeur(ModuleSet set, Event evt, NbmDownloader downloader, ObjectMapper mapper) throws Exception {
+        AddModuleActeur(ModuleSet set, HttpEvent evt, NbmDownloader downloader, ObjectMapper mapper) throws Exception {
             String url = evt.getParameter("url");
             boolean useOriginalUrl = "true".equals(evt.getParameter("useOriginalUrl"));
             add(Headers.CONTENT_TYPE, MediaType.PLAIN_TEXT_UTF_8);
@@ -83,7 +84,7 @@ public class PutModulePage extends Page {
 
         private List<String> messages = new LinkedList<>();
         @Override
-        public Status write(Event evt, Output out, int iteration) throws Exception {
+        public Status write(Event<?> evt, Output out, int iteration) throws Exception {
             this.out = out;
             write("Starting download of " + url + "\n");
             for (String msg : messages) {

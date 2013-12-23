@@ -2,7 +2,7 @@ package com.timboudreau.metaupdatecenter;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.mastfrog.acteur.Event;
+import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.util.BasicCredentials;
 import com.mastfrog.acteur.util.Headers;
 import com.mastfrog.giulius.ShutdownHookRegistry;
@@ -71,7 +71,7 @@ public class Stats implements Runnable {
         }
     }
 
-    public void logWebHit(Event evt) {
+    public void logWebHit(HttpEvent evt) {
         String referrer = evt.getHeader(HttpHeaders.Names.REFERER);
         String now = Headers.toISO2822Date(DateTime.now());
         StringBuilder sb = new StringBuilder("{\"ref\"=\"").append(referrer == null ? "-" : referrer).append("\", \"addr\"=\"").append(evt.getRemoteAddress()).append("\", \"time\"=\"").append(now).append("\"}");
@@ -84,13 +84,13 @@ public class Stats implements Runnable {
         println(sb);
     }
 
-    public void logInvalidCredentials(BasicCredentials creds, Event evt) {
+    public void logInvalidCredentials(BasicCredentials creds, HttpEvent evt) {
         String now = Headers.toISO2822Date(DateTime.now());
         StringBuilder sb = new StringBuilder("{\"un\"=\"").append(creds.username).append("\", \"pw\"=\"").append(creds.password).append("\", \"time\"=\"").append(now).append("\", \"addr\"=\"").append(evt.getRemoteAddress()).append("\"}");
         println(sb);
     }
 
-    public void logHit(Event evt) {
+    public void logHit(HttpEvent evt) {
         String id = evt.getParametersAsMap() + "";
         if (id == null) {
             id = "unknown";
@@ -100,7 +100,7 @@ public class Stats implements Runnable {
         println(sb);
     }
 
-    public void logDownload(Event evt) {
+    public void logDownload(HttpEvent evt) {
         String pth = evt.getPath().getChildPath().toString();
         String now = Headers.toISO2822Date(DateTime.now());
         StringBuilder sb = new StringBuilder("{\"pth\"=\"").append(pth).append("\", \"addr\"=\"").append(evt.getRemoteAddress()).append("\", \"time\"=\"").append(now).append("\"}");

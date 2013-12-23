@@ -17,6 +17,7 @@ import com.mastfrog.acteur.util.Server;
 import com.mastfrog.giulius.Dependencies;
 import com.mastfrog.guicy.annotations.Defaults;
 import com.mastfrog.guicy.annotations.Namespace;
+import com.mastfrog.jackson.JacksonModule;
 import com.mastfrog.netty.http.client.HttpClient;
 import com.mastfrog.settings.MutableSettings;
 import com.mastfrog.settings.Settings;
@@ -108,6 +109,7 @@ public class UpdateCenterServer extends Application {
             Dependencies deps = Dependencies.builder()
                     .add(new NbmInfoModule(base, settings))
                     .add(new ServerModule(UpdateCenterServer.class))
+                    .add(new JacksonModule())
                     .add(settings, Namespace.DEFAULT)
                     .add(settings, "nbmserver")
                     .build();

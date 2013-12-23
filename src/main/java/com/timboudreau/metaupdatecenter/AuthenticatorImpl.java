@@ -3,7 +3,7 @@ package com.timboudreau.metaupdatecenter;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
-import com.mastfrog.acteur.Event;
+import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.auth.Authenticator;
 import com.mastfrog.acteur.util.BasicCredentials;
 import com.mastfrog.acteur.util.PasswordHasher;
@@ -20,9 +20,9 @@ class AuthenticatorImpl implements Authenticator {
     private final PasswordHasher hasher;
     private final String userName;
     private final Stats stats;
-    private final Provider<Event> event;
+    private final Provider<HttpEvent> event;
     @Inject
-    AuthenticatorImpl(@Named(value = "password") String password, PasswordHasher hasher, @Named(value = "admin.user.name") String userName, Stats stats, Provider<Event> event) {
+    AuthenticatorImpl(@Named(value = "password") String password, PasswordHasher hasher, @Named(value = "admin.user.name") String userName, Stats stats, Provider<HttpEvent> event) {
         this.hasher = hasher;
         hashedPassword = hasher.encryptPassword(password);
         this.userName = userName;

@@ -8,6 +8,7 @@ import com.mastfrog.settings.Settings;
 import com.mastfrog.settings.SettingsBuilder;
 import com.mastfrog.url.Path;
 import com.mastfrog.url.PathElement;
+import com.mastfrog.url.Protocol;
 import com.mastfrog.util.AbstractBuilder;
 import com.mastfrog.util.Streams;
 import com.timboudreau.metaupdatecenter.gennbm.UpdateCenterModuleGenerator;
@@ -150,6 +151,21 @@ public class AppTest {
 
         @Override
         public Path toExternalPath(String path) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public com.mastfrog.url.URL constructURL(Protocol protocol, Path path) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public com.mastfrog.url.URL constructURL(Protocol protocol, Path path, boolean secure) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public com.mastfrog.url.URL constructURL(Protocol protocol, Path path, int port) {
             throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
     }

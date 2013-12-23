@@ -7,6 +7,7 @@ import com.google.inject.Inject;
 import com.mastfrog.acteur.Acteur;
 import com.mastfrog.acteur.ActeurFactory;
 import com.mastfrog.acteur.Event;
+import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.Page;
 import com.mastfrog.acteur.ResponseWriter;
 import com.mastfrog.acteur.server.PathFactory;
@@ -14,7 +15,6 @@ import com.mastfrog.acteur.util.CacheControlTypes;
 import com.mastfrog.acteur.util.Headers;
 import com.mastfrog.acteur.util.Method;
 import io.netty.channel.ChannelFutureListener;
-import io.netty.handler.codec.http.DefaultHttpRequest;
 import java.util.Iterator;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
@@ -43,14 +43,14 @@ public class ModuleCatalogPage extends Page {
     private static final class SetupLastModified extends Acteur {
 
         @Inject
-        SetupLastModified(Page page, ModuleSet set, Event evt, Stats stats) {
+        SetupLastModified(Page page, ModuleSet set, HttpEvent evt, Stats stats) {
             stats.logHit(evt);
-            page.getReponseHeaders().setLastModified(set.getNewestDownloaded());
-            page.getReponseHeaders().setContentType("true".equals(evt.getParameter("json")) ? MediaType.JSON_UTF_8 : MediaType.XML_UTF_8);
-            page.getReponseHeaders().addCacheControl(CacheControlTypes.Public);
-            page.getReponseHeaders().addCacheControl(CacheControlTypes.must_revalidate);
-            page.getReponseHeaders().addCacheControl(CacheControlTypes.max_age, Duration.standardHours(1));
-            page.getReponseHeaders().addVaryHeader(Headers.CONTENT_ENCODING);
+            page.getResponseHeaders().setLastModified(set.getNewestDownloaded());
+            page.getResponseHeaders().setContentType("true".equals(evt.getParameter("json")) ? MediaType.JSON_UTF_8 : MediaType.XML_UTF_8);
+            page.getResponseHeaders().addCacheControl(CacheControlTypes.Public);
+            page.getResponseHeaders().addCacheControl(CacheControlTypes.must_revalidate);
+            page.getResponseHeaders().addCacheControl(CacheControlTypes.max_age, Duration.standardHours(1));
+            page.getResponseHeaders().addVaryHeader(Headers.CONTENT_ENCODING);
             setState(new ConsumedLockedState());
         }
     }
@@ -59,7 +59,7 @@ public class ModuleCatalogPage extends Page {
 
         @Inject
         SetupETag(Page page, ModuleSet set) {
-            page.getReponseHeaders().setETag(set.getCombinedHash());
+            page.getResponseHeaders().setETag(set.getCombinedHash());
             setState(new ConsumedLockedState());
         }
     }
@@ -67,7 +67,7 @@ public class ModuleCatalogPage extends Page {
     private static final class ModuleListSender extends Acteur {
 
         @Inject
-        ModuleListSender(ModuleSet set, Event evt, ObjectMapper mapper, final PathFactory factory) throws JsonProcessingException {
+        ModuleListSender(ModuleSet set, HttpEvent evt, ObjectMapper mapper, final PathFactory factory) throws JsonProcessingException {
             final Iterator<ModuleItem> items = set.iterator();
             final DateTime lm = set.getNewestDownloaded();
             setChunked(false);
@@ -78,7 +78,7 @@ public class ModuleCatalogPage extends Page {
                 if (evt.getMethod() != Method.HEAD) {
                     setResponseWriter(new ResponseWriter() {
                         @Override
-                        public Status write(Event evt, ResponseWriter.Output out, int iteration) throws Exception {
+                        public Status write(Event<?> evt, ResponseWriter.Output out, int iteration) throws Exception {
                             if (iteration == 0) {
                                 String timestamp = lm.getSecondOfMinute() + "/" + lm.getMinuteOfHour() + "/" + lm.getHourOfDay() + "/" + lm.getDayOfMonth() + "/" + lm.getMonthOfYear() + "/" + lm.getYear();
                                 out.write("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n"

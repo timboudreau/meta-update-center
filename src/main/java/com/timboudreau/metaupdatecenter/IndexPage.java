@@ -5,7 +5,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.mastfrog.acteur.Acteur;
 import com.mastfrog.acteur.ActeurFactory;
-import com.mastfrog.acteur.Event;
+import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.Page;
 import com.mastfrog.acteur.server.PathFactory;
 import com.mastfrog.acteur.util.CacheControlTypes;
@@ -31,18 +31,18 @@ public class IndexPage extends Page {
 //        getReponseHeaders().addCacheControl(CacheControlTypes.Public);
 //        getReponseHeaders().addCacheControl(CacheControlTypes.must_revalidate);
 //        getReponseHeaders().addCacheControl(CacheControlTypes.max_age, Duration.standardHours(1));
-        getReponseHeaders().addCacheControl(CacheControlTypes.no_cache);
-        getReponseHeaders().addCacheControl(CacheControlTypes.no_store);
-        getReponseHeaders().setExpires(serverStartTime);
+        getResponseHeaders().addCacheControl(CacheControlTypes.no_cache);
+        getResponseHeaders().addCacheControl(CacheControlTypes.no_store);
+        getResponseHeaders().setExpires(serverStartTime);
 
-        getReponseHeaders().setContentType(MediaType.HTML_UTF_8);
-        getReponseHeaders().setLastModified(serverStartTime);
+        getResponseHeaders().setContentType(MediaType.HTML_UTF_8);
+        getResponseHeaders().setLastModified(serverStartTime);
         add(IndexActeur.class);
     }
     
     private static class LogActeur extends Acteur {
         @Inject
-        LogActeur(Stats stats, Event evt) {
+        LogActeur(Stats stats, HttpEvent evt) {
             stats.logWebHit(evt);
             setState(new ConsumedLockedState());
         }

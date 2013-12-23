@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import com.mastfrog.acteur.Acteur;
 import com.mastfrog.acteur.ActeurFactory;
 import com.mastfrog.acteur.Event;
+import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.Page;
 import com.mastfrog.acteur.ResponseWriter;
 import com.mastfrog.acteur.util.CacheControlTypes;
@@ -32,9 +33,9 @@ public class DownloadPage extends Page {
         add(af.matchMethods(Method.GET, Method.HEAD));
         add(af.matchPath(DOWNLOAD_REGEX));
         add(FindModuleItem.class);
-        getReponseHeaders().addCacheControl(CacheControlTypes.Public);
-        getReponseHeaders().addCacheControl(CacheControlTypes.max_age, Duration.standardDays(120));
-        getReponseHeaders().addCacheControl(CacheControlTypes.must_revalidate);
+        getResponseHeaders().addCacheControl(CacheControlTypes.Public);
+        getResponseHeaders().addCacheControl(CacheControlTypes.max_age, Duration.standardDays(120));
+        getResponseHeaders().addCacheControl(CacheControlTypes.must_revalidate);
         add(af.sendNotModifiedIfIfModifiedSinceHeaderMatches());
         add(af.sendNotModifiedIfETagHeaderMatches());
 //        add(af.exactPathLength(3));
@@ -44,7 +45,7 @@ public class DownloadPage extends Page {
     private static class FindModuleItem extends Acteur {
 
         @Inject
-        FindModuleItem(ModuleSet ms, Event evt, Page page, Stats stats) {
+        FindModuleItem(ModuleSet ms, HttpEvent evt, Page page, Stats stats) {
             Path pth = evt.getPath();
             String codeName = pth.getElement(1).toString();
             String hash = pth.getElement(2).toString();
@@ -54,8 +55,8 @@ public class DownloadPage extends Page {
             if (item == null) {
                 setState(new RespondWith(404, "No such file " + hash + ".nbm"));
             } else {
-                page.getReponseHeaders().setLastModified(item.getDownloaded());
-                page.getReponseHeaders().setETag(hash);
+                page.getResponseHeaders().setLastModified(item.getDownloaded());
+                page.getResponseHeaders().setETag(hash);
             }
             setState(new ConsumedLockedState(item));
             stats.logDownload(evt);
@@ -65,7 +66,7 @@ public class DownloadPage extends Page {
     private static class DownloadActeur extends Acteur {
 
         @Inject
-        DownloadActeur(ModuleSet ms, Event evt) {
+        DownloadActeur(ModuleSet ms, HttpEvent evt) {
             Path pth = evt.getPath();
             String codeName = pth.getElement(1).toString();
             String hash = pth.getElement(2).toString();
@@ -81,7 +82,7 @@ public class DownloadPage extends Page {
                 if (evt.getMethod() != Method.HEAD) {
                     setResponseWriter(new ResponseWriter() {
                         @Override
-                        public ResponseWriter.Status write(Event evt, ResponseWriter.Output out, int iteration) throws Exception {
+                        public ResponseWriter.Status write(Event<?> evt, ResponseWriter.Output out, int iteration) throws Exception {
                             out.write(new BufferedInputStream(new FileInputStream(file), BUFFER_SIZE));
                             return Status.DONE;
                         }
