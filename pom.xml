@@ -8,6 +8,7 @@
     <properties>
         <mastfrog.version>1.4.0</mastfrog.version>
         <netbeans.version>RELEASE74</netbeans.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <name>Meta Update Center</name>
@@ -65,7 +66,7 @@
         <dependency>
             <groupId>com.mastfrog</groupId>
             <artifactId>jackson</artifactId>
-            <version>1.4.0</version>
+            <version>${mastfrog.version}</version>
             <type>jar</type>
         </dependency>
     </dependencies>
