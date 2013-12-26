@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.util.BasicCredentials;
-import com.mastfrog.acteur.util.Headers;
+import com.mastfrog.acteur.headers.Headers;
 import com.mastfrog.giulius.ShutdownHookRegistry;
 import com.mastfrog.util.ConfigurationError;
 import io.netty.handler.codec.http.DefaultHttpRequest;

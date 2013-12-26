@@ -1,7 +1,7 @@
 package com.timboudreau.metaupdatecenter;
 
 import com.google.inject.Inject;
-import com.mastfrog.acteur.util.Headers;
+import com.mastfrog.acteur.headers.Headers;
 import com.mastfrog.giulius.ShutdownHookRegistry;
 import com.mastfrog.guicy.annotations.Defaults;
 import com.mastfrog.guicy.annotations.Namespace;

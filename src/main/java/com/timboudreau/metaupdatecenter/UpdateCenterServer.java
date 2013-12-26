@@ -12,7 +12,7 @@ import com.mastfrog.acteur.auth.Authenticator;
 import com.mastfrog.acteur.server.ServerModule;
 import static com.mastfrog.acteur.server.ServerModule.BYTEBUF_ALLOCATOR_SETTINGS_KEY;
 import static com.mastfrog.acteur.server.ServerModule.POOLED_ALLOCATOR;
-import com.mastfrog.acteur.util.Method;
+import com.mastfrog.acteur.headers.Method;
 import com.mastfrog.acteur.util.Server;
 import com.mastfrog.giulius.Dependencies;
 import com.mastfrog.guicy.annotations.Defaults;

@@ -2,7 +2,7 @@ package com.timboudreau.metaupdatecenter;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.mastfrog.acteur.util.Headers;
+import com.mastfrog.acteur.headers.Headers;
 import com.mastfrog.netty.http.client.HttpClient;
 import com.mastfrog.netty.http.client.HttpRequestBuilder;
 import com.mastfrog.netty.http.client.ResponseFuture;
