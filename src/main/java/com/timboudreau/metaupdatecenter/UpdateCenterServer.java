@@ -83,7 +83,7 @@ public class UpdateCenterServer extends Application {
                     .parseCommandLineArguments(args).buildMutableSettings();
 
             // Compression is broken in Netty 4.0-CR10 - turning it off for now
-//            settings.setBoolean("httpCompression", false);
+            settings.setBoolean("httpCompression", true);
             settings.setString(BYTEBUF_ALLOCATOR_SETTINGS_KEY, POOLED_ALLOCATOR);
             String path = settings.getString("nbm.dir");
             if (path == null) {
@@ -105,7 +105,6 @@ public class UpdateCenterServer extends Application {
                 System.out.println("Using password '" + password + "'");
                 settings.setString("password", password);
             }
-
             Dependencies deps = Dependencies.builder()
                     .add(new NbmInfoModule(base, settings))
                     .add(new ServerModule(UpdateCenterServer.class))
