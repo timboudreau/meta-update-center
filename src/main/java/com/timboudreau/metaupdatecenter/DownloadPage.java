@@ -8,10 +8,16 @@ import com.mastfrog.acteur.Event;
 import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.Page;
 import com.mastfrog.acteur.ResponseWriter;
+import com.mastfrog.acteur.annotations.HttpCall;
 import com.mastfrog.acteur.util.CacheControlTypes;
 import com.mastfrog.acteur.headers.Headers;
 import com.mastfrog.acteur.headers.Method;
+import static com.mastfrog.acteur.headers.Method.GET;
+import static com.mastfrog.acteur.headers.Method.HEAD;
+import com.mastfrog.acteur.preconditions.Methods;
+import com.mastfrog.acteur.preconditions.PathRegex;
 import com.mastfrog.url.Path;
+import static com.timboudreau.metaupdatecenter.DownloadPage.DOWNLOAD_REGEX;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,6 +28,9 @@ import org.joda.time.Duration;
  *
  * @author Tim Boudreau
  */
+@HttpCall
+@Methods({GET,HEAD})
+@PathRegex(DOWNLOAD_REGEX)
 public class DownloadPage extends Page {
 
     private static final int BUFFER_SIZE = 1490;
@@ -30,8 +39,6 @@ public class DownloadPage extends Page {
 
     @Inject
     public DownloadPage(ActeurFactory af) {
-        add(af.matchMethods(Method.GET, Method.HEAD));
-        add(af.matchPath(DOWNLOAD_REGEX));
         add(FindModuleItem.class);
         getResponseHeaders().addCacheControl(CacheControlTypes.Public);
         getResponseHeaders().addCacheControl(CacheControlTypes.max_age, Duration.standardDays(120));

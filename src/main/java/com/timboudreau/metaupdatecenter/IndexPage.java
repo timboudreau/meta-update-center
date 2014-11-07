@@ -7,13 +7,18 @@ import com.mastfrog.acteur.Acteur;
 import com.mastfrog.acteur.ActeurFactory;
 import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.Page;
+import com.mastfrog.acteur.annotations.HttpCall;
+import com.mastfrog.acteur.annotations.Precursors;
 import com.mastfrog.acteur.server.PathFactory;
 import com.mastfrog.acteur.util.CacheControlTypes;
 import com.mastfrog.acteur.headers.Headers;
 import com.mastfrog.acteur.headers.Method;
+import static com.mastfrog.acteur.headers.Method.GET;
+import com.mastfrog.acteur.preconditions.Methods;
 import com.mastfrog.settings.Settings;
 import com.mastfrog.url.Path;
 import com.mastfrog.url.URL;
+import com.timboudreau.metaupdatecenter.IndexPage.LogActeur;
 import java.util.Iterator;
 import org.joda.time.DateTime;
 
@@ -21,26 +26,24 @@ import org.joda.time.DateTime;
  *
  * @author Tim Boudreau
  */
+@HttpCall(order=Integer.MAX_VALUE)
+@Methods(GET)
+@Precursors(LogActeur.class)
 public class IndexPage extends Page {
 
     @Inject
     IndexPage(ActeurFactory af, DateTime serverStartTime) {
-        add(af.matchMethods(Method.GET));
-        add(LogActeur.class);
         add(af.sendNotModifiedIfIfModifiedSinceHeaderMatches());
-//        getReponseHeaders().addCacheControl(CacheControlTypes.Public);
-//        getReponseHeaders().addCacheControl(CacheControlTypes.must_revalidate);
-//        getReponseHeaders().addCacheControl(CacheControlTypes.max_age, Duration.standardHours(1));
+        add(IndexActeur.class);
         getResponseHeaders().addCacheControl(CacheControlTypes.no_cache);
         getResponseHeaders().addCacheControl(CacheControlTypes.no_store);
         getResponseHeaders().setExpires(serverStartTime);
 
         getResponseHeaders().setContentType(MediaType.HTML_UTF_8);
         getResponseHeaders().setLastModified(serverStartTime);
-        add(IndexActeur.class);
     }
     
-    private static class LogActeur extends Acteur {
+    static class LogActeur extends Acteur {
         @Inject
         LogActeur(Stats stats, HttpEvent evt) {
             stats.logWebHit(evt);

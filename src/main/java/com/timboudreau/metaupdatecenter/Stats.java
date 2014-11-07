@@ -7,8 +7,6 @@ import com.mastfrog.acteur.util.BasicCredentials;
 import com.mastfrog.acteur.headers.Headers;
 import com.mastfrog.giulius.ShutdownHookRegistry;
 import com.mastfrog.util.ConfigurationError;
-import io.netty.handler.codec.http.DefaultHttpRequest;
-import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaders;
 import java.io.BufferedOutputStream;
 import java.io.File;

@@ -6,13 +6,20 @@ import com.google.inject.Inject;
 import com.google.inject.name.Names;
 import com.mastfrog.acteur.ActeurFactory;
 import com.mastfrog.acteur.Application;
+import com.mastfrog.acteur.Help;
 import com.mastfrog.acteur.ImplicitBindings;
 import com.mastfrog.acteur.Page;
+import com.mastfrog.acteur.annotations.GenericApplication;
+import com.mastfrog.acteur.annotations.HttpCall;
 import com.mastfrog.acteur.auth.Authenticator;
 import com.mastfrog.acteur.server.ServerModule;
 import static com.mastfrog.acteur.server.ServerModule.BYTEBUF_ALLOCATOR_SETTINGS_KEY;
 import static com.mastfrog.acteur.server.ServerModule.POOLED_ALLOCATOR;
 import com.mastfrog.acteur.headers.Method;
+import static com.mastfrog.acteur.headers.Method.GET;
+import static com.mastfrog.acteur.headers.Method.HEAD;
+import com.mastfrog.acteur.preconditions.Methods;
+import com.mastfrog.acteur.preconditions.PathRegex;
 import com.mastfrog.acteur.util.Server;
 import com.mastfrog.giulius.Dependencies;
 import com.mastfrog.guicy.annotations.Defaults;
@@ -37,7 +44,8 @@ import org.xml.sax.SAXException;
     "admin.user.name=admin",
     "realm=NbmServerAdmin"
 })
-public class UpdateCenterServer extends Application {
+@Help
+public class UpdateCenterServer extends GenericApplication {
 
     public static final String SETTINGS_KEY_SERVER_VERSION = "serverVersion";
     public static final int VERSION = 1;
@@ -48,12 +56,6 @@ public class UpdateCenterServer extends Application {
 
     @Inject
     UpdateCenterServer(ModuleSet set, UpdateCenterModuleGenerator gen) throws IOException, ParserConfigurationException, SAXException {
-        add(ModuleCatalogPage.class);
-        add(PutModulePage.class);
-        add(DownloadPage.class);
-        add(FaviconPage.class);
-        add(helpPageType());
-        add(IndexPage.class);
         try {
             set.scan();
         } catch (Exception e) {
@@ -124,12 +126,13 @@ public class UpdateCenterServer extends Application {
         }
     }
 
+    @HttpCall
+    @PathRegex("^favicon.ico$")
+    @Methods({GET, HEAD})
     private static class FaviconPage extends Page {
 
         @Inject
         FaviconPage(ActeurFactory af) {
-            add(af.matchPath("^favicon.ico$"));
-            add(af.matchMethods(Method.GET, Method.HEAD));
             add(af.respondWith(HttpResponseStatus.NOT_FOUND));
         }
     }

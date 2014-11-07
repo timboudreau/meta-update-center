@@ -10,12 +10,22 @@ import com.mastfrog.acteur.Event;
 import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.Page;
 import com.mastfrog.acteur.ResponseWriter;
+import com.mastfrog.acteur.annotations.HttpCall;
 import com.mastfrog.acteur.auth.AuthenticateBasicActeur;
 import com.mastfrog.acteur.util.CacheControlTypes;
 import com.mastfrog.acteur.headers.Headers;
 import com.mastfrog.acteur.headers.Method;
+import static com.mastfrog.acteur.headers.Method.GET;
+import static com.mastfrog.acteur.headers.Method.POST;
+import static com.mastfrog.acteur.headers.Method.PUT;
+import com.mastfrog.acteur.preconditions.BasicAuth;
+import com.mastfrog.acteur.preconditions.Methods;
+import com.mastfrog.acteur.preconditions.PathRegex;
+import com.mastfrog.acteur.preconditions.RequiredUrlParameters;
+import com.mastfrog.acteur.util.CacheControl;
 import com.mastfrog.url.URL;
 import com.timboudreau.metaupdatecenter.NbmDownloader.DownloadHandler;
+import static com.timboudreau.metaupdatecenter.PutModulePage.ADD_PAGE_REGEX;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -32,39 +42,33 @@ import org.openide.util.Exceptions;
  *
  * @author Tim Boudreau
  */
-public class PutModulePage extends Page {
+@HttpCall
+@PathRegex(ADD_PAGE_REGEX)
+@Methods({PUT, POST, GET})
+@RequiredUrlParameters("url")
+@BasicAuth
+public class PutModulePage extends Acteur {
+
     public static final String ADD_PAGE_REGEX = "^add$";
 
     @Inject
-    PutModulePage(ActeurFactory af) {
-        add(af.matchPath(ADD_PAGE_REGEX));
-        add(af.matchMethods(Method.PUT, Method.POST, Method.GET));
-        add(af.requireParameters("url"));
-        add(AuthenticateBasicActeur.class);
-        add(AddModuleActeur.class);
-        getResponseHeaders().addCacheControl(CacheControlTypes.no_cache);
-        getResponseHeaders().addCacheControl(CacheControlTypes.no_store);
-        getResponseHeaders().setExpires(DateTime.now().minus(Duration.standardDays(30)));
-        getResponseHeaders().setContentType(MediaType.PLAIN_TEXT_UTF_8);
-    }
+    PutModulePage(ModuleSet set, HttpEvent evt, NbmDownloader downloader, ObjectMapper mapper) throws Exception {
+        add(Headers.CONTENT_TYPE, MediaType.PLAIN_TEXT_UTF_8);
+        add(Headers.EXPIRES, DateTime.now().minus(Duration.standardDays(30)));
+        add(Headers.CACHE_CONTROL, CacheControl.PRIVATE_NO_CACHE_NO_STORE);
 
-    private static class AddModuleActeur extends Acteur {
-
-        @Inject
-        AddModuleActeur(ModuleSet set, HttpEvent evt, NbmDownloader downloader, ObjectMapper mapper) throws Exception {
-            String url = evt.getParameter("url");
-            boolean useOriginalUrl = "true".equals(evt.getParameter("useOriginalUrl"));
-            add(Headers.CONTENT_TYPE, MediaType.PLAIN_TEXT_UTF_8);
-            URL u = URL.parse(url);
-            if (!u.isValid()) {
-                setState(new RespondWith(BAD_REQUEST, "URL " + u + " has problems: " + u.getProblems()));
-                return;
-            }
-            ok();
-            Downloader handler = new Downloader(u, set, useOriginalUrl, mapper);
-            setResponseWriter(handler);
-            downloader.download(new DateTime(0), url, handler);
+        String url = evt.getParameter("url");
+        boolean useOriginalUrl = "true".equals(evt.getParameter("useOriginalUrl"));
+        add(Headers.CONTENT_TYPE, MediaType.PLAIN_TEXT_UTF_8);
+        URL u = URL.parse(url);
+        if (!u.isValid()) {
+            setState(new RespondWith(BAD_REQUEST, "URL " + u + " has problems: " + u.getProblems()));
+            return;
         }
+        ok();
+        Downloader handler = new Downloader(u, set, useOriginalUrl, mapper);
+        setResponseWriter(handler);
+        downloader.download(new DateTime(0), url, handler);
     }
 
     private static class Downloader extends ResponseWriter implements DownloadHandler {
@@ -83,6 +87,7 @@ public class PutModulePage extends Page {
         }
 
         private List<String> messages = new LinkedList<>();
+
         @Override
         public Status write(Event<?> evt, Output out, int iteration) throws Exception {
             this.out = out;
@@ -104,7 +109,7 @@ public class PutModulePage extends Page {
                 return result;
             }
         }
-        
+
         private void write(String what) {
             if (out != null) {
                 try {
@@ -120,13 +125,13 @@ public class PutModulePage extends Page {
 
         @Override
         public void onModuleDownload(InfoFile module, InputStream bytes, String hash, String url) {
-                write("Download of " + module + " completed.  SHA-1 nbm hash: " + hash + "\n");
+            write("Download of " + module + " completed.  SHA-1 nbm hash: " + hash + "\n");
             ModuleItem item = null;
             try {
                 item = set.add(module, bytes, url, hash, origUrl);
             } catch (IOException ex) {
                 Exceptions.printStackTrace(ex);
-                    write("Failed " + ex + "\n");
+                write("Failed " + ex + "\n");
             }
             if (item != null) {
                 try {

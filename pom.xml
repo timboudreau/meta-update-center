@@ -3,11 +3,11 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.timboudreau</groupId>
     <artifactId>meta-update-center</artifactId>
-    <version>1.4.16</version>
+    <version>1.5.0</version>
     <packaging>jar</packaging>
     <properties>
-        <mastfrog.version>1.4.16</mastfrog.version>
-        <netbeans.version>RELEASE74</netbeans.version>
+        <mastfrog.version>1.5.0</mastfrog.version>
+        <netbeans.version>RELEASE80</netbeans.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <name>Meta Update Center</name>

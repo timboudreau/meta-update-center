@@ -10,10 +10,14 @@ import com.mastfrog.acteur.Event;
 import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.Page;
 import com.mastfrog.acteur.ResponseWriter;
+import com.mastfrog.acteur.annotations.HttpCall;
 import com.mastfrog.acteur.server.PathFactory;
 import com.mastfrog.acteur.util.CacheControlTypes;
 import com.mastfrog.acteur.headers.Headers;
 import com.mastfrog.acteur.headers.Method;
+import com.mastfrog.acteur.preconditions.Methods;
+import com.mastfrog.acteur.preconditions.PathRegex;
+import static com.timboudreau.metaupdatecenter.ModuleCatalogPage.MODULE_PAGE_REGEX;
 import io.netty.channel.ChannelFutureListener;
 import java.util.Iterator;
 import org.joda.time.DateTime;
@@ -23,6 +27,9 @@ import org.joda.time.Duration;
  *
  * @author Tim Boudreau
  */
+@HttpCall
+@Methods(Method.GET)
+@PathRegex(MODULE_PAGE_REGEX)
 public class ModuleCatalogPage extends Page {
 
     public static final String MODULE_PAGE_REGEX = "^modules$";
@@ -31,9 +38,6 @@ public class ModuleCatalogPage extends Page {
 //    ADD PUT PAGE
     @Inject
     ModuleCatalogPage(ActeurFactory af) {
-        add(af.matchMethods(Method.GET, Method.HEAD));
-        add(af.matchPath(MODULE_PAGE_REGEX));
-        add(SetupLastModified.class);
         add(af.sendNotModifiedIfIfModifiedSinceHeaderMatches());
         add(SetupETag.class);
         add(af.sendNotModifiedIfETagHeaderMatches());
