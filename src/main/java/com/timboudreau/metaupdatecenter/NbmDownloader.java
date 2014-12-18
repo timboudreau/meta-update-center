@@ -122,7 +122,7 @@ public class NbmDownloader {
     }
 
     protected void handleDownloadedNBM(ByteBuf buf, DownloadHandler callback, String url) throws IOException, SAXException, ParserConfigurationException {
-        System.out.println("Process bytes " + buf.readableBytes());
+//        System.out.println("Process bytes " + buf.readableBytes());
         InfoFile moduleInfo = null;
         try (HashingInputStream stream = HashingInputStream.sha1(new ByteBufInputStream(buf))) {
 
@@ -131,7 +131,7 @@ public class NbmDownloader {
                 try {
                     if ("Info/info.xml".equals(e.getName())) {
                         long size = e.getSize();
-                        System.out.println("INFO SIZE " + size);
+//                        System.out.println("INFO SIZE " + size);
                         if (size == -1) {
                             size = 32768;
                         }
@@ -142,7 +142,7 @@ public class NbmDownloader {
                         int read = 0;
                         int len = 0;
                         while ((read = in.read(buffer)) > 0) {
-                            System.out.println("Read " + read);
+//                            System.out.println("Read " + read);
                             if (read != -1) {
                                 len += read;
                                 out.write(buffer, 0, read);

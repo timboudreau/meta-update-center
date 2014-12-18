@@ -5,20 +5,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.net.MediaType;
 import com.google.inject.Inject;
 import com.mastfrog.acteur.Acteur;
-import com.mastfrog.acteur.ActeurFactory;
 import com.mastfrog.acteur.Event;
 import com.mastfrog.acteur.HttpEvent;
-import com.mastfrog.acteur.Page;
 import com.mastfrog.acteur.ResponseWriter;
 import com.mastfrog.acteur.annotations.HttpCall;
-import com.mastfrog.acteur.auth.AuthenticateBasicActeur;
-import com.mastfrog.acteur.util.CacheControlTypes;
 import com.mastfrog.acteur.headers.Headers;
-import com.mastfrog.acteur.headers.Method;
 import static com.mastfrog.acteur.headers.Method.GET;
 import static com.mastfrog.acteur.headers.Method.POST;
 import static com.mastfrog.acteur.headers.Method.PUT;
-import com.mastfrog.acteur.preconditions.BasicAuth;
+import com.mastfrog.acteur.preconditions.Authenticated;
 import com.mastfrog.acteur.preconditions.Methods;
 import com.mastfrog.acteur.preconditions.PathRegex;
 import com.mastfrog.acteur.preconditions.RequiredUrlParameters;
@@ -39,6 +34,7 @@ import org.joda.time.Duration;
 import org.openide.util.Exceptions;
 
 /**
+ * Add a module to the update center
  *
  * @author Tim Boudreau
  */
@@ -46,7 +42,7 @@ import org.openide.util.Exceptions;
 @PathRegex(ADD_PAGE_REGEX)
 @Methods({PUT, POST, GET})
 @RequiredUrlParameters("url")
-@BasicAuth
+@Authenticated
 public class PutModulePage extends Acteur {
 
     public static final String ADD_PAGE_REGEX = "^add$";

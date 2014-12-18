@@ -37,7 +37,7 @@ public final class ModuleSet implements Iterable<ModuleItem> {
     private final File dir;
     private final Provider<ObjectMapper> mapper;
     private final Set<ModuleItem> items = new ConcurrentSet<>();
-    
+
     public File getStorageDir() {
         return dir;
     }
@@ -77,6 +77,7 @@ public final class ModuleSet implements Iterable<ModuleItem> {
     }
 
     private final Provider<Stats> stats;
+
     @Inject
     ModuleSet(File dir, Provider<ObjectMapper> mapper, Provider<Stats> stats) {
         this.dir = dir;
@@ -236,11 +237,12 @@ public final class ModuleSet implements Iterable<ModuleItem> {
             }
         }
         for (Map.Entry<String, Map<String, Pair>> e : pairs.entrySet()) {
-            String cnb = e.getKey();
             Map<String, Pair> m = e.getValue();
             List<ModuleItem> items = new LinkedList<>();
             for (Map.Entry<String, Pair> e1 : m.entrySet()) {
-                String hash = e1.getKey();
+                if (!e1.getValue().isComplete()) {
+                    continue;
+                }
                 File md = e1.getValue().manifest;
                 try {
                     ModuleItem item = mapper.get().readValue(md, ModuleItem.class);
@@ -248,10 +250,10 @@ public final class ModuleSet implements Iterable<ModuleItem> {
                 } catch (IOException ex) {
                     Exceptions.printStackTrace(ex);
                 }
-                Collections.sort(items);
-                if (!items.isEmpty()) {
-                    this.items.add(items.iterator().next());
-                }
+            }
+            Collections.sort(items);
+            if (!items.isEmpty()) {
+                this.items.add(items.iterator().next());
             }
         }
     }

@@ -5,7 +5,6 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.name.Names;
 import com.mastfrog.acteur.ActeurFactory;
-import com.mastfrog.acteur.Application;
 import com.mastfrog.acteur.Help;
 import com.mastfrog.acteur.ImplicitBindings;
 import com.mastfrog.acteur.Page;
@@ -15,7 +14,6 @@ import com.mastfrog.acteur.auth.Authenticator;
 import com.mastfrog.acteur.server.ServerModule;
 import static com.mastfrog.acteur.server.ServerModule.BYTEBUF_ALLOCATOR_SETTINGS_KEY;
 import static com.mastfrog.acteur.server.ServerModule.POOLED_ALLOCATOR;
-import com.mastfrog.acteur.headers.Method;
 import static com.mastfrog.acteur.headers.Method.GET;
 import static com.mastfrog.acteur.headers.Method.HEAD;
 import com.mastfrog.acteur.preconditions.Methods;
@@ -85,7 +83,7 @@ public class UpdateCenterServer extends GenericApplication {
                     .parseCommandLineArguments(args).buildMutableSettings();
 
             // Compression is broken in Netty 4.0-CR10 - turning it off for now
-            settings.setBoolean("httpCompression", true);
+//            settings.setBoolean("httpCompression", true);
             settings.setString(BYTEBUF_ALLOCATOR_SETTINGS_KEY, POOLED_ALLOCATOR);
             String path = settings.getString("nbm.dir");
             if (path == null) {

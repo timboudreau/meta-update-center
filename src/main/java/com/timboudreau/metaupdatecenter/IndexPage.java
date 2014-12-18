@@ -21,6 +21,7 @@ import com.mastfrog.url.URL;
 import com.timboudreau.metaupdatecenter.IndexPage.LogActeur;
 import java.util.Iterator;
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
 
 /**
  *
@@ -59,9 +60,10 @@ public class IndexPage extends Page {
             ok();
             StringBuilder sb = new StringBuilder();
             sb.append("<!doctype html><html><head><title>Modules</title>\n");
-            sb.append("<style> .content { margin: 12px; } html{height:100%; font-family:'Verdana';}\n body{ margin: 0px;}\n td { vertical-align: top; text-align: left;}\n .header {background-color: #CCCCAA; padding: 12px;}\n tr { margin-bottom: 0.5em; border-bottom: 1px solid #CCCCCC;}\n code{background-color: #EDEDED; margin: 0.5em; font-size: 1.2em;}\n .odd { background-color: #FFFFEA; }\n td { border-left: solid 1px #BBBBBB; margin-left: 3px; margin-right: 3px; }</style>\n");
+            sb.append("<style> h1 { color: #222222; } .content { margin: 12px; } html{height:100%; font-family:'Helvetica'; color: #444441}\n body{ margin: 0px;}\n td { vertical-align: top; text-align: left;}\n .header {background-color: #EEEEFF; padding: 12px; color: #999991}\n tr { margin-bottom: 0.5em; border-bottom: 1px solid #CCCCCC; min-height: 5em;}\n code{background-color: #EDEDED; margin: 0.5em; font-size: 1.2em;}\n .odd { background-color: #F3F3FF; }\n td { border-left: solid 1px #BBBBBB; margin-left: 3px; margin-right: 3px; padding: 5px; }</style>\n");
             sb.append("</head>\n<body>\n");
-            sb.append("<div class='header'><h1>Update Center Server</h1>\n");
+            String name = settings.getString("server.name", "Update Center Server");
+            sb.append("<div class='header'><h1>").append(name).append("</h1>\n");
             sb.append("<font size='-1'><a target='other' href='https://github.com/timboudreau/meta-update-center'>MetaUpdateServer</a> 1.").append(ver).append(" online since ").append(serverStart.getMonthOfYear()).append('/').append(serverStart.getDayOfMonth()).append('/').append(serverStart.getYear()).append("</font><p/>\n");
             sb.append("</div>\n");
             sb.append("<div class='content'>\n");
@@ -70,20 +72,21 @@ public class IndexPage extends Page {
             sb.append("To access it from the NetBeans Update Center, add this URL to the settings tab in the IDE: \n");
             sb.append("<code>").append(paths.constructURL(Path.parse("modules"), false)).append("</code> (or just download the update center module below).\n");
 
-            sb.append("<table class='table'><tr><th>Name</th><th>Code Name</th><th>Description</th><th>Version</th><th>Updated</th><th>URLs</th></tr>\n");
+//            sb.append("<table class='table'><tr><th>Name</th><th>Code Name</th><th>Description</th><th>Version</th><th>Updated</th><th>URLs</th></tr>\n");
+            sb.append("<table class='table'><tr><th>Name</th><th>Description</th><th>Version</th><th>Updated</th><th>URLs</th></tr>\n");
             int ix = 0;
             while (items.hasNext()) {
                 boolean odd = ix++ % 2 != 0;
                 ModuleItem item = items.next();
-                sb.append("<tr").append(odd ? " class='odd'" : "").append(">\n<th>").append(item.getName()).append("</th>\n");
-                sb.append("  <td>").append(item.getCodeNameBase()).append("</td>\n");
-                sb.append("  <td>").append(item.getDescription()).append("</td>\n");
-                sb.append("  <td>").append(item.getVersion()).append("</td>\n");
-                sb.append("  <td>").append(Headers.toISO2822Date(item.getDownloaded())).append("</td>\n");
+                sb.append("<tr style='min-height:5em;'").append(odd ? " class='odd'" : "").append(">\n<th style='vertical-align: middle; text-align: left'>").append(item.getName()).append("</th>\n");
+//                sb.append("  <td valign='middle'>").append(item.getCodeNameBase()).append("</td>\n");
+                sb.append("  <td style='vertical-align: middle; margin: 5px;'>").append(item.getDescription()).append("</td>\n");
+                sb.append("  <td style='vertical-align: middle; margin: 5px;'>").append(item.getVersion()).append("</td>\n");
+                sb.append("  <td style='vertical-align: middle; margin: 5px;'>").append(DateTimeFormat.mediumDateTime().print(item.getDownloaded()).replaceAll(" ", "&nbsp;")).append("</td>\n");
                 if (!UpdateCenterServer.DUMMY_URL.equals(item.getFrom())) {
-                    sb.append("  <td><a href=\"").append(item.getFrom()).append("\">").append("Link to Original").append("</a>").append(" &middot; \n");
+                    sb.append("  <td style='vertical-align: middle; margin: 5px;'><a href=\"").append(item.getFrom()).append("\">").append("Link to Original").append("</a>").append(" &middot; \n");
                 } else {
-                    sb.append("  <td>\n");
+                    sb.append("  <td style='vertical-align: middle; margin: 5px;'>\n");
                 }
                 URL u = paths.constructURL(Path.builder().add("download").add(item.getCodeNameBase()).add(item.getHash() + ".nbm").create(), false);
                 sb.append("<a href=\"").append(u).append("\">").append("Cached Copy").append("</a>").append("</td></tr>\n");
