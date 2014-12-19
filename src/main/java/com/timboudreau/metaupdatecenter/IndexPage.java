@@ -129,33 +129,6 @@ public class IndexPage extends Page {
             sb.append("</body></html>");
 
             ok(sb.toString());
-//            setResponseWriter(new ResponseWriter() {
-//
-//                @Override
-//                public ResponseWriter.Status write(Event evt, ResponseWriter.Output out, int iteration) throws Exception {
-//                    if (iteration == 0) {
-//                        out.write("<!doctype html><html><head><title>Modules</title></head>\n<body>\n");
-//                        out.write("<h1>Update Center Server</h1>\n");
-//                        out.write("This server is happily serving\n");
-//                        out.write("<table><tr><th>Name</th><th>Code Name</th><th>Description</th><th>Updated</th><th>URL</th></tr>\n");
-//                    }
-//                    if (!items.hasNext()) {
-//                        out.write("</table>\n</body></html>\n");
-//                        return Status.DONE;
-//                    } else {
-//                        ModuleItem item = items.next();
-//
-//                        out.write("<tr><td>").write(item.getName()).write("</td>\n");
-//                        out.write("<td>").write(item.getCodeNameBase()).write("</td>\n");
-//                        out.write("<td>").write(item.getDescription()).write("</td>\n");
-//                        out.write("<td>").write(item.getDownloaded() + "").write("</td>\n");
-//                        out.write("<td>").write(item.getFrom()).write("</td></tr>\n");
-//                        out.channel().flush();
-//                        return Status.NOT_DONE;
-//                    }
-//                }
-//
-//            });
         }
     }
 }
