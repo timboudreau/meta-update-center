@@ -80,7 +80,6 @@ public class IndexPage extends Page {
 
         @Inject
         IndexActeur(ModuleSet set, PathFactory paths, Settings settings, @Named(UpdateCenterServer.SETTINGS_KEY_SERVER_VERSION) int ver, DateTime serverStart) {
-            final Iterator<ModuleItem> items = set.iterator();
             ok();
             StringBuilder sb = new StringBuilder();
             sb.append("<!doctype html><html><head><title>Modules</title>\n");
@@ -99,6 +98,7 @@ public class IndexPage extends Page {
 //            sb.append("<table class='table'><tr><th>Name</th><th>Code Name</th><th>Description</th><th>Version</th><th>Updated</th><th>URLs</th></tr>\n");
             sb.append("<table class='table'><tr><th>Name</th><th>Description</th><th>Version</th><th>Updated</th><th>URLs</th></tr>\n");
             int ix = 0;
+            final Iterator<ModuleItem> items = set.sorted().iterator();
             while (items.hasNext()) {
                 boolean odd = ix++ % 2 != 0;
                 ModuleItem item = items.next();

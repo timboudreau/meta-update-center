@@ -46,6 +46,12 @@ public final class ModuleSet implements Iterable<ModuleItem> {
     public Iterator<ModuleItem> iterator() {
         return toList().iterator();
     }
+    
+    public List<ModuleItem> sorted() {
+        List<ModuleItem> result = new LinkedList<>(items);
+        Collections.sort(result, new ModuleItemComparator());
+        return result;
+    }
 
     public File getNBM(String codeName, String fileName) {
         return new File(new File(dir, codeName), fileName);
