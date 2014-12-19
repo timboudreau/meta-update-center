@@ -10,7 +10,7 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
             </goals>
             <properties>
-                <exec.args>-classpath %classpath com.timboudreau.metaupdatecenter.UpdateCenterServer --password testit --hostname localhost --port 8959 --external.port 8959 --nbm.dir /home/tim/nbmserver_old --server.name "Tim Boudreau's Update Server"</exec.args>
+                <exec.args>-classpath %classpath com.timboudreau.metaupdatecenter.UpdateCenterServer --password testit --hostname localhost --port 8959 --external.port 8959 --nbm.dir /home/tim/nbmserver_old --server.name TimBoudreau_Update_Server</exec.args>
                 <exec.executable>java</exec.executable>
             </properties>
         </action>
@@ -24,7 +24,7 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
             </goals>
             <properties>
-                <exec.args>-Xdebug -Xrunjdwp:transport=dt_socket,server=n,address=${jpda.address} -classpath %classpath com.timboudreau.metaupdatecenter.UpdateCenterServer --password testit --hostname localhost --port 8959 --external.port 8959 --nbm.dir /home/tim/nbmserver_old --server.name "Tim Boudreau's Update Server"</exec.args>
+                <exec.args>-Xdebug -Xrunjdwp:transport=dt_socket,server=n,address=${jpda.address} -classpath %classpath com.timboudreau.metaupdatecenter.UpdateCenterServer --password testit --hostname localhost --port 8959 --external.port 8959 --nbm.dir /home/tim/nbmserver_old --server.name TimBoudreau_Update_Server</exec.args>
                 <exec.executable>java</exec.executable>
                 <jpda.listen>true</jpda.listen>
             </properties>
@@ -39,7 +39,7 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
             </goals>
             <properties>
-                <exec.args>-classpath %classpath com.timboudreau.metaupdatecenter.UpdateCenterServer --password testit --hostname localhost --port 8959 --external.port 8959 --nbm.dir /home/tim/nbmserver_old --server.name "Tim Boudreau's Update Server"</exec.args>
+                <exec.args>-classpath %classpath com.timboudreau.metaupdatecenter.UpdateCenterServer --password testit --hostname localhost --port 8959 --external.port 8959 --nbm.dir /home/tim/nbmserver_old --server.name TimBoudreau_Update_Server</exec.args>
                 <exec.executable>${profiler.java}</exec.executable>
             </properties>
         </action>
