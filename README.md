@@ -42,6 +42,10 @@ I briefly considered writing a Jenkins extension like its Maven Repository plugi
 which would serve this stuff. Then I thought, why be tied to Jenkins at all?  This solution
 will serve whatever you want, wherever it is.
 
+If you use this with Jenkins, one small change is useful to your Maven `pom.xml` - this
+server relies on the download URLs for modules not changing, but by default Maven includes
+the version in the NBM name.  To fix this, add `<finalName>YourModuleName</finalName>` to
+the `configuration` section for **both** the `nbm-maven-plugin` and the `maven-jar-plugin`.
 
 Usage
 -----
