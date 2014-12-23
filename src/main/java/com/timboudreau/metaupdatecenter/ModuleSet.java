@@ -46,7 +46,7 @@ public final class ModuleSet implements Iterable<ModuleItem> {
     public Iterator<ModuleItem> iterator() {
         return toList().iterator();
     }
-    
+
     public List<ModuleItem> sorted() {
         List<ModuleItem> result = new LinkedList<>(items);
         Collections.sort(result, new ModuleItemComparator());
@@ -58,6 +58,9 @@ public final class ModuleSet implements Iterable<ModuleItem> {
     }
 
     public ModuleItem find(String codeName, String hash) {
+        if (hash.endsWith(".nbm")) {
+            hash = hash.substring(0, hash.length() - 4);
+        }
         for (ModuleItem i : items) {
             if (codeName.equals(i.getCodeNameBase())) {
                 if (hash.equals(i.getHash())) {
@@ -80,6 +83,10 @@ public final class ModuleSet implements Iterable<ModuleItem> {
         List<ModuleItem> result = new ArrayList<>(this.items);
         Collections.sort(result);
         return result;
+    }
+
+    public String toString() {
+        return items.toString();
     }
 
     private final Provider<Stats> stats;

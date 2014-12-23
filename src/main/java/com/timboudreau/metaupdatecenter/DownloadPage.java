@@ -9,6 +9,7 @@ import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.Page;
 import com.mastfrog.acteur.ResponseWriter;
 import com.mastfrog.acteur.annotations.HttpCall;
+import com.mastfrog.acteur.errors.Err;
 import com.mastfrog.acteur.util.CacheControlTypes;
 import com.mastfrog.acteur.headers.Headers;
 import com.mastfrog.acteur.headers.Method;
@@ -18,18 +19,20 @@ import com.mastfrog.acteur.preconditions.Methods;
 import com.mastfrog.acteur.preconditions.PathRegex;
 import com.mastfrog.url.Path;
 import static com.timboudreau.metaupdatecenter.DownloadPage.DOWNLOAD_REGEX;
+import static io.netty.handler.codec.http.HttpResponseStatus.NOT_MODIFIED;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
+import org.openide.modules.SpecificationVersion;
 
 /**
  *
  * @author Tim Boudreau
  */
 @HttpCall
-@Methods({GET,HEAD})
+@Methods({GET, HEAD})
 @PathRegex(DOWNLOAD_REGEX)
 public class DownloadPage extends Page {
 
@@ -77,19 +80,33 @@ public class DownloadPage extends Page {
             Path pth = evt.getPath();
             String codeName = pth.getElement(1).toString();
             String hash = pth.getElement(2).toString();
+            ModuleItem item = ms.find(codeName, hash);
+            if (item == null) {
+                setState(new RespondWith(Err.conflict("Could not find " + codeName + " with hash " + hash + " in " + ms)));
+                return;
+            }
             final File file = ms.getNBM(codeName, hash);
-            setChunked(false);
+            String ifNoneMatch = evt.getHeader(Headers.IF_NONE_MATCH);
+            if (ifNoneMatch != null && hash.equals(ifNoneMatch)) {
+                setState(new RespondWith(NOT_MODIFIED));
+                return;
+            }
+            setChunked(true);
             if (!file.exists()) {
                 setState(new RespondWith(404, "No such file " + file));
             } else {
                 add(Headers.CONTENT_TYPE, MediaType.OCTET_STREAM);
                 add(Headers.LAST_MODIFIED, new DateTime(file.lastModified()));
-                add(Headers.CONTENT_LENGTH, file.length());
+                add(Headers.ETAG, hash);
+                SpecificationVersion version = item.getVersion();
+                String fn = codeName.replace('.', '-') + "_" + version + ".nbm";
+                add(Headers.stringHeader("Content-Disposition"), "attachment; filename=\"" + fn + '"');
                 ok();
                 if (evt.getMethod() != Method.HEAD) {
                     setResponseWriter(new ResponseWriter() {
                         @Override
                         public ResponseWriter.Status write(Event<?> evt, ResponseWriter.Output out, int iteration) throws Exception {
+                            // XXX chunk this in smaller chunks
                             out.write(new BufferedInputStream(new FileInputStream(file), BUFFER_SIZE));
                             return Status.DONE;
                         }

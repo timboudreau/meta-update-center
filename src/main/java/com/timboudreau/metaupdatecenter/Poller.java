@@ -54,7 +54,7 @@ public class Poller implements Runnable {
             }
         });
         this.downloader = downloader;
-        task.schedule((int) Duration.standardSeconds(30).getMillis());
+        task.schedule((int) Duration.standardMinutes(3).getMillis());
     }
 
     @Override
