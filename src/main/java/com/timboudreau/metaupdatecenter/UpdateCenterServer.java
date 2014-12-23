@@ -46,7 +46,7 @@ import org.xml.sax.SAXException;
 public class UpdateCenterServer extends GenericApplication {
 
     public static final String SETTINGS_KEY_SERVER_VERSION = "serverVersion";
-    public static final int VERSION = 1;
+    public static final int VERSION = 2;
 
     private static final String SERVER_NAME = " Tim Boudreau's Update Aggregator " + VERSION + " - " + "https://github.com/timboudreau/meta-update-center";
 
@@ -83,14 +83,16 @@ public class UpdateCenterServer extends GenericApplication {
                     .parseCommandLineArguments(args).buildMutableSettings();
 
             // Compression is broken in Netty 4.0-CR10 - turning it off for now
-//            settings.setBoolean("httpCompression", true);
+            settings.setBoolean("httpCompression", true);
             settings.setString(BYTEBUF_ALLOCATOR_SETTINGS_KEY, POOLED_ALLOCATOR);
             String path = settings.getString("nbm.dir");
             if (path == null) {
                 File tmp = new File(System.getProperty("java.io.tmpdir"));
                 File dir = new File(tmp, "nbmserver");
                 if (!dir.exists()) {
-                    dir.mkdirs();
+                    if (!dir.mkdirs()) {
+                        throw new IOException("Could not create " + dir);
+                    }
                 }
                 System.out.println("--nbm.dir not specified on command line or settings.");
                 System.out.println("Serving nbms from " + dir.getAbsolutePath());

@@ -80,27 +80,40 @@ public class ModuleCatalogPage extends Page {
             } else {
                 ok();
                 if (evt.getMethod() != Method.HEAD) {
-                    setResponseWriter(new ResponseWriter() {
-                        @Override
-                        public Status write(Event<?> evt, ResponseWriter.Output out, int iteration) throws Exception {
-                            if (iteration == 0) {
-                                String timestamp = lm.getSecondOfMinute() + "/" + lm.getMinuteOfHour() + "/" + lm.getHourOfDay() + "/" + lm.getDayOfMonth() + "/" + lm.getMonthOfYear() + "/" + lm.getYear();
-                                out.write("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n"
-                                        + "<!DOCTYPE module_updates PUBLIC \"-//NetBeans//DTD Autoupdate Catalog 2.6//EN\" \"http://www.netbeans.org/dtds/autoupdate-catalog-2_6.dtd\">\n"
-                                        + "<module_updates timestamp=\"" + timestamp + "\">\n\n");
-                            }
-                            if (items.hasNext()) {
-                                out.write(items.next().toXML(factory, "download"));
-                            }
-                            if (!items.hasNext()) {
-                                out.write("</module_updates>\n\n");
-                                out.channel().flush();
-                                out.future().addListener(ChannelFutureListener.CLOSE);
-                            }
-                            return items.hasNext() ? Status.NOT_DONE : Status.DONE;
-                        }
-                    });
+                    setResponseWriter(new ResponseWriterImpl(lm, items, factory));
                 }
+            }
+        }
+
+        private static class ResponseWriterImpl extends ResponseWriter {
+
+            private final DateTime lm;
+            private final Iterator<ModuleItem> items;
+            private final PathFactory factory;
+
+            public ResponseWriterImpl(DateTime lm, Iterator<ModuleItem> items, PathFactory factory) {
+                this.lm = lm;
+                this.items = items;
+                this.factory = factory;
+            }
+
+            @Override
+            public Status write(Event<?> evt, ResponseWriter.Output out, int iteration) throws Exception {
+                if (iteration == 0) {
+                    String timestamp = lm.getSecondOfMinute() + "/" + lm.getMinuteOfHour() + "/" + lm.getHourOfDay() + "/" + lm.getDayOfMonth() + "/" + lm.getMonthOfYear() + "/" + lm.getYear();
+                    out.write("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n"
+                            + "<!DOCTYPE module_updates PUBLIC \"-//NetBeans//DTD Autoupdate Catalog 2.6//EN\" \"http://www.netbeans.org/dtds/autoupdate-catalog-2_6.dtd\">\n"
+                            + "<module_updates timestamp=\"" + timestamp + "\">\n\n");
+                }
+                if (items.hasNext()) {
+                    out.write(items.next().toXML(factory, "download"));
+                }
+                if (!items.hasNext()) {
+                    out.write("</module_updates>\n\n");
+                    out.channel().flush();
+                    out.future().addListener(ChannelFutureListener.CLOSE);
+                }
+                return items.hasNext() ? Status.NOT_DONE : Status.DONE;
             }
         }
     }

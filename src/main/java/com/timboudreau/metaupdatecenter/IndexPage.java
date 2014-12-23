@@ -8,7 +8,6 @@ import com.mastfrog.acteur.ActeurFactory;
 import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.Page;
 import com.mastfrog.acteur.annotations.HttpCall;
-import com.mastfrog.acteur.annotations.Precursors;
 import com.mastfrog.acteur.headers.Headers;
 import com.mastfrog.acteur.server.PathFactory;
 import com.mastfrog.acteur.util.CacheControlTypes;
@@ -65,8 +64,6 @@ public class IndexPage extends Page {
             }
             String etag = sb.toString();
             String sent = evt.getHeader(Headers.IF_NONE_MATCH);
-            System.out.println("ETAG " + etag);
-            System.out.println("SENT " + sent);
             if (sent != null && etag.equals(sent)) {
                 setState(new RespondWith(NOT_MODIFIED));
             } else {

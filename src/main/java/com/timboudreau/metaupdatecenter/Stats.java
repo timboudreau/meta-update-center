@@ -44,7 +44,7 @@ public class Stats implements Runnable {
         }
         this.statsFile = f;
         OutputStream out = new BufferedOutputStream(new FileOutputStream(f, true), 80);
-        stream = new PrintStream(out);
+        stream = new PrintStream(out, false, "UTF-8");
         if (reg != null) { // null in test
             reg.add(new Runnable() {
 
@@ -90,7 +90,7 @@ public class Stats implements Runnable {
 
     public void logHit(HttpEvent evt) {
         String id = evt.getParametersAsMap() + "";
-        if (id == null) {
+        if (id.isEmpty()) {
             id = "unknown";
         }
         String now = Headers.toISO2822Date(DateTime.now());
