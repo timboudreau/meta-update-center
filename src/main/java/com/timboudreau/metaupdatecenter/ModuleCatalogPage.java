@@ -74,7 +74,7 @@ public class ModuleCatalogPage extends Page {
         ModuleListSender(ModuleSet set, HttpEvent evt, ObjectMapper mapper, final PathFactory factory) throws JsonProcessingException {
             final Iterator<ModuleItem> items = set.iterator();
             final DateTime lm = set.getNewestDownloaded();
-            setChunked(false);
+            setChunked(true);
             if ("true".equals(evt.getParameter("json"))) {
                 ok(mapper.writeValueAsString(set.toList()));
             } else {

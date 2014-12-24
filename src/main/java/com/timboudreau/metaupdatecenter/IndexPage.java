@@ -30,6 +30,7 @@ import org.joda.time.format.DateTimeFormat;
  */
 @HttpCall(order = Integer.MAX_VALUE)
 @Methods(GET)
+@com.mastfrog.acteur.preconditions.Path({"", "/", "index.html"})
 public class IndexPage extends Page {
 
     @Inject

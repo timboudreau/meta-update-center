@@ -48,7 +48,6 @@ public class DownloadPage extends Page {
             String codeName = pth.getElement(1).toString();
             String hash = pth.getElement(2).toString();
             hash = hash.substring(0, hash.length() - 4);
-            System.out.println("Look for hash " + hash);
             ModuleItem item = ms.find(codeName, hash);
             if (item == null) {
                 setState(new RespondWith(404, "No such file " + hash + ".nbm"));
