@@ -46,7 +46,7 @@ import org.xml.sax.SAXException;
 public class UpdateCenterServer extends GenericApplication {
 
     public static final String SETTINGS_KEY_SERVER_VERSION = "serverVersion";
-    public static final int VERSION = 3;
+    public static final int VERSION = 4;
 
     private static final String SERVER_NAME = " Tim Boudreau's Update Aggregator " + VERSION + " - " + "https://github.com/timboudreau/meta-update-center";
 

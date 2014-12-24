@@ -52,7 +52,7 @@ public class PutModulePage extends Acteur {
         add(Headers.CONTENT_TYPE, MediaType.PLAIN_TEXT_UTF_8);
         add(Headers.EXPIRES, DateTime.now().minus(Duration.standardDays(30)));
         add(Headers.CACHE_CONTROL, CacheControl.PRIVATE_NO_CACHE_NO_STORE);
-
+        setChunked(true);
         String url = evt.getParameter("url");
         boolean useOriginalUrl = "true".equals(evt.getParameter("useOriginalUrl"));
         add(Headers.CONTENT_TYPE, MediaType.PLAIN_TEXT_UTF_8);

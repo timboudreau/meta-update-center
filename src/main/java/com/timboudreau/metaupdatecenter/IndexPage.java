@@ -76,12 +76,15 @@ public class IndexPage extends Page {
 
     private static class IndexActeur extends Acteur {
 
+        String instructions = "To access it from NetBeans, open <b>Tools | Plugins</b>.  On the settings tab, "
+                + "click <b>Add</b> (middle right), and enter <code>__URL__</code>.";
+
         @Inject
         IndexActeur(ModuleSet set, PathFactory paths, Settings settings, @Named(UpdateCenterServer.SETTINGS_KEY_SERVER_VERSION) int ver, DateTime serverStart) {
             ok();
             StringBuilder sb = new StringBuilder();
-            sb.append("<!doctype html><html><head><title>Modules</title>\n");
-            sb.append("<style> .table { min-height: 50%;} h1 { color: #222222; } .content { margin: 12px; } html{height:100%; font-family:'Helvetica'; color: #444441}\n body{ margin: 0px;}\n td { vertical-align: top; text-align: left;}\n .header {background-color: #EEEEFF; padding: 12px; color: #999991; border-bottom: #AAAAAA solid 1px;}\n tr { margin-bottom: 0.5em; border-bottom: 1px solid #CCCCCC; min-height: 5em;}\n code{background-color: #EDEDED; margin: 0.5em; font-size: 1.2em;}\n .odd { background-color: #F3F3FF; }\n td { border-left: solid 1px #BBBBBB; margin-left: 3px; margin-right: 3px; padding: 5px; }</style>\n");
+            sb.append("<!doctype html><html><head><title>NetBeans Plugins</title>\n");
+            sb.append("<style>.tophead { font-size: 1.3em; border-top: 1px #AAAAAA solid; border-bottom: 1px #AAAAAA solid; margin-top: 2.5em;} .table { min-height: 50%;} h1 { color: #222222; } .content { margin: 12px; } html{height:100%; font-family:'Helvetica'; color: #444441}\n body{ margin: 0px;}\n td { vertical-align: top; text-align: left;}\n .header {background-color: #EEEEFF; padding: 12px; color: #999991; border-bottom: #AAAAAA solid 1px;}\n tr { margin-bottom: 0.5em; border-bottom: 1px solid #CCCCCC; min-height: 5em;}\n code{background-color: #EDEDED; margin: 0.5em; font-size: 1.2em;}\n .odd { background-color: #F3F3FF; }\n td { border-left: solid 1px #BBBBBB; margin-left: 3px; margin-right: 3px; padding: 5px; }</style>\n");
             sb.append("</head>\n<body>\n");
             String name = settings.getString("server.name", "Update Center Server");
             sb.append("<div class='header'><h1>").append(name).append("</h1>\n");
@@ -89,12 +92,35 @@ public class IndexPage extends Page {
             sb.append("</div>\n");
             sb.append("<div class='content'>\n");
 
-            sb.append("<p>This server is happily serving ").append(set.size()).append(" modules.\n");
-            sb.append("To access it from the NetBeans Update Center, add this URL to the settings tab in the IDE: \n");
-            sb.append("<code>").append(paths.constructURL(Path.parse("modules"), false)).append("</code> (or just download the update center module below).\n");
+            ModuleItem ucModule = null;
+            for (ModuleItem item : set) {
+                if (UpdateCenterServer.DUMMY_URL.equals(item.getFrom())) {
+                    ucModule = item;
+                    break;
+                }
+            }
+
+            sb.append("<p>This server is happily serving ").append(set.size()).append(" plugins.</p>\n");
+
+            if (ucModule != null) {
+                URL u = paths.constructURL(Path.builder().add("download").add(ucModule.getCodeNameBase()).add(ucModule.getHash() + ".nbm").create(), false);
+                sb.append("<p>To use these plugins in NetBeans, download <a href='").append(u).append("'>this plugin</a> and install it on "
+                        + "the <b>Download</b> tab in <b>Tools | Plugins</b>. Then go to the <b>Available</b> tab and click <b>Check For Newest</b> "
+                        + "and these will be there, and you will be notified of updates automatically.</p>");
+                sb.append("<p>Alternately, you can download any plugin individually and install it in the same place.  ");
+                sb.append("Or, open <b>Tools | Plugins</b>, and on the <b>Settings</b> tab, \n"
+                        + " click <b>Add</b> (middle right), and enter \n");
+                sb.append("<code>").append(paths.constructURL(Path.parse("modules"), false)).append("</code> (which is what the "
+                        + "update center plugin does).</p>\n");
+            } else {
+                // ??
+                sb.append("To access it from NetBeans, open <b>Tools | Plugins</b>.  On the settings tab, \n"
+                        + "                + \"click <b>Add</b> (middle right), and enter \n");
+                sb.append("<code>").append(paths.constructURL(Path.parse("modules"), false)).append("</code> (or just download the update center plugin below, and add that on the <b>Downloaded</b> tab).\n");
+            }
 
 //            sb.append("<table class='table'><tr><th>Name</th><th>Code Name</th><th>Description</th><th>Version</th><th>Updated</th><th>URLs</th></tr>\n");
-            sb.append("<table class='table'><tr><th>Name</th><th>Description</th><th>Version</th><th>Updated</th><th>URLs</th></tr>\n");
+            sb.append("<table class='table'><tr><th class='tophead'>Name</th><th class='tophead'>Description</th><th class='tophead'>Version</th><th class='tophead'>Updated</th><th class='tophead'>Download</th></tr>\n");
             int ix = 0;
             final Iterator<ModuleItem> items = set.sorted().iterator();
             while (items.hasNext()) {
@@ -105,16 +131,22 @@ public class IndexPage extends Page {
                 sb.append("  <td style='vertical-align: middle; margin: 5px;'>").append(item.getDescription()).append("</td>\n");
                 sb.append("  <td style='vertical-align: middle; margin: 5px;'>").append(item.getVersion()).append("</td>\n");
                 sb.append("  <td style='vertical-align: middle; margin: 5px;'>").append(DateTimeFormat.mediumDateTime().print(item.getDownloaded()).replaceAll(" ", "&nbsp;")).append("</td>\n");
-                if (!UpdateCenterServer.DUMMY_URL.equals(item.getFrom())) {
-                    sb.append("  <td style='vertical-align: middle; margin: 5px;'><a href=\"").append(item.getFrom()).append("\">").append("Link to Original").append("</a>").append(" &middot; \n");
-                } else {
-                    sb.append("  <td style='vertical-align: middle; margin: 5px;'><p>&nbsp;</p>\n");
-                }
                 URL u = paths.constructURL(Path.builder().add("download").add(item.getCodeNameBase()).add(item.getHash() + ".nbm").create(), false);
-                sb.append("<a href=\"").append(u).append("\">").append("Cached Copy").append("</a>").append("</td></tr>\n");
+
+                if (!UpdateCenterServer.DUMMY_URL.equals(item.getFrom())) {
+                    sb.append("  <td style='vertical-align: middle; margin: 5px;'>")
+                            .append("<a href=\"").append(u).append("\">").append("Download").append("</a>")
+                            .append(" <p/> \n")
+                            .append("<a href=\"").append(item.getFrom()).append("\">").append("Link to Original").append("</a>")
+                            .append("</td></tr>\n");
+                } else {
+                    sb.append("  <td style='vertical-align: middle; margin: 5px;'><p>&nbsp;</p>\n")
+                            .append("<a href=\"").append(u).append("\">").append("Download").append("</a>");
+                }
+                sb.append("</td></tr>\n");
             }
             sb.append("</table>\n");
-            sb.append("<hr>\n<h2>Add A Module URL</h2><p>Authentication Required</p>\n");
+            sb.append("<hr>\n<h2>Add A Plugin URL</h2><p>Authentication Required</p>\n");
 
             URL addUrl = paths.constructURL(Path.parse("add"), false);
 
