@@ -210,7 +210,23 @@ public final class UpdateCenterModuleGenerator {
                 case "Com":
                 case "Org":
                 case "Edu":
+                case "Net":
+                case "Gov":
+                case "Mil":
                 case "Cz":
+                case "Eu":
+                case "Ee":
+                case "Fr":
+                case "Uk":
+                case "Hu":
+                case "Ie":
+                case "In":
+                case "Jp":
+                case "Nl":
+                case "Pl":
+                case "Ro":
+                case "Sk":
+                case "Ua":
                 case "It":
                 case "Name":
                 case "Br":
@@ -284,6 +300,7 @@ public final class UpdateCenterModuleGenerator {
         result.put(UPDATE_URL, getUpdatesURL());
         result.put(SPECIFICATION_VERSION, serverVersion + "." + serverInstallId + "." + version);
         result.put(IMPLEMENTATION_VERSION, getImplementationVersion(result));
+        result.put(HOME_PAGE, paths.constructURL(Path.parse("/"), updateUrlHttps).toString());
         return substs = result;
     }
 
@@ -304,6 +321,7 @@ public final class UpdateCenterModuleGenerator {
     public static final String CODE_NAME_SLASHES = "codeNameSlashes";
     public static final String CODE_NAME_UNDERSCORES = "codeNameUnderscores";
     public static final String CODE_NAME_DASHES = "codeNameDashes";
+    public static final String HOME_PAGE = "homePage";
 
     private String hash;
 
@@ -319,6 +337,7 @@ public final class UpdateCenterModuleGenerator {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         HashingOutputStream hashOut = HashingOutputStream.sha1(out);
         try (JarOutputStream jarOut = new JarOutputStream(out)) {
+            jarOut.setLevel(9);
             for (FileTemplate f : nbmFileTemplates) {
                 f.write(jarOut, substs);
             }

@@ -35,8 +35,8 @@ public class IndexPage extends Page {
 
     @Inject
     IndexPage(ActeurFactory af, DateTime serverStartTime) {
-        add(af.sendNotModifiedIfIfModifiedSinceHeaderMatches());
         add(LogActeur.class);
+        add(af.sendNotModifiedIfIfModifiedSinceHeaderMatches());
         add(EtagGenActeur.class);
         add(IndexActeur.class);
         getResponseHeaders().addCacheControl(CacheControlTypes.Public);

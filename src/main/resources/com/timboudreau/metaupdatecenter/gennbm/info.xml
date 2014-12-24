@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE module PUBLIC "-//NetBeans//DTD Autoupdate Module Info 2.5//EN" "http://www.netbeans.org/dtds/autoupdate-info-2_5.dtd">
-<module codenamebase="${codeNameBase}" distribution="${serverUrl}" downloadsize="0" homepage="" license="AA0000C9" moduleauthor="${author}" needsrestart="false" releasedate="${year}/${month}/${day}">
+<module codenamebase="${codeNameBase}" distribution="${serverUrl}" downloadsize="0" homepage="${homePage}" license="AA0000C9" moduleauthor="${author}" needsrestart="false" releasedate="${year}/${month}/${day}">
     <manifest AutoUpdate-Show-In-Client="true" OpenIDE-Module="${codeNameBase}" OpenIDE-Module-Implementation-Version="${implementationVersion}" OpenIDE-Module-Java-Dependencies="Java &gt; 1.6" OpenIDE-Module-Module-Dependencies="org.netbeans.modules.autoupdate.services &gt; 1.3" OpenIDE-Module-Name="${moduleDisplayName}" OpenIDE-Module-Requires="org.openide.modules.ModuleFormat1" OpenIDE-Module-Specification-Version="${specificationVersion}" OpenIDE-Module-Long-Description="${moduleDescription}" OpenIDE-Module-Short-Description="${moduleDescription}"/>
     <license name="AA0000C9">The MIT License
 
