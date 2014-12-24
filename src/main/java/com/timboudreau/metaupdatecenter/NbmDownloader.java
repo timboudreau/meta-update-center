@@ -55,30 +55,26 @@ public class NbmDownloader {
 
     private void handleFileDownload(URL url, DownloadHandler callback) throws URISyntaxException, FileNotFoundException, IOException, SAXException, ParserConfigurationException {
         File file = new File(url.toURI());
-        System.out.println("FILE DOWNLOAD OF " + file);
+//        System.out.println("FILE DOWNLOAD OF " + file);
         if (!file.exists()) {
             System.out.println("no file.");
             throw new IOException("No such file " + url);
         }
         try (InputStream in = new BufferedInputStream(new FileInputStream(file), 2048)) {
             ByteBuf buf = Unpooled.buffer((int) file.length());
-            System.out.println("Copying " + file.length());
             try (ByteBufOutputStream out = new ByteBufOutputStream(buf)) {
                 Streams.copy(in, out);
             }
-            System.out.println("done with copy");
             buf.resetReaderIndex();
             handleDownloadedNBM(buf, callback, url.toString());
         }
     }
 
     public ResponseFuture download(DateTime ifModifiedSince, final String url, final DownloadHandler callback) throws MalformedURLException, URISyntaxException, FileNotFoundException, IOException, SAXException, ParserConfigurationException {
-        System.out.println("GET " + url);
+        System.out.println("Download " + url);
 
         URL uu = new URL(url);
-        System.out.println("AUTH " + uu.toURI().getScheme());
         if ("file".equals(uu.toURI().getScheme())) {
-            System.out.println("Is a file ");
             handleFileDownload(uu, callback);
             return null;
         }
@@ -159,7 +155,7 @@ public class NbmDownloader {
                         moduleInfo = new InfoFile(doc);
                         break;
                     }
-                    System.out.println(e.getName());
+//                    System.out.println(e.getName());
                 } finally {
                     in.closeEntry();
                 }

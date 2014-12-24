@@ -9,8 +9,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.mastfrog.jackson.JacksonConfigurer;
+import com.timboudreau.metaupdatecenter.borrowed.SpecificationVersion;
 import java.io.IOException;
-import org.openide.modules.SpecificationVersion;
 import org.openide.util.lookup.ServiceProvider;
 
 @ServiceProvider(service = JacksonConfigurer.class)

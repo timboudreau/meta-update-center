@@ -45,12 +45,6 @@
             <version>4.11</version>
         </dependency>
         <dependency>
-            <groupId>org.netbeans.api</groupId>
-            <artifactId>org-openide-modules</artifactId>
-            <version>${netbeans.version}</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
             <artifactId>giulius-settings</artifactId>
             <groupId>com.mastfrog</groupId>
             <type>jar</type>

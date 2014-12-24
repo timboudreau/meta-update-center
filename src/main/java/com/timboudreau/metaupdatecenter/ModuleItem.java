@@ -10,6 +10,7 @@ import com.mastfrog.url.Path;
 import com.mastfrog.url.URL;
 import com.sun.org.apache.xml.internal.serialize.OutputFormat;
 import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
+import com.timboudreau.metaupdatecenter.borrowed.SpecificationVersion;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -21,7 +22,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import org.joda.time.DateTime;
-import org.openide.modules.SpecificationVersion;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 

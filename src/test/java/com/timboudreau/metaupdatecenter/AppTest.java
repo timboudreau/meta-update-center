@@ -11,6 +11,7 @@ import com.mastfrog.url.PathElement;
 import com.mastfrog.url.Protocol;
 import com.mastfrog.util.AbstractBuilder;
 import com.mastfrog.util.Streams;
+import com.timboudreau.metaupdatecenter.borrowed.SpecificationVersion;
 import com.timboudreau.metaupdatecenter.gennbm.UpdateCenterModuleGenerator;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -30,7 +31,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
-import org.openide.modules.SpecificationVersion;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 

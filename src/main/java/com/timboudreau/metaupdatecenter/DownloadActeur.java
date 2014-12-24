@@ -11,6 +11,7 @@ import com.mastfrog.acteur.errors.Err;
 import com.mastfrog.acteur.headers.Headers;
 import com.mastfrog.acteur.headers.Method;
 import com.mastfrog.url.Path;
+import com.timboudreau.metaupdatecenter.borrowed.SpecificationVersion;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import java.io.BufferedInputStream;
@@ -19,7 +20,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import org.joda.time.DateTime;
-import org.openide.modules.SpecificationVersion;
 
 /**
  *
