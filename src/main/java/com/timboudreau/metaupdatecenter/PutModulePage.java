@@ -25,6 +25,7 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
+import io.netty.handler.codec.http.LastHttpContent;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedList;
@@ -143,6 +144,15 @@ public class PutModulePage extends Acteur {
                 write("I already have that module.\n");
                 if (out != null) {
                     out.future().channel().flush();
+                    close();
+                }
+            }
+            if (out != null) {
+                try {
+                    out.write(LastHttpContent.EMPTY_LAST_CONTENT);
+                } catch (IOException ex) {
+                    Exceptions.printStackTrace(ex);
+                } finally {
                     close();
                 }
             }
