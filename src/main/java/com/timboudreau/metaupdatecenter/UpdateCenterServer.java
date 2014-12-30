@@ -3,6 +3,8 @@ package com.timboudreau.metaupdatecenter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
 import com.google.inject.name.Names;
 import com.mastfrog.acteur.ActeurFactory;
 import com.mastfrog.acteur.Help;
@@ -29,6 +31,9 @@ import com.mastfrog.settings.Settings;
 import com.mastfrog.settings.SettingsBuilder;
 import com.mastfrog.util.GUIDFactory;
 import com.timboudreau.metaupdatecenter.gennbm.UpdateCenterModuleGenerator;
+import io.netty.buffer.ByteBufAllocator;
+import io.netty.buffer.PooledByteBufAllocator;
+import io.netty.channel.ChannelOption;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import java.io.File;
 import java.io.IOException;
@@ -68,7 +73,7 @@ public class UpdateCenterServer extends GenericApplication {
 
         System.out.println("Serving the following modules:");
         for (ModuleItem i : set) {
-            System.out.println("  " + i);
+            System.out.println("  " + i + " - " + i.getFrom());
         }
     }
 
@@ -108,7 +113,7 @@ public class UpdateCenterServer extends GenericApplication {
                 settings.setString("password", password);
             }
             Dependencies deps = Dependencies.builder()
-                    .add(new NbmInfoModule(base, settings))
+                    .add(new NbmInfoModule(base))
                     .add(new ServerModule(UpdateCenterServer.class))
                     .add(new JacksonModule())
                     .add(settings, Namespace.DEFAULT)
@@ -140,22 +145,41 @@ public class UpdateCenterServer extends GenericApplication {
     private static class NbmInfoModule extends AbstractModule {
 
         private final File base;
-        private final Settings settings;
 
-        public NbmInfoModule(File base, Settings settings) {
+        public NbmInfoModule(File base) {
             this.base = base;
-            this.settings = settings;
         }
 
         @Override
         protected void configure() {
             ModuleSet set = new ModuleSet(base, binder().getProvider(ObjectMapper.class), binder().getProvider(Stats.class));
             bind(ModuleSet.class).toInstance(set);
-            int downloadThreads = settings.getInt("download.threads", 4);
-            bind(HttpClient.class).toInstance(HttpClient.builder().setUserAgent(SERVER_NAME).followRedirects().threadCount(downloadThreads).maxChunkSize(16384).build());
+            bind(HttpClient.class).toProvider(HttpClientProvider.class);
             bind(Authenticator.class).to(AuthenticatorImpl.class);
             bind(Poller.class).asEagerSingleton();
             bind(Integer.class).annotatedWith(Names.named(SETTINGS_KEY_SERVER_VERSION)).toInstance(VERSION);
+        }
+
+        @Singleton
+        static class HttpClientProvider implements Provider<HttpClient> {
+
+            private final HttpClient client;
+
+            @Inject
+            HttpClientProvider(ByteBufAllocator alloc, Settings settings) {
+                int downloadThreads = settings.getInt("download.threads", 4);
+                client = HttpClient.builder()
+                        .setUserAgent(SERVER_NAME)
+                        .followRedirects()
+                        .setChannelOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
+                        .threadCount(downloadThreads)
+                        .maxChunkSize(16384).build();
+            }
+
+            @Override
+            public HttpClient get() {
+                return client;
+            }
         }
     }
 }
