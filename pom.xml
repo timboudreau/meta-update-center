@@ -6,7 +6,7 @@
     <version>1.5.4</version>
     <packaging>jar</packaging>
     <properties>
-        <mastfrog.version>1.5.4</mastfrog.version>
+        <mastfrog.version>1.6.0-dev</mastfrog.version>
         <netbeans.version>RELEASE80</netbeans.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>

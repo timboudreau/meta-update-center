@@ -149,6 +149,8 @@ public class NbmDownloader {
 //                                        String body = new String(out.toByteArray(), 0, len, CharsetUtil.UTF_8);
 //                                        System.out.println("BODY: *********************\n" + body + "\n***************");
                         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+                        dbFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+
                         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
                         Document doc = dBuilder.parse(new ByteArrayInputStream(out.toByteArray(), 0, len));
                         doc.getDocumentElement().normalize();

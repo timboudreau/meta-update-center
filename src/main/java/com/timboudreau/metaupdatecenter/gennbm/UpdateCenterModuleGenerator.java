@@ -345,11 +345,11 @@ public final class UpdateCenterModuleGenerator {
         hashOut.close();
         hash = hashOut.getHashAsString();
         return new ByteArrayInputStream(out.toByteArray());
-
     }
 
     public InfoFile getInfoFile() throws ParserConfigurationException, IOException, SAXException {
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+        dbFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
         Document doc = dBuilder.parse(infoTemplate.getInputStream(getSubstitutions()));
         doc.getDocumentElement().normalize();

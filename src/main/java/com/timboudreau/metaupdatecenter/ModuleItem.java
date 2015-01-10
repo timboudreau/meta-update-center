@@ -131,7 +131,9 @@ public final class ModuleItem implements Comparable<ModuleItem> {
             URL nue = paths.constructURL(Path.builder().add(base).add(getCodeNameBase()).add(hash + ".nbm").create(), false);
             meta.put("distribution", nue.toString());
         }
-        Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        dbf.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+        Document document = dbf.newDocumentBuilder().newDocument();
         Element moduleNode = document.createElement("module");
         for (Map.Entry<String, Object> e : meta.entrySet()) {
             String key = e.getKey();
