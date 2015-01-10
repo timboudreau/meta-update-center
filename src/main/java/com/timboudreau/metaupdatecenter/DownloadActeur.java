@@ -47,7 +47,7 @@ class DownloadActeur extends Acteur {
         }
         setChunked(true);
         if (!file.exists()) {
-            setState(new RespondWith(404, "No such file " + file));
+            notFound("No such file " + file);
         } else {
             add(Headers.CONTENT_TYPE, MediaType.OCTET_STREAM);
             add(Headers.LAST_MODIFIED, new DateTime(file.lastModified()));

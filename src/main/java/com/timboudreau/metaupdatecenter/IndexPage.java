@@ -50,7 +50,7 @@ public class IndexPage extends Page {
         @Inject
         LogActeur(Stats stats, HttpEvent evt) {
             stats.logWebHit(evt);
-            setState(new ConsumedLockedState());
+            next();
         }
     }
 
@@ -66,10 +66,10 @@ public class IndexPage extends Page {
             String etag = sb.toString();
             String sent = evt.getHeader(Headers.IF_NONE_MATCH);
             if (sent != null && etag.equals(sent)) {
-                setState(new RespondWith(NOT_MODIFIED));
+                reply(NOT_MODIFIED);
             } else {
                 add(Headers.ETAG, etag);
-                setState(new ConsumedLockedState());
+                next();
             }
         }
     }

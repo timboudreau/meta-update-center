@@ -55,7 +55,7 @@ public class ModuleCatalogPage extends Page {
             page.getResponseHeaders().addCacheControl(CacheControlTypes.must_revalidate);
             page.getResponseHeaders().addCacheControl(CacheControlTypes.max_age, Duration.standardHours(1));
             page.getResponseHeaders().addVaryHeader(Headers.CONTENT_ENCODING);
-            setState(new ConsumedLockedState());
+            next();
         }
     }
 
@@ -64,7 +64,7 @@ public class ModuleCatalogPage extends Page {
         @Inject
         SetupETag(Page page, ModuleSet set) {
             page.getResponseHeaders().setETag(set.getCombinedHash());
-            setState(new ConsumedLockedState());
+            next();
         }
     }
 

@@ -50,12 +50,12 @@ public class DownloadPage extends Page {
             hash = hash.substring(0, hash.length() - 4);
             ModuleItem item = ms.find(codeName, hash);
             if (item == null) {
-                setState(new RespondWith(404, "No such file " + hash + ".nbm"));
+                notFound("No such file " + hash + ".nbm");
             } else {
                 page.getResponseHeaders().setLastModified(item.getDownloaded());
                 page.getResponseHeaders().setETag(hash);
             }
-            setState(new ConsumedLockedState(item));
+            next(item);
             stats.logDownload(evt);
         }
     }
