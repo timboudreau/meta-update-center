@@ -84,11 +84,37 @@ public class IndexPage extends Page {
             ok();
             StringBuilder sb = new StringBuilder();
             sb.append("<!doctype html><html><head><title>NetBeans Plugins</title>\n");
-            sb.append("<style>.tophead { font-size: 1.3em; border-top: 1px #AAAAAA solid; border-bottom: 1px #AAAAAA solid; margin-top: 2.5em;} .table { min-height: 50%;} h1 { color: #222222; } .content { margin: 12px; } html{height:100%; font-family:'Helvetica'; color: #444441}\n body{ margin: 0px;}\n td { vertical-align: top; text-align: left;}\n .header {background-color: #EEEEFF; padding: 12px; color: #999991; border-bottom: #AAAAAA solid 1px;}\n tr { margin-bottom: 0.5em; border-bottom: 1px solid #CCCCCC; min-height: 5em;}\n code{background-color: #EDEDED; margin: 0.5em; font-size: 1.2em;}\n .odd { background-color: #F3F3FF; }\n td { border-left: solid 1px #BBBBBB; margin-left: 3px; margin-right: 3px; padding: 5px; }</style>\n");
+            sb.append("<style>@import url(//fonts.googleapis.com/css?family=Sanchez|Montserrat);"
+                    + ".tophead { font-size: 1.3em; border-top: 1px #AAAAAA solid; border-bottom: 1px #AAAAAA solid; margin-top: 2.5em;} "
+                    + ".table { min-height: 50%; min-width: 100%; width: 100%;} "
+                    + "h1, h2, h3, h4{ color: #222222; font-family: 'Montserrat';} "
+                    + ".content { margin: 12px; } "
+                    + "html{height:100%; font-family:'Montserrat'; color: #444441}\n "
+                    + "body{ margin: 0px;}\n "
+                    + "body{ margin: 0px; font-family: 'Sanchez'}\n "
+                    + "td { vertical-align: top;"
+                    + "text-align: left;}\n "
+                    + "a { text-decoration: none; color: #3333AA; }"
+                    + "body > div.content > table > tbody > tr > td > a, body > div.content > table > tbody > tr > td > p > a { text-align: center; min-width: 10em; padding: 0.5em; background-color: #EEEEFF; display: inline-block; border: 1px solid #CCCCCC; border-radius: 1em; }"
+                    + ".header {background-color: #EEEEFF; padding: 12px; color: #999991; border-bottom: #AAAAAA solid 1px;}\n "
+                    + "tr { margin-bottom: 0.5em; border-bottom: 1px solid #CCCCCC; min-height: 5em;}\n "
+                    + "code{background-color: #EDEDED; margin: 0.5em; font-size: 1.2em;}\n "
+                    + ".odd { background-color: #F5F5F6; }\n"
+                    + ".even { background-color: #FEFEFE; }\n"
+                    + " td { border-left: solid 1px #BBBBBB; margin-left: 3px; margin-right: 3px; padding: 5px; }</style>\n");
             sb.append("</head>\n<body>\n");
             String name = settings.getString("server.name", "Update Center Server");
             sb.append("<div class='header'><h1>").append(name).append("</h1>\n");
-            sb.append("<font size='-1'><a target='other' href='https://github.com/timboudreau/meta-update-center'>MetaUpdateServer</a> 1.").append(ver).append(" online since ").append(serverStart.getMonthOfYear()).append('/').append(serverStart.getDayOfMonth()).append('/').append(serverStart.getYear()).append("</font><p/>\n");
+            sb.append("<font size='-1'><a target='other' href='https://github.com/timboudreau/meta-update-center'>MetaUpdateServer</a> 1.")
+                    .append(ver)
+                    .append(" online since ")
+                    .append(serverStart.getMonthOfYear())
+                    .append('/')
+                    .append(serverStart.getDayOfMonth())
+                    .append('/')
+                    .append(serverStart.getYear())
+                    .append(", serving ").append(set.size()).append(" plugins.")
+                    .append("</font><p/>\n");
             sb.append("</div>\n");
             sb.append("<div class='content'>\n");
 
@@ -99,8 +125,6 @@ public class IndexPage extends Page {
                     break;
                 }
             }
-
-            sb.append("<p>This server is happily serving ").append(set.size()).append(" plugins.</p>\n");
 
             if (ucModule != null) {
                 URL u = paths.constructURL(Path.builder().add("download").add(ucModule.getCodeNameBase()).add(ucModule.getHash() + ".nbm").create(), false);
@@ -126,7 +150,7 @@ public class IndexPage extends Page {
             while (items.hasNext()) {
                 boolean odd = ix++ % 2 != 0;
                 ModuleItem item = items.next();
-                sb.append("<tr style='min-height:5em;'").append(odd ? " class='odd'" : "").append(">\n<th style='vertical-align: middle; text-align: left'>").append(item.getName()).append("</th>\n");
+                sb.append("<tr style='min-height:5em;'").append(odd ? " class='odd'" : "class='even'").append(">\n<th style='vertical-align: middle; text-align: left'>").append(item.getName()).append("</th>\n");
 //                sb.append("  <td valign='middle'>").append(item.getCodeNameBase()).append("</td>\n");
                 sb.append("  <td style='vertical-align: middle; margin: 5px;'>").append(item.getDescription()).append("</td>\n");
                 sb.append("  <td style='vertical-align: middle; margin: 5px;'>").append(item.getVersion()).append("</td>\n");
