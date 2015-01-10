@@ -12,6 +12,7 @@ import com.mastfrog.url.Protocol;
 import com.mastfrog.util.AbstractBuilder;
 import com.mastfrog.util.Streams;
 import com.timboudreau.metaupdatecenter.borrowed.SpecificationVersion;
+import com.timboudreau.metaupdatecenter.gennbm.ServerInstallId;
 import com.timboudreau.metaupdatecenter.gennbm.UpdateCenterModuleGenerator;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -116,7 +117,7 @@ public class AppTest {
                 .add("basepath", "121/final/modules")
                 .add("serverDisplayName", "The Foo Collection")
                 .build();
-        UpdateCenterModuleGenerator gen = new UpdateCenterModuleGenerator(set, settings, x, new ObjectMapper());
+        UpdateCenterModuleGenerator gen = new UpdateCenterModuleGenerator(set, new ServerInstallId(1), settings, x, new ObjectMapper());
         gen.version = 6;
 
         File f = new File(new File(System.getProperty("java.io.tmpdir")), "test.nbm");

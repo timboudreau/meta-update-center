@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
-import java.util.prefs.Preferences;
 import java.util.regex.Pattern;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -55,31 +54,17 @@ public final class UpdateCenterModuleGenerator {
     private String day;
     private String month;
     private boolean updateUrlHttps;
-    private long serverInstallId;
+    private final long serverInstallId;
     private final int serverVersion;
 
-    private static final long TIME_OFFSET = 1373764126035L;
-
     @Inject
-    public UpdateCenterModuleGenerator(ModuleSet modules, Settings settings, PathFactory paths, ObjectMapper mapper) throws IOException {
+    public UpdateCenterModuleGenerator(ModuleSet modules, ServerInstallId idProvider, Settings settings, PathFactory paths, ObjectMapper mapper) throws IOException {
         this.modules = modules;
         this.settings = settings;
         this.paths = paths;
         this.mapper = mapper;
         updateUrlHttps = settings.getBoolean("update.url.https", false);
-        // We compute and persist an "install id" and store it in preferences
-        // It is based on the current timestamp to the minute, subtracting
-        // an offset (so the ID is really "minutes since this class was written").
-        // This gives us a persistent but incrementing integer for the middle
-        // number of the specification version, and keeps it as short as possible
-        // This guarantees that generated modules will retain a middle ID after
-        long now = (DateTime.now().getMillis() - TIME_OFFSET) / (1000 * 60);
-        Preferences prefs = Preferences.userNodeForPackage(UpdateCenterModuleGenerator.class);
-        serverInstallId = prefs.getLong("updateServerId", -1);
-        if (serverInstallId == -1L) {
-            serverInstallId = now;
-            prefs.putLong("updateServerId", serverInstallId);
-        }
+        serverInstallId = idProvider.get();
         serverVersion = settings.getInt(UpdateCenterServer.SETTINGS_KEY_SERVER_VERSION, 2);
         initTemplates();
         load();
