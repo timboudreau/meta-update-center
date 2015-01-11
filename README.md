@@ -302,3 +302,14 @@ To-Dos
  * Auto-generate version numbers and repack (and possibly re-sign) NBM bits 
 [as described here](http://wiki.netbeans.org/AggregatingUC#Version-aware_push) so that even if the remote bits version didn't change, if the bits did, it increments
 
+Metrics
+-------
+
+Logging is done in a format compatible with [bunyan](https://github.com/trentm/node-bunyan). Bunyan is quite
+useful for monitoring and filtering logs in real time.
+
+A couple of scripts
+are included in the project root directory for analyzing logs to determine the geographic distribution of users.
+They require NodeJS, bunyan and geoiplookup to be available on the path.  For a simple geographic distribution,
+tweak the uniqueAddresses script to point to your `nbmserver.log` is and run `./uniqueAddresses | ./listaddrs`.
+

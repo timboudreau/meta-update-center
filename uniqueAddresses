@@ -1,0 +1,4 @@
+#!/bin/sh
+echo [
+cat nbmserver.log | bunyan -c 'this.msg == "catalog" && typeof this.address !== "undefined"' -o inspect | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" | grep address | uniq | sort | cut -b 12- | uniq
+echo ]

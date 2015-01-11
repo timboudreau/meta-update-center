@@ -1,0 +1,87 @@
+#!/usr/bin/env node
+
+var fs = require('fs'), util = require('util'), child_process = require('child_process'), path = require('path');
+
+var count;
+var arg;
+var results = {};
+var countByCountry = {};
+
+var rex = /GeoIP Country Edition\: (.*)/;
+var cityrex = /GeoIP City Edition, Rev 1\: (.*)/;
+
+if (typeof arg === 'undefined') {
+    var chunks = [];
+    process.stdin.on('data', function (data) {
+        chunks.push(data);
+    });
+    process.stdin.on('end', function () {
+        if (chunks.length === 0) {
+            console.log('No data.');
+            process.exit(1);
+        }
+        var json;
+        try {
+            json = JSON.parse(chunks.join(''));
+        } catch (err) {
+            json = eval(chunks.join(''));
+        }
+        data = json;
+        count = data.length;
+        go();
+    });
+    process.stdin.resume();
+} else {
+    var fl = /\//.test(arg) ? arg : path.join(process.cwd(), arg);
+    var dta = fs.readFileSync(fl);
+    var json;
+    try {
+        json = JSON.parse(dta);
+    } catch (err) {
+        json = eval(dta);
+    }
+    data = json;
+    count = data.length;
+    go();
+}
+
+function finish() {
+    console.log(util.inspect(results));
+    var keys = [];
+    for (var key in countByCountry) {
+        keys.push(key);
+    }
+    keys.sort(function (a, b) {
+        var a1 = countByCountry[a];
+        var b1 = countByCountry[b];
+        return a1 === b1 ? 0 : a1 < b1 ? 1 : -1;
+    });
+    for (var i = 0; i < keys.length; i++) {
+        var key = keys[i];
+        console.log(key + ': ' + countByCountry[key]);
+    }
+}
+
+function go() {
+    data.forEach(function (item) {
+        child_process.exec('geoiplookup ' + item, function (err, out, stderr) {
+            count--;
+            var info = (out + '').split('\n');
+            if (info.length > 0) {
+                if (rex.test(info[0])) {
+                    var country = rex.exec(info[0])[1];
+                    if (!results[country]) {
+                        results[country] = [];
+                        countByCountry[country] = 0;
+                    }
+                    var city = cityrex.exec(info[1])[1];
+                    results[country].push(city);
+                    countByCountry[country]++;
+                }
+            }
+            if (count === 0) {
+                finish();
+            }
+        });
+    });
+}
