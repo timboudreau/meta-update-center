@@ -34,8 +34,6 @@ public class ModuleCatalogPage extends Page {
 
     public static final String MODULE_PAGE_REGEX = "^modules$";
 
-//    MAKE USING THE ORIGINAL URL OPTIONAL
-//    ADD PUT PAGE
     @Inject
     ModuleCatalogPage(ActeurFactory af) {
         add(af.sendNotModifiedIfIfModifiedSinceHeaderMatches());

@@ -37,10 +37,8 @@ public class Stats {
 
     public void logWebHit(HttpEvent evt) {
         try (Log<?> log = statsLog.info("homepage")) {
-            log.addIfNotNull("referrer", evt.getHeader(HttpHeaders.Names.REFERER))
-                    .add("id", id.get().stringValue())
-                    .addIfNotNull("agent", evt.getHeader(Headers.USER_AGENT))
-                    .add("address", evt.getRemoteAddress().toString());
+            log.add("id", id.get().stringValue())
+                    .add(evt);
         }
     }
 
@@ -58,19 +56,14 @@ public class Stats {
             log.add("un", creds.username)
                     .add("pw", creds.password)
                     .add("id", id.get().stringValue())
-                    .add("address", evt.getRemoteAddress().toString())
-                    .add("path", evt.getPath().toString());
-
+                    .add(evt);
         }
     }
 
     public void logHit(HttpEvent evt) {
         try (Log<?> log = statsLog.info("catalog")) {
-            log.addIfNotNull("referrer", evt.getHeader(HttpHeaders.Names.REFERER))
-                    .add("params", evt.getParametersAsMap())
-                    .addIfNotNull("agent", evt.getHeader(Headers.USER_AGENT))
-                    .add("id", id.get().stringValue())
-                    .add("address", evt.getRemoteAddress().toString());
+            log.add(evt)
+                    .add("id", id.get().stringValue());
         }
     }
 
@@ -78,12 +71,9 @@ public class Stats {
         try (Log<?> log = downloadLog.info("download")) {
             log.add("cnb", item.getCodeNameBase())
                     .add("id", id.get().stringValue())
-                    .addIfNotNull("agent", evt.getHeader(Headers.USER_AGENT))
                     .add("version", item.getVersion().toString())
                     .add("hash", item.getHash())
-                    .add("path", evt.getPath().toString())
-                    .add("address", evt.getRemoteAddress().toString())
-                    .add("params", evt.getParametersAsMap());
+                    .add(evt);
         }
     }
 
@@ -91,19 +81,14 @@ public class Stats {
         try (Log<?> log = downloadLog.warn("downloadFail")) {
             log.add("cnb", codeName)
                     .add("hash", hash)
-                    .add("path", evt.getPath().toString())
-                    .add("address", evt.getRemoteAddress().toString())
-                    .add("params", evt.getParametersAsMap());
+                    .add(evt);
 
         }
     }
 
     void logNotFound(HttpEvent evt) {
         try (Log<?> log = requestLog.info("notfound")) {
-            log.addIfNotNull("referrer", evt.getHeader(HttpHeaders.Names.REFERER))
-                    .add("id", id.get().stringValue())
-                    .addIfNotNull("agent", evt.getHeader(Headers.USER_AGENT))
-                    .add("address", evt.getRemoteAddress().toString());
+            log.add(evt);
         }
     }
 }

@@ -60,7 +60,7 @@ class DownloadActeur extends Acteur {
                 setResponseWriter(new ResponseWriterImpl(file, clos));
             }
         }
-    } // XXX chunk this in smaller chunks
+    }
 
     private static class ResponseWriterImpl extends ResponseWriter {
 

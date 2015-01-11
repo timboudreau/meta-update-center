@@ -36,7 +36,6 @@ public class DownloadPage extends Page {
         getResponseHeaders().addCacheControl(CacheControlTypes.must_revalidate);
         add(af.sendNotModifiedIfIfModifiedSinceHeaderMatches());
         add(af.sendNotModifiedIfETagHeaderMatches());
-//        add(af.exactPathLength(3));
         add(DownloadActeur.class);
     }
 

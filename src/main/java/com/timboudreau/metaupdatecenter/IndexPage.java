@@ -142,7 +142,6 @@ public class IndexPage extends Page {
                 sb.append("<code>").append(paths.constructURL(Path.parse("modules"), false)).append("</code> (or just download the update center plugin below, and add that on the <b>Downloaded</b> tab).\n");
             }
 
-//            sb.append("<table class='table'><tr><th>Name</th><th>Code Name</th><th>Description</th><th>Version</th><th>Updated</th><th>URLs</th></tr>\n");
             sb.append("<table class='table'><tr><th class='tophead'>Name</th><th class='tophead'>Description</th><th class='tophead'>Version</th><th class='tophead'>Updated</th><th class='tophead'>Download</th></tr>\n");
             int ix = 0;
             final Iterator<ModuleItem> items = set.sorted().iterator();
@@ -150,7 +149,6 @@ public class IndexPage extends Page {
                 boolean odd = ix++ % 2 != 0;
                 ModuleItem item = items.next();
                 sb.append("<tr style='min-height:5em;'").append(odd ? " class='odd'" : "class='even'").append(">\n<th style='vertical-align: middle; text-align: left'>").append(item.getName()).append("</th>\n");
-//                sb.append("  <td valign='middle'>").append(item.getCodeNameBase()).append("</td>\n");
                 sb.append("  <td style='vertical-align: middle; margin: 5px;'>").append(item.getDescription()).append("</td>\n");
                 sb.append("  <td style='vertical-align: middle; margin: 5px;'>").append(item.getVersion()).append("</td>\n");
                 sb.append("  <td style='vertical-align: middle; margin: 5px;'>").append(DateTimeFormat.mediumDateTime().print(item.getDownloaded()).replaceAll(" ", "&nbsp;")).append("</td>\n");
