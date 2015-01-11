@@ -22,6 +22,7 @@ Features
  * It processes metadata in the downloaded NBM files and uses that to figure out the rest.
  * It periodically checks for new versions and updates what it is serving automatically.
  * Automatically generates and serves a NetBeans plugin which registers your server as an update server - your users install that, and from then on the IDE/application will automatically check your server for updates
+ * Logs hit and download statistics using in easily analyzed [bunyan-compatible JSON](https://github.com/trentm/node-bunyan) using [bunyan-java](https://github.com/timboudreau/bunyan-java)
 
 Usage fairly self-explanatory - start it and navigate to it in a browser.  Try the [demo server](http://timboudreau.com/modules) to see what it does.
 
@@ -144,6 +145,8 @@ add URLs to the system).  If not set, a random one is generated on startup and l
  * ``poll.interval.minutes`` - the interval in minutes between checks of remote servers for newer 
 versions of the NBMs served.  The default is hourly.
  * ``admin.user.name`` - sets the user name expected for basic authentication for adding modules.  The default is ``admin``.
+ * ``log.file`` - the file to log stats and other information to - default is `nbmserver.log` in the process' working directory
+ * ``log.level`` - defaults to `info` - see [bunyan-java](https://github.com/timboudreau/bunyan-java) for details
 
 See the documentation for [Acteur](http://github.com/timboudreau/acteur) for 
 additional settings.  The properties are loaded using [Giulius](http://github.com/timboudreau/giulius)
