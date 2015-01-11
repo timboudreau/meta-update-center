@@ -22,7 +22,7 @@ import org.w3c.dom.NamedNodeMap;
  */
 public class InfoFile implements Comparable<InfoFile> {
 
-    private Document doc;
+    private final Document doc;
     private Element module;
     private Element manifest;
 

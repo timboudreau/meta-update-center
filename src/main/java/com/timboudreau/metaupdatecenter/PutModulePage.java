@@ -83,7 +83,7 @@ public class PutModulePage extends Acteur {
             this.mapper = mapper;
         }
 
-        private List<String> messages = new LinkedList<>();
+        private final List<String> messages = new LinkedList<>();
 
         @Override
         public Status write(Event<?> evt, Output out, int iteration) throws Exception {

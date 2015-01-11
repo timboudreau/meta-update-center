@@ -145,7 +145,7 @@ public class JsonConfig implements JacksonConfigurer {
             if (addr instanceof InetSocketAddress) {
                 inetSer.serialize((InetSocketAddress) addr, jg, sp);
             } else {
-                socketSer.serialize((SocketAddress) addr, jg, sp);
+                socketSer.serialize(addr, jg, sp);
             }
             jg.writeFieldName("params");
             jg.writeStartObject();

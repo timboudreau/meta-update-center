@@ -49,12 +49,12 @@ public final class UpdateCenterModuleGenerator {
     private final PathFactory paths;
     private final List<FileTemplate> nbmFileTemplates = new LinkedList<>();
     private final List<FileTemplate> jarFileTemplates = new LinkedList<>();
-    private ObjectMapper mapper;
+    private final ObjectMapper mapper;
     public int version = 1; //public for unit test
     private String year;
     private String day;
     private String month;
-    private boolean updateUrlHttps;
+    private final boolean updateUrlHttps;
     private final long serverInstallId;
     private final int serverVersion;
 

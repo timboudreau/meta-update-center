@@ -113,7 +113,6 @@ public class AppTest {
         assertEquals("test-hash", info.getHash());
 
         System.out.println("-------------XML--------------------");
-        System.out.println(info.toXML(new X(), "download"));
 
         assertNotNull(info.getVersion());
         assertEquals(new SpecificationVersion("1.3.1"), info.getVersion());

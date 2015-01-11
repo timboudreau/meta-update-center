@@ -76,7 +76,7 @@ public class Poller implements Runnable {
                         @Override
                         public boolean onResponse(HttpResponseStatus status, HttpHeaders headers) {
                             if (status.code() > 399) {
-                                pollLogger.warn("dowloadFail").add("url", item.getFrom()).add("status", status.code()).close();
+                                pollLogger.warn("downloadFail").add("url", item.getFrom()).add("status", status.code()).close();
                             }
                             return OK.equals(status);
                         }
@@ -87,7 +87,7 @@ public class Poller implements Runnable {
                                 pollLogger.info("newVersionDownloaded")
                                         .add("cnb", module.getModuleCodeName())
                                         .add("url", url)
-                                        .add("version", module.getModuleVersion().toString());
+                                        .add("version", module.getModuleVersion().toString()).close();
                                 set.add(module, bytes, url, hash, item.isUseOriginalURL());
                             } catch (IOException ex) {
                                 Exceptions.printStackTrace(ex);
@@ -98,7 +98,7 @@ public class Poller implements Runnable {
 
                         @Override
                         public void onError(Throwable t) {
-                            t.printStackTrace();
+                            pollLogger.error("download").add("url", item.getFrom()).add(t).close();
                         }
                     });
                 } catch (IOException | URISyntaxException | SAXException | ParserConfigurationException ex) {

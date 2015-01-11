@@ -120,7 +120,7 @@ public final class ModuleSet implements Iterable<ModuleItem> {
         return sb.toString();
     }
 
-    private Pattern PAT = Pattern.compile("(.*)\\.(.*)");
+    private final Pattern PAT = Pattern.compile("(.*)\\.(.*)");
     public static final int COPY_BUFFER_SIZE = 2048;
 
     public File getModuleFile(ModuleItem item) {
@@ -157,7 +157,6 @@ public final class ModuleSet implements Iterable<ModuleItem> {
                 }
             }
             if (!nbmFile.exists()) {
-                System.out.println("Create " + nbmFile);
                 if (!nbmFile.createNewFile()) {
                     throw new IOException("Could not create " + nbmFile);
                 }
@@ -243,7 +242,6 @@ public final class ModuleSet implements Iterable<ModuleItem> {
                 for (String key : new LinkedList<>(pairForHash.keySet())) {
                     Pair pair = pairForHash.get(key);
                     if (!pair.isComplete()) {
-                        System.out.println("  Incomplete file pair " + pair + " - for hash " + key + " ignoring");
                         pairForHash.remove(key);
                     }
                 }
