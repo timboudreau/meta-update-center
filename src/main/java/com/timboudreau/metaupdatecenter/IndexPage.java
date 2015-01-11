@@ -81,7 +81,6 @@ public class IndexPage extends Page {
         @Inject
         IndexActeur(ModuleSet set, PathFactory paths, Settings settings, @Named(UpdateCenterServer.SETTINGS_KEY_SERVER_VERSION) int ver, DateTime serverStart) {
             ok();
-            if (true) throw new IllegalStateException();
             StringBuilder sb = new StringBuilder();
             sb.append("<!doctype html><html><head><title>NetBeans Plugins</title>\n");
             sb.append("<style>@import url(//fonts.googleapis.com/css?family=Sanchez|Montserrat);"
