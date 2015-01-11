@@ -8,6 +8,7 @@ import com.google.common.collect.ImmutableMap;
 import com.mastfrog.acteur.server.PathFactory;
 import com.mastfrog.url.Path;
 import com.mastfrog.url.URL;
+import com.mastfrog.util.collections.MapBuilder;
 import com.sun.org.apache.xml.internal.serialize.OutputFormat;
 import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
 import com.timboudreau.metaupdatecenter.borrowed.SpecificationVersion;
@@ -52,17 +53,23 @@ public final class ModuleItem implements Comparable<ModuleItem> {
         this.useOriginalURL = useOriginalURL;
         this.from = from;
     }
-    
+
     public static ModuleItem fromFile(File file, ObjectMapper mapper) throws IOException {
         return mapper.readValue(file, ModuleItem.class);
     }
-    
+
     public boolean isUseOriginalURL() {
         return useOriginalURL;
     }
 
     public Map<String, Object> getMetadata() {
         return new ImmutableMap.Builder<String, Object>().putAll(metadata).build();
+    }
+
+    public Map<String, Object> toMap() {
+        return new MapBuilder().put("cnb", getCodeNameBase())
+                .put("downloaded", getDownloaded())
+                .put("version", getVersion()).build();
     }
 
     public DateTime getDownloaded() {
@@ -80,7 +87,7 @@ public final class ModuleItem implements Comparable<ModuleItem> {
     public String getHash() {
         return hash;
     }
-    
+
     public String toString() {
         return getCodeNameBase() + "-" + getVersion() + " downloaded " + getDownloaded();
     }
@@ -94,11 +101,11 @@ public final class ModuleItem implements Comparable<ModuleItem> {
     public Map<String, Object> getManifest() {
         return (Map<String, Object>) getMetadata().get("manifest");
     }
-    
+
     public String getName() {
         return (String) getManifest().get("OpenIDE-Module-Name");
     }
-    
+
     public String getDescription() {
         String result = (String) getManifest().get("OpenIDE-Module-Long-Description");
         if (result == null) {

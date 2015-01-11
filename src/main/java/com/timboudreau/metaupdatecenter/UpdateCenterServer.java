@@ -5,23 +5,36 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.mastfrog.acteur.ActeurFactory;
+import com.mastfrog.acteur.Event;
 import com.mastfrog.acteur.Help;
+import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.ImplicitBindings;
 import com.mastfrog.acteur.Page;
+import com.mastfrog.acteur.RequestLogger;
 import com.mastfrog.acteur.annotations.GenericApplication;
 import com.mastfrog.acteur.annotations.HttpCall;
 import com.mastfrog.acteur.auth.Authenticator;
-import com.mastfrog.acteur.server.ServerModule;
 import static com.mastfrog.acteur.server.ServerModule.BYTEBUF_ALLOCATOR_SETTINGS_KEY;
 import static com.mastfrog.acteur.server.ServerModule.POOLED_ALLOCATOR;
 import static com.mastfrog.acteur.headers.Method.GET;
 import static com.mastfrog.acteur.headers.Method.HEAD;
 import com.mastfrog.acteur.preconditions.Methods;
 import com.mastfrog.acteur.preconditions.PathRegex;
+import com.mastfrog.acteur.server.ServerBuilder;
+import com.mastfrog.acteur.server.ServerModule;
+import static com.mastfrog.acteur.server.ServerModule.HTTP_COMPRESSION;
+import com.mastfrog.acteur.util.ErrorInterceptor;
 import com.mastfrog.acteur.util.Server;
-import com.mastfrog.giulius.Dependencies;
+import com.mastfrog.bunyan.Log;
+import com.mastfrog.bunyan.Logger;
+import com.mastfrog.bunyan.LoggingModule;
+import static com.mastfrog.bunyan.LoggingModule.SETTINGS_KEY_ASYNC_LOGGING;
+import static com.mastfrog.bunyan.LoggingModule.SETTINGS_KEY_LOG_FILE;
+import static com.mastfrog.bunyan.LoggingModule.SETTINGS_KEY_LOG_LEVEL;
+import com.mastfrog.giulius.ShutdownHookRegistry;
 import com.mastfrog.guicy.annotations.Defaults;
 import com.mastfrog.guicy.annotations.Namespace;
 import com.mastfrog.jackson.JacksonModule;
@@ -30,21 +43,28 @@ import com.mastfrog.settings.MutableSettings;
 import com.mastfrog.settings.Settings;
 import com.mastfrog.settings.SettingsBuilder;
 import com.mastfrog.util.GUIDFactory;
+import static com.timboudreau.metaupdatecenter.UpdateCenterServer.SETTINGS_KEY_ADMIN_USER_NAME;
+import static com.timboudreau.metaupdatecenter.UpdateCenterServer.SETTINGS_NAMESPACE;
+import com.timboudreau.metaupdatecenter.gennbm.ServerInstallId;
 import com.timboudreau.metaupdatecenter.gennbm.UpdateCenterModuleGenerator;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelOption;
+import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import javax.xml.parsers.ParserConfigurationException;
 import org.openide.util.Exceptions;
 import org.xml.sax.SAXException;
 
 @ImplicitBindings(ModuleItem.class)
-@Defaults(namespace = @Namespace("nbmserver"), value = {
-    "admin.user.name=admin",
+@Defaults(namespace = @Namespace(SETTINGS_NAMESPACE), value = {
+    SETTINGS_KEY_ADMIN_USER_NAME + "=admin",
     "realm=NbmServerAdmin"
 })
 @Help
@@ -52,29 +72,57 @@ public class UpdateCenterServer extends GenericApplication {
 
     public static final String SETTINGS_KEY_SERVER_VERSION = "serverVersion";
     public static final int VERSION = 5;
-
+    public static final String STATS_LOGGER = "stats";
+    public static final String ERROR_LOGGER = "errors";
+    public static final String REQUESTS_LOGGER = "requests";
+    public static final String DOWNLOAD_LOGGER = "downloads";
+    public static final String SYSTEM_LOGGER = "system";
+    public static final String SETTINGS_KEY_NBM_DIR = "nbm.dir";
+    public static final String SETTINGS_KEY_PASSWORD = "password";
+    public static final String SETTINGS_KEY_ADMIN_USER_NAME = "admin.user.name";
+    public static final String SETTINGS_KEY_POLL_INTERVAL_MINUTES = "poll.interval.minutes";
     private static final String SERVER_NAME = " Tim Boudreau's Update Aggregator 1." + VERSION + " - " + "https://github.com/timboudreau/meta-update-center";
-
+    public static final String SETTINGS_NAMESPACE = "nbmserver";
     public static final String DUMMY_URL = "http://GENERATED.MODULE";
+    private final Stats stats;
 
     @Inject
-    UpdateCenterServer(ModuleSet set, UpdateCenterModuleGenerator gen) throws IOException, ParserConfigurationException, SAXException {
+    UpdateCenterServer(ModuleSet set, UpdateCenterModuleGenerator gen, Stats stats, @Named(SYSTEM_LOGGER) final Logger systemLogger, Settings settings, ServerInstallId serverId, ShutdownHookRegistry shutdown) throws IOException, ParserConfigurationException, SAXException {
         try {
             set.scan();
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
         }
-
-        InputStream nbm = gen.getNbmInputStream();
-        InfoFile nbmInfo = gen.getInfoFile();
-        String hash = gen.getHash();
-        set.add(nbmInfo, nbm, DUMMY_URL, hash, false);
-
-        System.out.println("Serving the following modules:");
-        for (ModuleItem i : set) {
-            System.out.println("  " + i + " - " + i.getFrom());
+        try (InputStream nbm = gen.getNbmInputStream()) {
+            InfoFile nbmInfo = gen.getInfoFile();
+            String hash = gen.getHash();
+            set.add(nbmInfo, nbm, DUMMY_URL, hash, false);
         }
+        System.err.println("Serving the following modules:");
+        List<Map<String, Object>> logInfo = new LinkedList<>();
+        for (ModuleItem i : set) {
+            System.err.println("  " + i + " - " + i.getFrom());
+            logInfo.add(i.toMap());
+        }
+        this.stats = stats;
+        try (Log<?> log = systemLogger.info("startup")) {
+            log.addIfNotNull(SETTINGS_KEY_NBM_DIR, settings.getString(SETTINGS_KEY_NBM_DIR))
+                    .add("serverId", serverId.get())
+                    .add("version", VERSION)
+                    .add("modules", logInfo)
+                    .addIfNotNull("pollInterval", settings.getInt(SETTINGS_KEY_POLL_INTERVAL_MINUTES))
+                    .addIfNotNull(ServerModule.PORT, settings.getInt(ServerModule.PORT))
+                    .addIfNotNull(ServerModule.WORKER_THREADS, settings.getInt(ServerModule.WORKER_THREADS))
+                    .addIfNotNull(ServerModule.BYTEBUF_ALLOCATOR_SETTINGS_KEY, settings.getString(ServerModule.BYTEBUF_ALLOCATOR_SETTINGS_KEY))
+                    .addIfNotNull(SETTINGS_KEY_LOG_LEVEL, settings.getString(SETTINGS_KEY_LOG_LEVEL));
+        }
+        shutdown.add(new Runnable() {
+            @Override
+            public void run() {
+                systemLogger.info("shutdown").close();
+            }
+        });
     }
 
     @Override
@@ -84,45 +132,55 @@ public class UpdateCenterServer extends GenericApplication {
 
     public static void main(String[] args) {
         try {
-            MutableSettings settings = new SettingsBuilder("nbmserver").addDefaultLocations()
+            MutableSettings settings = new SettingsBuilder(SETTINGS_NAMESPACE)
+                    .add(SETTINGS_KEY_LOG_LEVEL, "info")
+                    .add(SETTINGS_KEY_LOG_FILE, "nbmserver.log")
+                    //                    .add(LoggingModule.SETTINGS_KEY_LOG_TO_CONSOLE, "true")
+                    .add(SETTINGS_KEY_ASYNC_LOGGING, "true")
+                    .add(HTTP_COMPRESSION, "true")
+                    .addDefaultLocations()
                     .parseCommandLineArguments(args).buildMutableSettings();
 
-            // Compression is broken in Netty 4.0-CR10 - turning it off for now
-            settings.setBoolean("httpCompression", true);
             settings.setString(BYTEBUF_ALLOCATOR_SETTINGS_KEY, POOLED_ALLOCATOR);
-            String path = settings.getString("nbm.dir");
+            String path = settings.getString(SETTINGS_KEY_NBM_DIR);
             if (path == null) {
                 File tmp = new File(System.getProperty("java.io.tmpdir"));
-                File dir = new File(tmp, "nbmserver");
+                File dir = new File(tmp, SETTINGS_NAMESPACE);
                 if (!dir.exists()) {
                     if (!dir.mkdirs()) {
                         throw new IOException("Could not create " + dir);
                     }
                 }
-                System.out.println("--nbm.dir not specified on command line or settings.");
-                System.out.println("Serving nbms from " + dir.getAbsolutePath());
-                settings.setString("nbm.dir", path = dir.getAbsolutePath());
+                System.err.println("--" + SETTINGS_KEY_NBM_DIR
+                        + " not specified on command line or settings.");
+                System.err.println("Serving nbms from " + dir.getAbsolutePath());
+                settings.setString(SETTINGS_KEY_NBM_DIR, path = dir.getAbsolutePath());
             }
             File base = new File(path);
 
-            String password = settings.getString("password");
+            String password = settings.getString(SETTINGS_KEY_PASSWORD);
             if (password == null) {
-                password = GUIDFactory.get().newGUID();
-                System.out.println("--password not specified on command line or setttings.");
-                System.out.println("Using password '" + password + "'");
-                settings.setString("password", password);
+                password = GUIDFactory.get().newGUID(1, 12);
+                System.err.println("--" + SETTINGS_KEY_PASSWORD
+                        + " not specified on command line or setttings.");
+                System.err.println("Using one-time password '" + password + "'");
+                settings.setString(SETTINGS_KEY_PASSWORD, password);
             }
-            Dependencies deps = Dependencies.builder()
+
+            Server server = new ServerBuilder(SETTINGS_NAMESPACE)
+                    .add(new LoggingModule()
+                            .bindLogger(STATS_LOGGER)
+                            .bindLogger(SYSTEM_LOGGER)
+                            .bindLogger(REQUESTS_LOGGER)
+                            .bindLogger(DOWNLOAD_LOGGER)
+                            .bindLogger(ERROR_LOGGER))
                     .add(new NbmInfoModule(base))
-                    .add(new ServerModule(UpdateCenterServer.class))
+                    .applicationClass(UpdateCenterServer.class)
                     .add(new JacksonModule())
-                    .add(settings, Namespace.DEFAULT)
-                    .add(settings, "nbmserver")
+                    .add(settings)
                     .build();
 
-            Server server = deps.getInstance(Server.class);
             server.start().await();
-
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
             System.exit(1);
@@ -131,7 +189,34 @@ public class UpdateCenterServer extends GenericApplication {
         }
     }
 
-    @HttpCall
+    static class ErrorH implements ErrorInterceptor {
+
+        private final Logger logger;
+
+        @Inject
+        ErrorH(@Named(ERROR_LOGGER) Logger logger) {
+            this.logger = logger;
+        }
+
+        Throwable last;
+        @Override
+        public void onError(Throwable err) {
+            if (last == err) { // FIXME in acteur
+                return;
+            }
+            last = err;
+            logger.error(err.getClass().getName()).add(err).close();
+        }
+    }
+
+    @Override
+    protected HttpResponse createNotFoundResponse(Event<?> event) {
+        HttpEvent evt = (HttpEvent) event;
+        stats.logNotFound(evt);
+        return super.createNotFoundResponse(event);
+    }
+
+    @HttpCall(order = Integer.MIN_VALUE)
     @PathRegex("^favicon.ico$")
     @Methods({GET, HEAD})
     private static class FaviconPage extends Page {
@@ -152,12 +237,14 @@ public class UpdateCenterServer extends GenericApplication {
 
         @Override
         protected void configure() {
+            bind(RequestLogger.class).to(JsonRequestLogger.class);
             ModuleSet set = new ModuleSet(base, binder().getProvider(ObjectMapper.class), binder().getProvider(Stats.class));
             bind(ModuleSet.class).toInstance(set);
             bind(HttpClient.class).toProvider(HttpClientProvider.class);
             bind(Authenticator.class).to(AuthenticatorImpl.class);
             bind(Poller.class).asEagerSingleton();
             bind(Integer.class).annotatedWith(Names.named(SETTINGS_KEY_SERVER_VERSION)).toInstance(VERSION);
+            bind(ErrorInterceptor.class).to(ErrorH.class).asEagerSingleton();
         }
 
         @Singleton
@@ -173,7 +260,7 @@ public class UpdateCenterServer extends GenericApplication {
                         .followRedirects()
                         .setChannelOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
                         .threadCount(downloadThreads)
-                        .maxChunkSize(16384).build();
+                        .maxChunkSize(32768).build();
             }
 
             @Override

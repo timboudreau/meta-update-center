@@ -41,7 +41,6 @@ public class IndexPage extends Page {
         add(IndexActeur.class);
         getResponseHeaders().addCacheControl(CacheControlTypes.Public);
         getResponseHeaders().addCacheControl(CacheControlTypes.max_age, Duration.standardDays(1));
-        getResponseHeaders().setExpires(serverStartTime);
         getResponseHeaders().setContentType(MediaType.HTML_UTF_8);
     }
 
@@ -82,6 +81,7 @@ public class IndexPage extends Page {
         @Inject
         IndexActeur(ModuleSet set, PathFactory paths, Settings settings, @Named(UpdateCenterServer.SETTINGS_KEY_SERVER_VERSION) int ver, DateTime serverStart) {
             ok();
+            if (true) throw new IllegalStateException();
             StringBuilder sb = new StringBuilder();
             sb.append("<!doctype html><html><head><title>NetBeans Plugins</title>\n");
             sb.append("<style>@import url(//fonts.googleapis.com/css?family=Sanchez|Montserrat);"
@@ -95,7 +95,7 @@ public class IndexPage extends Page {
                     + "td { vertical-align: top;"
                     + "text-align: left;}\n "
                     + "a { text-decoration: none; color: #3333AA; }"
-                    + "body > div.content > table > tbody > tr > td > a, body > div.content > table > tbody > tr > td > p > a { text-align: center; min-width: 10em; padding: 0.5em; background-color: #EEEEFF; display: inline-block; border: 1px solid #CCCCCC; border-radius: 1em; }"
+                    + "body > div.content > table > tbody > tr > td > a, body > div.content > table > tbody > tr > td > p > a { margin-top: 5px; text-align: center; min-width: 10em; padding: 0.5em; background-color: #EEEEFF; display: inline-block; border: 1px solid #CCCCCC; border-radius: 1em; }"
                     + ".header {background-color: #EEEEFF; padding: 12px; color: #999991; border-bottom: #AAAAAA solid 1px;}\n "
                     + "tr { margin-bottom: 0.5em; border-bottom: 1px solid #CCCCCC; min-height: 5em;}\n "
                     + "code{background-color: #EDEDED; margin: 0.5em; font-size: 1.2em;}\n "

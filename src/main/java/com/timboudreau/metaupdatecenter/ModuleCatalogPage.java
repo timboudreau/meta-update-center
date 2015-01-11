@@ -48,7 +48,6 @@ public class ModuleCatalogPage extends Page {
 
         @Inject
         SetupLastModified(Page page, ModuleSet set, HttpEvent evt, Stats stats) {
-            stats.logHit(evt);
             page.getResponseHeaders().setLastModified(set.getNewestDownloaded());
             page.getResponseHeaders().setContentType("true".equals(evt.getParameter("json")) ? MediaType.JSON_UTF_8 : MediaType.XML_UTF_8);
             page.getResponseHeaders().addCacheControl(CacheControlTypes.Public);
@@ -62,7 +61,8 @@ public class ModuleCatalogPage extends Page {
     private static final class SetupETag extends Acteur {
 
         @Inject
-        SetupETag(Page page, ModuleSet set) {
+        SetupETag(Page page, ModuleSet set, HttpEvent evt, Stats stats) {
+            stats.logHit(evt);
             page.getResponseHeaders().setETag(set.getCombinedHash());
             next();
         }

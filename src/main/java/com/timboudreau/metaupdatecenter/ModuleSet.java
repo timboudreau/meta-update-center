@@ -84,7 +84,7 @@ public final class ModuleSet implements Iterable<ModuleItem> {
         Collections.sort(result);
         return result;
     }
-
+    
     public String toString() {
         return items.toString();
     }

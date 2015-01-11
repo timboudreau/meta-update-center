@@ -2,13 +2,14 @@ package com.timboudreau.metaupdatecenter;
 
 import com.google.inject.Inject;
 import com.mastfrog.acteur.headers.Headers;
+import com.mastfrog.bunyan.Logger;
 import com.mastfrog.giulius.ShutdownHookRegistry;
 import com.mastfrog.guicy.annotations.Defaults;
 import com.mastfrog.guicy.annotations.Namespace;
 import com.mastfrog.netty.http.client.HttpClient;
 import com.mastfrog.util.ConfigurationError;
 import com.timboudreau.metaupdatecenter.NbmDownloader.DownloadHandler;
-import static com.timboudreau.metaupdatecenter.Poller.SETTINGS_KEY_POLL_INTERVAL_MINUTES;
+import static com.timboudreau.metaupdatecenter.UpdateCenterServer.SETTINGS_KEY_POLL_INTERVAL_MINUTES;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import static io.netty.handler.codec.http.HttpResponseStatus.OK;
@@ -17,6 +18,7 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import javax.inject.Named;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathExpressionException;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.openide.util.Exceptions;
@@ -28,18 +30,18 @@ import org.xml.sax.SAXException;
  * @author Tim Boudreau
  */
 @Namespace("nbmserver")
-@Defaults(namespace=@Namespace("nbmserver"), value=SETTINGS_KEY_POLL_INTERVAL_MINUTES + "=3")
+@Defaults(namespace = @Namespace("nbmserver"), value = SETTINGS_KEY_POLL_INTERVAL_MINUTES + "=10")
 public class Poller implements Runnable {
 
-    public static final String SETTINGS_KEY_POLL_INTERVAL_MINUTES = "poll.interval.minutes";
     private final ModuleSet set;
     private final Duration interval;
     private final HttpClient client;
     private final NbmDownloader downloader;
     private final RequestProcessor.Task task = RequestProcessor.getDefault().create(this);
+    private final Logger pollLogger;
 
     @Inject
-    Poller(ModuleSet set, @Named(SETTINGS_KEY_POLL_INTERVAL_MINUTES) long interval, HttpClient client, ShutdownHookRegistry registry, NbmDownloader downloader) {
+    Poller(ModuleSet set, @Named(SETTINGS_KEY_POLL_INTERVAL_MINUTES) long interval, HttpClient client, ShutdownHookRegistry registry, NbmDownloader downloader, @Named(UpdateCenterServer.SYSTEM_LOGGER) Logger pollLogger) {
         if (interval <= 0) {
             throw new ConfigurationError("Poll interval must be >= 0 but is " + interval);
         }
@@ -55,13 +57,14 @@ public class Poller implements Runnable {
         });
         this.downloader = downloader;
         task.schedule((int) Duration.standardMinutes(3).getMillis());
+        this.pollLogger = pollLogger;
     }
 
     @Override
     public void run() {
         String msg = "Poll NBMs at " + Headers.toISO2822Date(DateTime.now());
+        pollLogger.trace("poll").close();
         Thread.currentThread().setName(msg);
-        System.out.println(msg);
         try {
             for (final ModuleItem item : set) {
                 try {
@@ -72,14 +75,23 @@ public class Poller implements Runnable {
 
                         @Override
                         public boolean onResponse(HttpResponseStatus status, HttpHeaders headers) {
+                            if (status.code() > 399) {
+                                pollLogger.warn("dowloadFail").add("url", item.getFrom()).add("status", status.code()).close();
+                            }
                             return OK.equals(status);
                         }
 
                         @Override
                         public void onModuleDownload(InfoFile module, InputStream bytes, String hash, String url) {
                             try {
+                                pollLogger.info("newVersionDownloaded")
+                                        .add("cnb", module.getModuleCodeName())
+                                        .add("url", url)
+                                        .add("version", module.getModuleVersion().toString());
                                 set.add(module, bytes, url, hash, item.isUseOriginalURL());
                             } catch (IOException ex) {
+                                Exceptions.printStackTrace(ex);
+                            } catch (XPathExpressionException ex) {
                                 Exceptions.printStackTrace(ex);
                             }
                         }

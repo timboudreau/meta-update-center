@@ -55,9 +55,7 @@ public class NbmDownloader {
 
     private void handleFileDownload(URL url, DownloadHandler callback) throws URISyntaxException, FileNotFoundException, IOException, SAXException, ParserConfigurationException {
         File file = new File(url.toURI());
-//        System.out.println("FILE DOWNLOAD OF " + file);
         if (!file.exists()) {
-            System.out.println("no file.");
             throw new IOException("No such file " + url);
         }
         try (InputStream in = new BufferedInputStream(new FileInputStream(file), 2048)) {
@@ -71,7 +69,6 @@ public class NbmDownloader {
     }
 
     public ResponseFuture download(DateTime ifModifiedSince, final String url, final DownloadHandler callback) throws MalformedURLException, URISyntaxException, FileNotFoundException, IOException, SAXException, ParserConfigurationException {
-        System.out.println("Download " + url);
 
         URL uu = new URL(url);
         if ("file".equals(uu.toURI().getScheme())) {
@@ -118,7 +115,6 @@ public class NbmDownloader {
     }
 
     protected void handleDownloadedNBM(ByteBuf buf, DownloadHandler callback, String url) throws IOException, SAXException, ParserConfigurationException {
-//        System.out.println("Process bytes " + buf.readableBytes());
         InfoFile moduleInfo = null;
         try (HashingInputStream stream = HashingInputStream.sha1(new ByteBufInputStream(buf))) {
 
@@ -127,7 +123,6 @@ public class NbmDownloader {
                 try {
                     if ("Info/info.xml".equals(e.getName())) {
                         long size = e.getSize();
-//                        System.out.println("INFO SIZE " + size);
                         if (size == -1) {
                             size = 32768;
                         }
@@ -138,7 +133,6 @@ public class NbmDownloader {
                         int read = 0;
                         int len = 0;
                         while ((read = in.read(buffer)) > 0) {
-//                            System.out.println("Read " + read);
                             if (read != -1) {
                                 len += read;
                                 out.write(buffer, 0, read);
@@ -146,8 +140,6 @@ public class NbmDownloader {
                                 break;
                             }
                         }
-//                                        String body = new String(out.toByteArray(), 0, len, CharsetUtil.UTF_8);
-//                                        System.out.println("BODY: *********************\n" + body + "\n***************");
                         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
                         dbFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
 
@@ -157,7 +149,6 @@ public class NbmDownloader {
                         moduleInfo = new InfoFile(doc);
                         break;
                     }
-//                    System.out.println(e.getName());
                 } finally {
                     in.closeEntry();
                 }

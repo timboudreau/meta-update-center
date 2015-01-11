@@ -2,8 +2,15 @@ package com.timboudreau.metaupdatecenter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.google.inject.Key;
+import com.google.inject.name.Names;
 import com.google.inject.util.Providers;
 import com.mastfrog.acteur.server.PathFactory;
+import com.mastfrog.acteur.util.RequestID;
+import com.mastfrog.bunyan.Logger;
+import com.mastfrog.bunyan.LoggingModule;
+import com.mastfrog.giulius.Dependencies;
+import com.mastfrog.giulius.ShutdownHookRegistry;
 import com.mastfrog.settings.Settings;
 import com.mastfrog.settings.SettingsBuilder;
 import com.mastfrog.url.Path;
@@ -49,6 +56,9 @@ public class AppTest {
     public void test() throws SAXException, ParserConfigurationException, IOException, XPathExpressionException, TransformerException {
 
         System.out.println("NOW: " + DateTime.now().getMillis());
+        
+        Dependencies deps = new Dependencies(new LoggingModule().bindLogger("x"));
+        Logger logger = deps.getInstance(Key.get(Logger.class, Names.named("x")));
 
         File tmp = new File(System.getProperty("java.io.tmpdir"));
         assertTrue(tmp.isDirectory());
@@ -73,7 +83,8 @@ public class AppTest {
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
 
-        ModuleSet set = new ModuleSet(dir, Providers.of(mapper), Providers.of(new Stats(null, null)));
+        ModuleSet set = new ModuleSet(dir, Providers.of(mapper), Providers.of(
+                new Stats(null, deps.getInstance(ShutdownHookRegistry.class), logger, logger, logger, Providers.of(new RequestID.Factory().next()))));
 
         URL res = AppTest.class.getResource("org-netbeans-modules-fisheye.nbm");
         set.add(moduleInfo, nbmIn, res.toString(), "test-hash", false);

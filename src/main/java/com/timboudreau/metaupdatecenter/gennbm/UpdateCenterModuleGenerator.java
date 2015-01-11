@@ -12,6 +12,7 @@ import com.mastfrog.util.streams.HashingOutputStream;
 import com.timboudreau.metaupdatecenter.InfoFile;
 import com.timboudreau.metaupdatecenter.ModuleSet;
 import com.timboudreau.metaupdatecenter.UpdateCenterServer;
+import static com.timboudreau.metaupdatecenter.UpdateCenterServer.VERSION;
 import io.netty.util.CharsetUtil;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -65,7 +66,7 @@ public final class UpdateCenterModuleGenerator {
         this.mapper = mapper;
         updateUrlHttps = settings.getBoolean("update.url.https", false);
         serverInstallId = idProvider.get();
-        serverVersion = settings.getInt(UpdateCenterServer.SETTINGS_KEY_SERVER_VERSION, 2);
+        serverVersion = settings.getInt(UpdateCenterServer.SETTINGS_KEY_SERVER_VERSION, VERSION);
         initTemplates();
         load();
     }

@@ -2,6 +2,7 @@ package com.timboudreau.metaupdatecenter.gennbm;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.mastfrog.settings.Settings;
 import com.mastfrog.util.Streams;
 import io.netty.util.CharsetUtil;
 import java.io.File;
@@ -20,17 +21,21 @@ public class ServerInstallId {
 
     private final long id;
     private static final long TIME_OFFSET = 1373764126035L;
+    public static final String SETTINGS_KEY_SERVER_ID_FILE_PATH = "server.id.file";
+    public static final String DEFAULT_SERVER_ID_FILE = ".serverid";
 
     @Inject
-    public ServerInstallId() throws IOException {
-        this(loadOrCreateId());
+    public ServerInstallId(Settings settings) throws IOException {
+        this(loadOrCreateId(settings));
     }
 
     public ServerInstallId(long val) throws IOException {
         id = val;
     }
 
-    private static long loadOrCreateId() throws IOException {
+    private static long loadOrCreateId(Settings settings) throws IOException {
+        String serverIdFilePath = settings.getString(SETTINGS_KEY_SERVER_ID_FILE_PATH, 
+                DEFAULT_SERVER_ID_FILE);
         // We compute and persist an "install id" and store it in ./.serverid
         // It is based on the current timestamp to the minute, subtracting
         // an offset (so the ID is really "minutes since this class was written").
@@ -38,7 +43,7 @@ public class ServerInstallId {
         // number of the specification version, and keeps it as short as possible
         // This guarantees that generated modules will retain a middle ID after        
         long id;
-        File f = new File(".serverid");
+        File f = new File(serverIdFilePath);
         if (f.exists()) {
             try (FileInputStream in = new FileInputStream(f)) {
                 String s = Streams.readString(in).trim();

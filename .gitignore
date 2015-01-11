@@ -1,3 +1,6 @@
+stats.log
+.serverid
+nbmserver.log
 *.class
 
 # Package Files #

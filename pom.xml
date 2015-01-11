@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.timboudreau</groupId>
     <artifactId>meta-update-center</artifactId>
-    <version>1.5.4</version>
+    <version>1.5.5</version>
     <packaging>jar</packaging>
     <properties>
         <mastfrog.version>1.6.0-dev</mastfrog.version>
@@ -15,6 +15,12 @@
         <dependency>
             <groupId>com.mastfrog</groupId>
             <artifactId>acteur</artifactId>
+            <version>${mastfrog.version}</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>com.mastfrog</groupId>
+            <artifactId>bunyan-java</artifactId>
             <version>${mastfrog.version}</version>
             <type>jar</type>
         </dependency>
@@ -62,6 +68,12 @@
             <version>${mastfrog.version}</version>
             <type>jar</type>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-joda</artifactId>
+            <version>2.4.4</version>
+            <type>jar</type>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -81,7 +93,7 @@
                 <configuration>
                     <mainClass>com.timboudreau.metaupdatecenter.UpdateCenterServer</mainClass>
                     <jarName>meta-update-center-standalone</jarName>
-                </configuration>                
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

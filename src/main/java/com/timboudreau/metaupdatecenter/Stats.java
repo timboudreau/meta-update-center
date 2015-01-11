@@ -1,123 +1,109 @@
 package com.timboudreau.metaupdatecenter;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import com.mastfrog.acteur.HttpEvent;
-import com.mastfrog.acteur.util.BasicCredentials;
 import com.mastfrog.acteur.headers.Headers;
+import com.mastfrog.acteur.util.BasicCredentials;
+import com.mastfrog.acteur.util.RequestID;
+import com.mastfrog.bunyan.Log;
+import com.mastfrog.bunyan.Logger;
 import com.mastfrog.giulius.ShutdownHookRegistry;
-import com.mastfrog.util.ConfigurationError;
+import static com.timboudreau.metaupdatecenter.UpdateCenterServer.STATS_LOGGER;
 import io.netty.handler.codec.http.HttpHeaders;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.LinkedTransferQueue;
-import org.joda.time.DateTime;
-import org.openide.util.RequestProcessor;
 
 /**
  *
  * @author Tim Boudreau
  */
 @Singleton
-public class Stats implements Runnable {
+public class Stats {
 
-    private final File statsFile;
-    private final LinkedTransferQueue<CharSequence> queue = new LinkedTransferQueue<>();
-    private volatile boolean shuttingDown;
-    private volatile boolean shutdown;
-    private final PrintStream stream;
-    private final RequestProcessor.Task task = RequestProcessor.getDefault().create(this);
+    private final Logger statsLog;
+    private final Logger requestLog;
+    private final Logger downloadLog;
+    private final Provider<RequestID> id;
 
     @Inject
-    public Stats(ModuleSet dir, ShutdownHookRegistry reg) throws IOException {
-        File f = new File(dir == null ? new File(System.getProperty("java.io.tmpdir")) : dir.getStorageDir(), "stats.log");
-        if (!f.exists()) {
-            if (!f.createNewFile()) {
-                throw new ConfigurationError("Could not create " + f);
-            }
-        }
-        this.statsFile = f;
-        OutputStream out = new BufferedOutputStream(new FileOutputStream(f, true), 80);
-        stream = new PrintStream(out, false, "UTF-8");
-        if (reg != null) { // null in test
-            reg.add(new Runnable() {
-
-                @Override
-                public void run() {
-                    println("{\"shutdown\"=\"" + Headers.toISO2822Date(DateTime.now()) + "\"}");
-                    shuttingDown = true;
-                    Stats.this.run();
-                }
-            });
-        }
-        System.out.println("Logging stats to " + statsFile);
-        println("{\"start\"=\"" + Headers.toISO2822Date(DateTime.now()) + "\"}");
-    }
-
-    private void println(CharSequence line) {
-        if (shutdown) {
-            System.out.println("SHUTTING DOWN:" + line);
-        } else {
-            queue.offer(line);
-            task.schedule(1000);
-        }
+    public Stats(ModuleSet dir, ShutdownHookRegistry reg, @Named(STATS_LOGGER) Logger statsLog, @Named(UpdateCenterServer.REQUESTS_LOGGER) Logger requestLog, @Named(UpdateCenterServer.DOWNLOAD_LOGGER) Logger downloadLog, Provider<RequestID> id) throws IOException {
+        this.statsLog = statsLog;
+        this.requestLog = requestLog;
+        this.downloadLog = downloadLog;
+        this.id = id;
     }
 
     public void logWebHit(HttpEvent evt) {
-        String referrer = evt.getHeader(HttpHeaders.Names.REFERER);
-        String now = Headers.toISO2822Date(DateTime.now());
-        StringBuilder sb = new StringBuilder("{\"ref\"=\"").append(referrer == null ? "-" : referrer).append("\", \"addr\"=\"").append(evt.getRemoteAddress()).append("\", \"time\"=\"").append(now).append("\"}");
-        println(sb);
+        try (Log<?> log = statsLog.info("homepage")) {
+            log.addIfNotNull("referrer", evt.getHeader(HttpHeaders.Names.REFERER))
+                    .add("id", id.get().stringValue())
+                    .addIfNotNull("agent", evt.getHeader(Headers.USER_AGENT))
+                    .add("address", evt.getRemoteAddress().toString());
+        }
     }
 
     public void logIngest(ModuleItem item) {
-        String now = Headers.toISO2822Date(DateTime.now());
-        StringBuilder sb = new StringBuilder("{\"dl\"=\"").append(item.getCodeNameBase()).append("\", \"ver\"=\"").append(item.getVersion()).append("\", \"hash\"=\"").append(item.getHash()).append("\", \"time\"=\"" + now + "\"}");
-        println(sb);
+        try (Log<?> log = downloadLog.info("ingest")) {
+            log.add("cnb", item.getCodeNameBase())
+                    .add("url", item.getFrom())
+                    .add("version", item.getVersion().toString())
+                    .add("hash", item.getHash());
+        }
     }
 
     public void logInvalidCredentials(BasicCredentials creds, HttpEvent evt) {
-        String now = Headers.toISO2822Date(DateTime.now());
-        StringBuilder sb = new StringBuilder("{\"un\"=\"").append(creds.username).append("\", \"pw\"=\"").append(creds.password).append("\", \"time\"=\"").append(now).append("\", \"addr\"=\"").append(evt.getRemoteAddress()).append("\"}");
-        println(sb);
+        try (Log<?> log = requestLog.warn("loginFail")) {
+            log.add("un", creds.username)
+                    .add("pw", creds.password)
+                    .add("id", id.get().stringValue())
+                    .add("address", evt.getRemoteAddress().toString())
+                    .add("path", evt.getPath().toString());
+
+        }
     }
 
     public void logHit(HttpEvent evt) {
-        String id = evt.getParametersAsMap() + "";
-        if (id.isEmpty()) {
-            id = "unknown";
+        try (Log<?> log = statsLog.info("catalog")) {
+            log.addIfNotNull("referrer", evt.getHeader(HttpHeaders.Names.REFERER))
+                    .add("params", evt.getParametersAsMap())
+                    .addIfNotNull("agent", evt.getHeader(Headers.USER_AGENT))
+                    .add("id", id.get().stringValue())
+                    .add("address", evt.getRemoteAddress().toString());
         }
-        String now = Headers.toISO2822Date(DateTime.now());
-        StringBuilder sb = new StringBuilder("{\"id\"=\"").append(id).append("\", \"addr\"=\"").append(evt.getRemoteAddress()).append("\", \"time\"=\"").append(now).append("\"}");
-        println(sb);
     }
 
-    public void logDownload(HttpEvent evt) {
-        String pth = evt.getPath().getChildPath().toString();
-        String now = Headers.toISO2822Date(DateTime.now());
-        StringBuilder sb = new StringBuilder("{\"pth\"=\"").append(pth).append("\", \"addr\"=\"").append(evt.getRemoteAddress()).append("\", \"time\"=\"").append(now).append("\"}");
-        println(sb);
+    public void logDownload(HttpEvent evt, ModuleItem item) {
+        try (Log<?> log = downloadLog.info("download")) {
+            log.add("cnb", item.getCodeNameBase())
+                    .add("id", id.get().stringValue())
+                    .addIfNotNull("agent", evt.getHeader(Headers.USER_AGENT))
+                    .add("version", item.getVersion().toString())
+                    .add("hash", item.getHash())
+                    .add("path", evt.getPath().toString())
+                    .add("address", evt.getRemoteAddress().toString())
+                    .add("params", evt.getParametersAsMap());
+        }
     }
 
-    @Override
-    public void run() {
-        while (!queue.isEmpty()) {
-            List<CharSequence> l = new LinkedList<>();
-            queue.drainTo(l);
-            for (CharSequence s : l) {
-                stream.println(s);
-            }
+    public void logFailedDownload(HttpEvent evt, String codeName, String hash) {
+        try (Log<?> log = downloadLog.warn("downloadFail")) {
+            log.add("cnb", codeName)
+                    .add("hash", hash)
+                    .add("path", evt.getPath().toString())
+                    .add("address", evt.getRemoteAddress().toString())
+                    .add("params", evt.getParametersAsMap());
+
         }
-        stream.flush();
-        if (shuttingDown) {
-            shutdown = true;
-            stream.close();
+    }
+
+    void logNotFound(HttpEvent evt) {
+        try (Log<?> log = requestLog.info("notfound")) {
+            log.addIfNotNull("referrer", evt.getHeader(HttpHeaders.Names.REFERER))
+                    .add("id", id.get().stringValue())
+                    .addIfNotNull("agent", evt.getHeader(Headers.USER_AGENT))
+                    .add("address", evt.getRemoteAddress().toString());
         }
     }
 }
