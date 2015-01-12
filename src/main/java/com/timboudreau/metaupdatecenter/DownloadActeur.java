@@ -27,7 +27,7 @@ import org.joda.time.DateTime;
  */
 class DownloadActeur extends Acteur {
 
-    private static final int BUFFER_SIZE = 1024;
+    public static final int FILE_CHUNK_SIZE = 768;
 
     @Inject
     DownloadActeur(ModuleSet ms, HttpEvent evt, Closables clos) throws FileNotFoundException {
@@ -57,30 +57,9 @@ class DownloadActeur extends Acteur {
             add(Headers.stringHeader("Content-Disposition"), "attachment; filename=\"" + fn + '"');
             ok();
             if (evt.getMethod() != Method.HEAD) {
-                setResponseWriter(new ResponseWriterImpl(file, clos));
+                setResponseWriter(new ChunkedFileResponseWriter(file, clos));
             }
         }
     }
 
-    private static class ResponseWriterImpl extends ResponseWriter {
-
-        private final byte[] buffer = new byte[BUFFER_SIZE];
-        private final InputStream stream;
-
-        public ResponseWriterImpl(File file, Closables clos) throws FileNotFoundException {
-            stream = clos.add(new BufferedInputStream(new FileInputStream(file), buffer.length));
-        }
-
-        @Override
-        public ResponseWriter.Status write(Event<?> evt, ResponseWriter.Output out, int iteration) throws Exception {
-            ByteBuf buf = evt.getChannel().alloc().buffer(BUFFER_SIZE);
-            int bytes = buf.writeBytes(stream, BUFFER_SIZE);
-            if (bytes == -1) {
-                stream.close();
-                return ResponseWriter.Status.DONE;
-            }
-            out.write(buf);
-            return ResponseWriter.Status.NOT_DONE;
-        }
-    }
 }

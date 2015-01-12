@@ -81,6 +81,9 @@ public class UpdateCenterServer extends GenericApplication {
     public static final String SETTINGS_KEY_PASSWORD = "password";
     public static final String SETTINGS_KEY_ADMIN_USER_NAME = "admin.user.name";
     public static final String SETTINGS_KEY_POLL_INTERVAL_MINUTES = "poll.interval.minutes";
+    public static final String SETTINGS_KEY_HTTP_LOG_ENABLED = "http.log.enabled";
+    public static final boolean DEFAULT_HTTP_LOG_ENABLED = true;
+    public static final int FILE_CHUNK_SIZE = 768;
     private static final String SERVER_NAME = " Tim Boudreau's Update Aggregator 1." + VERSION + " - " + "https://github.com/timboudreau/meta-update-center";
     public static final String SETTINGS_NAMESPACE = "nbmserver";
     public static final String DUMMY_URL = "http://GENERATED.MODULE";
@@ -135,6 +138,7 @@ public class UpdateCenterServer extends GenericApplication {
             MutableSettings settings = new SettingsBuilder(SETTINGS_NAMESPACE)
                     .add(SETTINGS_KEY_LOG_LEVEL, "info")
                     .add(SETTINGS_KEY_LOG_FILE, "nbmserver.log")
+                    .add(SETTINGS_KEY_HTTP_LOG_ENABLED, DEFAULT_HTTP_LOG_ENABLED + "")
                     //                    .add(LoggingModule.SETTINGS_KEY_LOG_TO_CONSOLE, "true")
                     .add(SETTINGS_KEY_ASYNC_LOGGING, "true")
                     .add(HTTP_COMPRESSION, "true")
