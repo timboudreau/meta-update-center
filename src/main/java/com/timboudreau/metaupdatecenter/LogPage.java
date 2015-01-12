@@ -33,8 +33,7 @@ import java.io.FileNotFoundException;
 public class LogPage extends Acteur {
 
     @Inject
-    LogPage(@Named(LoggingModule.SETTINGS_KEY_LOG_FILE) String logFile, Closables clos, @Named(SETTINGS_KEY_HTTP_LOG_ENABLED) boolean enabled) throws FileNotFoundException {
-        File f = new File(logFile);
+    LogPage(Closables clos, @Named(SETTINGS_KEY_HTTP_LOG_ENABLED) boolean enabled) throws FileNotFoundException {
         setChunked(true);
         ok();
         add(CONTENT_TYPE, MediaType.JSON_UTF_8);
