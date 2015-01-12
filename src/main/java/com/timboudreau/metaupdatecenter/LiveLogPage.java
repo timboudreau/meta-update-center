@@ -11,6 +11,7 @@ import com.mastfrog.acteur.annotations.Precursors;
 import static com.mastfrog.acteur.headers.Headers.CONTENT_TYPE;
 import static com.mastfrog.acteur.headers.Method.GET;
 import com.mastfrog.acteur.preconditions.Authenticated;
+import com.mastfrog.acteur.preconditions.Description;
 import com.mastfrog.acteur.preconditions.Methods;
 import com.mastfrog.acteur.preconditions.ParametersMustBeNumbersIfPresent;
 import com.mastfrog.acteur.preconditions.Path;
@@ -43,6 +44,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Methods(GET)
 @ParametersMustBeNumbersIfPresent("offset")
 @Precursors({LogPage.CheckLogEnabled.class, LogPage.CheckLogFileReadable.class})
+@Description("Get the server log, leaving the connection open and flushing new "
+        + "log lines as they arrive, for use with curl | bunyan")
 public class LiveLogPage extends Acteur {
 
     @Inject

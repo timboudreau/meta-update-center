@@ -12,6 +12,7 @@ import com.mastfrog.acteur.headers.Headers;
 import com.mastfrog.acteur.server.PathFactory;
 import com.mastfrog.acteur.util.CacheControlTypes;
 import static com.mastfrog.acteur.headers.Method.GET;
+import com.mastfrog.acteur.preconditions.Description;
 import com.mastfrog.acteur.preconditions.Methods;
 import com.mastfrog.settings.Settings;
 import com.mastfrog.url.Path;
@@ -31,6 +32,7 @@ import org.joda.time.format.DateTimeFormat;
 @HttpCall(order = Integer.MAX_VALUE)
 @Methods(GET)
 @com.mastfrog.acteur.preconditions.Path({"", "/", "index.html"})
+@Description("The home page")
 public class IndexPage extends Page {
 
     @Inject

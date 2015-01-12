@@ -10,6 +10,7 @@ import com.mastfrog.acteur.annotations.Precursors;
 import static com.mastfrog.acteur.headers.Headers.CONTENT_TYPE;
 import static com.mastfrog.acteur.headers.Method.GET;
 import com.mastfrog.acteur.preconditions.Authenticated;
+import com.mastfrog.acteur.preconditions.Description;
 import com.mastfrog.acteur.preconditions.Methods;
 import com.mastfrog.acteur.preconditions.Path;
 import com.mastfrog.bunyan.LoggingModule;
@@ -28,6 +29,7 @@ import java.io.FileNotFoundException;
 @Authenticated
 @Methods(GET)
 @Precursors({CheckLogEnabled.class, CheckLogFileReadable.class})
+@Description("Get the server log")
 public class LogPage extends Acteur {
 
     @Inject
@@ -39,6 +41,7 @@ public class LogPage extends Acteur {
         setResponseWriter(ChunkedFileResponseWriter.class);
     }
 
+    @Description("Check that server is configured to serve logs via HTTP")
     static class CheckLogEnabled extends Acteur {
         @Inject
         CheckLogEnabled(@Named(SETTINGS_KEY_HTTP_LOG_ENABLED) boolean enabled) {
@@ -51,6 +54,7 @@ public class LogPage extends Acteur {
         }
     }
 
+    @Description("Check that the server is configured to log to a file")
     static class CheckLogFileReadable extends Acteur {
         @Inject
         CheckLogFileReadable(@Named(LoggingModule.SETTINGS_KEY_LOG_FILE) String logFile) {

@@ -14,6 +14,7 @@ import static com.mastfrog.acteur.headers.Method.GET;
 import static com.mastfrog.acteur.headers.Method.POST;
 import static com.mastfrog.acteur.headers.Method.PUT;
 import com.mastfrog.acteur.preconditions.Authenticated;
+import com.mastfrog.acteur.preconditions.Description;
 import com.mastfrog.acteur.preconditions.Methods;
 import com.mastfrog.acteur.preconditions.PathRegex;
 import com.mastfrog.acteur.preconditions.RequiredUrlParameters;
@@ -44,6 +45,7 @@ import org.openide.util.Exceptions;
 @Methods({PUT, POST, GET})
 @RequiredUrlParameters("url")
 @Authenticated
+@Description("Add a module to be downloaded and served")
 public class PutModulePage extends Acteur {
 
     public static final String ADD_PAGE_REGEX = "^add$";

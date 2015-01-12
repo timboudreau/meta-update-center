@@ -9,6 +9,7 @@ import com.mastfrog.acteur.annotations.HttpCall;
 import com.mastfrog.acteur.util.CacheControlTypes;
 import static com.mastfrog.acteur.headers.Method.GET;
 import static com.mastfrog.acteur.headers.Method.HEAD;
+import com.mastfrog.acteur.preconditions.Description;
 import com.mastfrog.acteur.preconditions.Methods;
 import com.mastfrog.acteur.preconditions.PathRegex;
 import com.mastfrog.url.Path;
@@ -22,6 +23,7 @@ import org.joda.time.Duration;
 @HttpCall
 @Methods({GET, HEAD})
 @PathRegex(DOWNLOAD_REGEX)
+@Description("Download a module")
 public class DownloadPage extends Page {
 
     static final int BUFFER_SIZE = 1490;

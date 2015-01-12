@@ -15,6 +15,7 @@ import com.mastfrog.acteur.server.PathFactory;
 import com.mastfrog.acteur.util.CacheControlTypes;
 import com.mastfrog.acteur.headers.Headers;
 import com.mastfrog.acteur.headers.Method;
+import com.mastfrog.acteur.preconditions.Description;
 import com.mastfrog.acteur.preconditions.Methods;
 import com.mastfrog.acteur.preconditions.PathRegex;
 import static com.timboudreau.metaupdatecenter.ModuleCatalogPage.MODULE_PAGE_REGEX;
@@ -30,6 +31,7 @@ import org.joda.time.Duration;
 @HttpCall
 @Methods(Method.GET)
 @PathRegex(MODULE_PAGE_REGEX)
+@Description("Get the XML module catalog used by Tools | Plugins in NetBeans")
 public class ModuleCatalogPage extends Page {
 
     public static final String MODULE_PAGE_REGEX = "^modules$";
