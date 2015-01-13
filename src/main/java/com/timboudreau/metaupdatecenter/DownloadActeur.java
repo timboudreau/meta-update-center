@@ -4,21 +4,15 @@ import com.google.common.net.MediaType;
 import com.google.inject.Inject;
 import com.mastfrog.acteur.Acteur;
 import com.mastfrog.acteur.Closables;
-import com.mastfrog.acteur.Event;
 import com.mastfrog.acteur.HttpEvent;
-import com.mastfrog.acteur.ResponseWriter;
 import com.mastfrog.acteur.errors.Err;
 import com.mastfrog.acteur.headers.Headers;
 import com.mastfrog.acteur.headers.Method;
 import com.mastfrog.url.Path;
 import com.timboudreau.metaupdatecenter.borrowed.SpecificationVersion;
-import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.InputStream;
 import org.joda.time.DateTime;
 
 /**

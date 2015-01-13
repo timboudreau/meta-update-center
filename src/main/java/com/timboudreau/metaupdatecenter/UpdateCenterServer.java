@@ -17,6 +17,7 @@ import com.mastfrog.acteur.RequestLogger;
 import com.mastfrog.acteur.annotations.GenericApplication;
 import com.mastfrog.acteur.annotations.HttpCall;
 import com.mastfrog.acteur.auth.Authenticator;
+import com.mastfrog.acteur.bunyan.ActeurBunyanModule;
 import static com.mastfrog.acteur.server.ServerModule.BYTEBUF_ALLOCATOR_SETTINGS_KEY;
 import static com.mastfrog.acteur.server.ServerModule.POOLED_ALLOCATOR;
 import static com.mastfrog.acteur.headers.Method.GET;
@@ -30,7 +31,6 @@ import com.mastfrog.acteur.util.ErrorInterceptor;
 import com.mastfrog.acteur.util.Server;
 import com.mastfrog.bunyan.Log;
 import com.mastfrog.bunyan.Logger;
-import com.mastfrog.bunyan.LoggingModule;
 import static com.mastfrog.bunyan.LoggingModule.SETTINGS_KEY_ASYNC_LOGGING;
 import static com.mastfrog.bunyan.LoggingModule.SETTINGS_KEY_LOG_FILE;
 import static com.mastfrog.bunyan.LoggingModule.SETTINGS_KEY_LOG_LEVEL;
@@ -73,8 +73,8 @@ public class UpdateCenterServer extends GenericApplication {
     public static final String SETTINGS_KEY_SERVER_VERSION = "serverVersion";
     public static final int VERSION = 6;
     public static final String STATS_LOGGER = "stats";
-    public static final String ERROR_LOGGER = "errors";
-    public static final String REQUESTS_LOGGER = "requests";
+    public static final String ERROR_LOGGER = ActeurBunyanModule.ERROR_LOGGER;
+    public static final String REQUESTS_LOGGER = ActeurBunyanModule.ACCESS_LOGGER;
     public static final String DOWNLOAD_LOGGER = "downloads";
     public static final String SYSTEM_LOGGER = "system";
     public static final String SETTINGS_KEY_NBM_DIR = "nbm.dir";
@@ -105,7 +105,7 @@ public class UpdateCenterServer extends GenericApplication {
         System.err.println("Serving the following modules:");
         List<Map<String, Object>> logInfo = new LinkedList<>();
         for (ModuleItem i : set) {
-            System.err.println("  " + i + " - " + i.getFrom());
+            System.err.println("\t" + i);
             logInfo.add(i.toMap());
         }
         this.stats = stats;
@@ -172,12 +172,10 @@ public class UpdateCenterServer extends GenericApplication {
             }
 
             Server server = new ServerBuilder(SETTINGS_NAMESPACE)
-                    .add(new LoggingModule()
+                    .add(new ActeurBunyanModule(true)
                             .bindLogger(STATS_LOGGER)
                             .bindLogger(SYSTEM_LOGGER)
-                            .bindLogger(REQUESTS_LOGGER)
-                            .bindLogger(DOWNLOAD_LOGGER)
-                            .bindLogger(ERROR_LOGGER))
+                            .bindLogger(DOWNLOAD_LOGGER))
                     .add(new NbmInfoModule(base))
                     .applicationClass(UpdateCenterServer.class)
                     .add(new JacksonModule())
@@ -190,26 +188,6 @@ public class UpdateCenterServer extends GenericApplication {
             System.exit(1);
         } catch (InterruptedException ex) {
             Exceptions.printStackTrace(ex);
-        }
-    }
-
-    static class ErrorH implements ErrorInterceptor {
-
-        private final Logger logger;
-
-        @Inject
-        ErrorH(@Named(ERROR_LOGGER) Logger logger) {
-            this.logger = logger;
-        }
-
-        Throwable last;
-        @Override
-        public void onError(Throwable err) {
-            if (last == err) { // FIXME in acteur
-                return;
-            }
-            last = err;
-            logger.error(err.getClass().getName()).add(err).close();
         }
     }
 
@@ -241,14 +219,12 @@ public class UpdateCenterServer extends GenericApplication {
 
         @Override
         protected void configure() {
-            bind(RequestLogger.class).to(JsonRequestLogger.class);
             ModuleSet set = new ModuleSet(base, binder().getProvider(ObjectMapper.class), binder().getProvider(Stats.class));
             bind(ModuleSet.class).toInstance(set);
             bind(HttpClient.class).toProvider(HttpClientProvider.class);
             bind(Authenticator.class).to(AuthenticatorImpl.class);
             bind(Poller.class).asEagerSingleton();
             bind(Integer.class).annotatedWith(Names.named(SETTINGS_KEY_SERVER_VERSION)).toInstance(VERSION);
-            bind(ErrorInterceptor.class).to(ErrorH.class).asEagerSingleton();
         }
 
         @Singleton

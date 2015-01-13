@@ -84,7 +84,7 @@ public class AppTest {
         mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
 
         ModuleSet set = new ModuleSet(dir, Providers.of(mapper), Providers.of(
-                new Stats(null, deps.getInstance(ShutdownHookRegistry.class), logger, logger, logger, Providers.of(new RequestID.Factory().next()))));
+                new Stats(logger, logger, logger, Providers.of(new RequestID.Factory().next()))));
 
         URL res = AppTest.class.getResource("org-netbeans-modules-fisheye.nbm");
         set.add(moduleInfo, nbmIn, res.toString(), "test-hash", false);
@@ -97,7 +97,6 @@ public class AppTest {
         assertTrue(mfile.isFile());
         assertFalse(mfile.length() == 0L);
         File meta = new File(mdir, "test-hash.json");
-        System.out.println("META IS " + meta.getAbsolutePath());
         assertTrue("Non existent: " + meta, meta.exists());
         assertTrue(meta.isFile());
         assertFalse(meta.length() == 0L);

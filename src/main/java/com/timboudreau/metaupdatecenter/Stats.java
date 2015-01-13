@@ -26,7 +26,7 @@ public class Stats {
     private final Provider<RequestID> id;
 
     @Inject
-    public Stats(ModuleSet dir, ShutdownHookRegistry reg, @Named(STATS_LOGGER) Logger statsLog, @Named(UpdateCenterServer.REQUESTS_LOGGER) Logger requestLog, @Named(UpdateCenterServer.DOWNLOAD_LOGGER) Logger downloadLog, Provider<RequestID> id) throws IOException {
+    public Stats(@Named(STATS_LOGGER) Logger statsLog, @Named(UpdateCenterServer.REQUESTS_LOGGER) Logger requestLog, @Named(UpdateCenterServer.DOWNLOAD_LOGGER) Logger downloadLog, Provider<RequestID> id) throws IOException {
         this.statsLog = statsLog;
         this.requestLog = requestLog;
         this.downloadLog = downloadLog;
@@ -35,7 +35,7 @@ public class Stats {
 
     public void logWebHit(HttpEvent evt) {
         try (Log<?> log = statsLog.info("homepage")) {
-            log.add("id", id.get().stringValue())
+            log.add("id", id.get())
                     .add(evt);
         }
     }
@@ -53,7 +53,7 @@ public class Stats {
         try (Log<?> log = requestLog.warn("loginFail")) {
             log.add("un", creds.username)
                     .add("pw", creds.password)
-                    .add("id", id.get().stringValue())
+                    .add("id", id.get())
                     .add(evt);
         }
     }
@@ -61,14 +61,14 @@ public class Stats {
     public void logHit(HttpEvent evt) {
         try (Log<?> log = statsLog.info("catalog")) {
             log.add(evt)
-                    .add("id", id.get().stringValue());
+                    .add("id", id.get());
         }
     }
 
     public void logDownload(HttpEvent evt, ModuleItem item) {
         try (Log<?> log = downloadLog.info("download")) {
             log.add("cnb", item.getCodeNameBase())
-                    .add("id", id.get().stringValue())
+                    .add("id", id.get())
                     .add("version", item.getVersion().toString())
                     .add("hash", item.getHash())
                     .add(evt);

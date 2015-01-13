@@ -68,6 +68,12 @@
             <version>${mastfrog.version}</version>
             <type>jar</type>
         </dependency>
+        <dependency>
+            <groupId>com.mastfrog</groupId>
+            <artifactId>acteur-bunyan</artifactId>
+            <version>1.6.0-dev</version>
+            <type>jar</type>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
+import com.mastfrog.acteur.headers.Headers;
 import com.mastfrog.acteur.server.PathFactory;
 import com.mastfrog.url.Path;
 import com.mastfrog.url.URL;
@@ -89,7 +90,8 @@ public final class ModuleItem implements Comparable<ModuleItem> {
     }
 
     public String toString() {
-        return getCodeNameBase() + "-" + getVersion() + " downloaded " + getDownloaded();
+        return getCodeNameBase() + " " + getVersion() + " downloaded " + 
+                Headers.ISO2822DateFormat.print(getDownloaded()) + " from " + getFrom();
     }
 
     public SpecificationVersion getVersion() {
