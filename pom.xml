@@ -71,7 +71,7 @@
         <dependency>
             <groupId>com.mastfrog</groupId>
             <artifactId>acteur-bunyan</artifactId>
-            <version>1.6.0-dev</version>
+            <version>${mastfrog.version}</version>
             <type>jar</type>
         </dependency>
     </dependencies>
