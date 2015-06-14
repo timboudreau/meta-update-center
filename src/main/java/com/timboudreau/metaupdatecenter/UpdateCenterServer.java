@@ -27,6 +27,7 @@ import com.mastfrog.acteur.preconditions.PathRegex;
 import com.mastfrog.acteur.server.ServerBuilder;
 import com.mastfrog.acteur.server.ServerModule;
 import static com.mastfrog.acteur.server.ServerModule.HTTP_COMPRESSION;
+import static com.mastfrog.acteur.server.ServerModule.MAX_CONTENT_LENGTH;
 import com.mastfrog.acteur.util.ErrorInterceptor;
 import com.mastfrog.acteur.util.Server;
 import com.mastfrog.bunyan.Log;
@@ -139,10 +140,11 @@ public class UpdateCenterServer extends GenericApplication {
                     .add(SETTINGS_KEY_LOG_LEVEL, "info")
                     .add(SETTINGS_KEY_LOG_FILE, "nbmserver.log")
                     .add(SETTINGS_KEY_HTTP_LOG_ENABLED, DEFAULT_HTTP_LOG_ENABLED + "")
-                    //                    .add(LoggingModule.SETTINGS_KEY_LOG_TO_CONSOLE, "true")
+                    .add("productionMode", "true")
                     .add(SETTINGS_KEY_ASYNC_LOGGING, "true")
                     .add(HTTP_COMPRESSION, "true")
-                    .addDefaultLocations()
+                    .add(MAX_CONTENT_LENGTH, "384")
+                    .addFilesystemAndClasspathLocations()
                     .parseCommandLineArguments(args).buildMutableSettings();
 
             settings.setString(BYTEBUF_ALLOCATOR_SETTINGS_KEY, POOLED_ALLOCATOR);
