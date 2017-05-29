@@ -28,12 +28,12 @@ import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.regex.Pattern;
+import javax.swing.text.Utilities;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import org.joda.time.DateTime;
 import org.openide.util.Exceptions;
-import org.openide.util.Utilities;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -386,10 +386,7 @@ public final class UpdateCenterModuleGenerator {
                 // Use two sets of delimiters - simple delimiters screw up with
                 // {$ ... } delimited URL parameters
                 String replace = "~^~" + e.getKey() + "~%~";
-//                Pattern p = Pattern.compile(replace, Pattern.LITERAL | Pattern.DOTALL | Pattern.MULTILINE);
-//                text = p.matcher(text).replaceAll(e.getValue());
-                text = Utilities.replaceString(text, replace, e.getValue());
-
+                text = text.replace(replace, e.getValue());
                 replace = "${" + e.getKey() + "}";
                 Pattern p = Pattern.compile(replace, Pattern.LITERAL | Pattern.DOTALL | Pattern.MULTILINE);
                 text = p.matcher(text).replaceAll(e.getValue());

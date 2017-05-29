@@ -72,7 +72,7 @@ import org.xml.sax.SAXException;
 public class UpdateCenterServer extends GenericApplication {
 
     public static final String SETTINGS_KEY_SERVER_VERSION = "serverVersion";
-    public static final int VERSION = 6;
+    public static final int VERSION = 7;
     public static final String STATS_LOGGER = "stats";
     public static final String ERROR_LOGGER = ActeurBunyanModule.ERROR_LOGGER;
     public static final String REQUESTS_LOGGER = ActeurBunyanModule.ACCESS_LOGGER;

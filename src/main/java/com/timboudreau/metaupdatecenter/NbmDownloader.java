@@ -92,7 +92,7 @@ public class NbmDownloader {
                             break;
                         case Finished:
                             DefaultFullHttpResponse resp = (DefaultFullHttpResponse) object.get();
-                            if (!callback.onResponse(resp.getStatus(), resp.headers())) {
+                            if (!callback.onResponse(resp.status(), resp.headers())) {
                                 return;
                             }
                             ByteBuf buf = resp.content();
