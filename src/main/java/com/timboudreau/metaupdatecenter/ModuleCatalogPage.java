@@ -5,24 +5,34 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.net.MediaType;
 import com.google.inject.Inject;
 import com.mastfrog.acteur.Acteur;
-import com.mastfrog.acteur.ActeurFactory;
+import com.mastfrog.acteur.CheckIfNoneMatchHeader;
 import com.mastfrog.acteur.Event;
 import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.Page;
 import com.mastfrog.acteur.ResponseWriter;
 import com.mastfrog.acteur.annotations.HttpCall;
+import com.mastfrog.acteur.headers.HeaderValueType;
 import com.mastfrog.acteur.server.PathFactory;
-import com.mastfrog.acteur.util.CacheControlTypes;
-import com.mastfrog.acteur.headers.Headers;
+import static com.mastfrog.acteur.headers.Headers.CACHE_CONTROL;
+import static com.mastfrog.acteur.headers.Headers.CONTENT_ENCODING;
+import static com.mastfrog.acteur.headers.Headers.CONTENT_TYPE;
+import static com.mastfrog.acteur.headers.Headers.ETAG;
+import static com.mastfrog.acteur.headers.Headers.LAST_MODIFIED;
+import static com.mastfrog.acteur.headers.Headers.VARY;
 import com.mastfrog.acteur.headers.Method;
 import com.mastfrog.acteur.preconditions.Description;
 import com.mastfrog.acteur.preconditions.Methods;
 import com.mastfrog.acteur.preconditions.PathRegex;
+import com.mastfrog.acteur.util.CacheControl;
+import static com.mastfrog.acteur.util.CacheControlTypes.Public;
+import static com.mastfrog.acteur.util.CacheControlTypes.max_age;
+import static com.mastfrog.acteur.util.CacheControlTypes.must_revalidate;
 import static com.timboudreau.metaupdatecenter.ModuleCatalogPage.MODULE_PAGE_REGEX;
 import io.netty.channel.ChannelFutureListener;
+import java.time.Duration;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoField;
 import java.util.Iterator;
-import org.joda.time.DateTime;
-import org.joda.time.Duration;
 
 /**
  *
@@ -37,23 +47,21 @@ public class ModuleCatalogPage extends Page {
     public static final String MODULE_PAGE_REGEX = "^modules$";
 
     @Inject
-    ModuleCatalogPage(ActeurFactory af) {
-        add(af.sendNotModifiedIfIfModifiedSinceHeaderMatches());
+    ModuleCatalogPage() {
         add(SetupETag.class);
-        add(af.sendNotModifiedIfETagHeaderMatches());
+        add(CheckIfNoneMatchHeader.class);
         add(ModuleListSender.class);
     }
 
     private static final class SetupLastModified extends Acteur {
 
         @Inject
-        SetupLastModified(Page page, ModuleSet set, HttpEvent evt, Stats stats) {
-            page.getResponseHeaders().setLastModified(set.getNewestDownloaded());
-            page.getResponseHeaders().setContentType("true".equals(evt.getParameter("json")) ? MediaType.JSON_UTF_8 : MediaType.XML_UTF_8);
-            page.getResponseHeaders().addCacheControl(CacheControlTypes.Public);
-            page.getResponseHeaders().addCacheControl(CacheControlTypes.must_revalidate);
-            page.getResponseHeaders().addCacheControl(CacheControlTypes.max_age, Duration.standardHours(1));
-            page.getResponseHeaders().addVaryHeader(Headers.CONTENT_ENCODING);
+        SetupLastModified(ModuleSet set, HttpEvent evt, Stats stats) {
+            add(LAST_MODIFIED, set.getNewestDownloaded());
+            MediaType contentType = "true".equals(evt.urlParameter("json")) ? MediaType.JSON_UTF_8 : MediaType.XML_UTF_8;
+            add(CONTENT_TYPE, contentType);
+            add(CACHE_CONTROL, new CacheControl(Public, must_revalidate).add(max_age, Duration.ofHours(1)));
+            add(VARY, new HeaderValueType<?>[] { CONTENT_ENCODING });
             next();
         }
     }
@@ -61,9 +69,9 @@ public class ModuleCatalogPage extends Page {
     private static final class SetupETag extends Acteur {
 
         @Inject
-        SetupETag(Page page, ModuleSet set, HttpEvent evt, Stats stats) {
+        SetupETag(ModuleSet set, HttpEvent evt, Stats stats) {
             stats.logHit(evt);
-            page.getResponseHeaders().setETag(set.getCombinedHash());
+            add(ETAG, set.getCombinedHash());
             next();
         }
     }
@@ -73,13 +81,13 @@ public class ModuleCatalogPage extends Page {
         @Inject
         ModuleListSender(ModuleSet set, HttpEvent evt, ObjectMapper mapper, final PathFactory factory) throws JsonProcessingException {
             final Iterator<ModuleItem> items = set.iterator();
-            final DateTime lm = set.getNewestDownloaded();
+            final ZonedDateTime lm = set.getNewestDownloaded();
             setChunked(true);
-            if ("true".equals(evt.getParameter("json"))) {
+            if ("true".equals(evt.urlParameter("json"))) {
                 ok(mapper.writeValueAsString(set.toList()));
             } else {
                 ok();
-                if (evt.getMethod() != Method.HEAD) {
+                if (evt.method() != Method.HEAD) {
                     setResponseWriter(new ResponseWriterImpl(lm, items, factory));
                 }
             }
@@ -87,11 +95,11 @@ public class ModuleCatalogPage extends Page {
 
         private static class ResponseWriterImpl extends ResponseWriter {
 
-            private final DateTime lm;
+            private final ZonedDateTime lm;
             private final Iterator<ModuleItem> items;
             private final PathFactory factory;
 
-            public ResponseWriterImpl(DateTime lm, Iterator<ModuleItem> items, PathFactory factory) {
+            public ResponseWriterImpl(ZonedDateTime lm, Iterator<ModuleItem> items, PathFactory factory) {
                 this.lm = lm;
                 this.items = items;
                 this.factory = factory;
@@ -100,7 +108,9 @@ public class ModuleCatalogPage extends Page {
             @Override
             public Status write(Event<?> evt, ResponseWriter.Output out, int iteration) throws Exception {
                 if (iteration == 0) {
-                    String timestamp = lm.getSecondOfMinute() + "/" + lm.getMinuteOfHour() + "/" + lm.getHourOfDay() + "/" + lm.getDayOfMonth() + "/" + lm.getMonthOfYear() + "/" + lm.getYear();
+                    String timestamp = lm.get(ChronoField.SECOND_OF_MINUTE) + "/" + lm.get(ChronoField.MINUTE_OF_HOUR) + "/" 
+                            + lm.get(ChronoField.HOUR_OF_DAY) + "/" + lm.get(ChronoField.DAY_OF_MONTH) + "/" 
+                            + lm.get(ChronoField.MONTH_OF_YEAR) + "/" + lm.getYear();
                     out.write("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n"
                             + "<!DOCTYPE module_updates PUBLIC \"-//NetBeans//DTD Autoupdate Catalog 2.6//EN\" \"http://www.netbeans.org/dtds/autoupdate-catalog-2_6.dtd\">\n"
                             + "<module_updates timestamp=\"" + timestamp + "\">\n\n");

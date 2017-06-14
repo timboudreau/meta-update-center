@@ -20,6 +20,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoField;
+import static java.time.temporal.ChronoField.MONTH_OF_YEAR;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -32,7 +35,6 @@ import javax.swing.text.Utilities;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import org.joda.time.DateTime;
 import org.openide.util.Exceptions;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -88,6 +90,7 @@ public final class UpdateCenterModuleGenerator {
     private void load() throws IOException {
         File dir = modules.getStorageDir();
         File f = new File(dir, "genmodule.properties");
+        ZonedDateTime now = ZonedDateTime.now();
         if (f.exists()) {
             Map<String, Object> m = mapper.readValue(f, Map.class);
             Number num = (Number) m.get("version");
@@ -108,9 +111,9 @@ public final class UpdateCenterModuleGenerator {
                 m.put("version", version);
                 // Record the current date, so on restart we can generate an
                 // identical NBM
-                m.put("year", DateTime.now().getYear() + "");
-                m.put("month", DateTime.now().getMonthOfYear() + "");
-                m.put("day", DateTime.now().getDayOfMonth() + "");
+                m.put("year", now.getYear() + "");
+                m.put("month", now.get(ChronoField.MONTH_OF_YEAR) + "");
+                m.put("day", now.getDayOfMonth() + "");
                 mapper.writeValue(f, m);
             } else {
                 // Use the date from the last time the bits changed
@@ -128,9 +131,9 @@ public final class UpdateCenterModuleGenerator {
             m.put("version", version);
             // Record the current date, so on restart we can generate an
             // identical NBM
-            m.put("year", DateTime.now().getYear() + "");
-            m.put("month", DateTime.now().getMonthOfYear() + "");
-            m.put("day", DateTime.now().getDayOfMonth() + "");
+            m.put("year", now.getYear() + "");
+            m.put("month", now.get(ChronoField.MONTH_OF_YEAR) + "");
+            m.put("day", now.getDayOfMonth() + "");
             year = (String) m.get("year");
             day = (String) m.get("day");
             month = (String) m.get("month");
@@ -269,9 +272,10 @@ public final class UpdateCenterModuleGenerator {
         }
         Map<String, String> result = new HashMap<>();
         // author, year, serverUrl
-        result.put(YEAR, year == null ? DateTime.now().getYear() + "" : year);
-        result.put(MONTH, month == null ? DateTime.now().getMonthOfYear() + "" : month);
-        result.put(DAY, day == null ? DateTime.now().getMonthOfYear() + "" : day);
+        ZonedDateTime now = ZonedDateTime.now();
+        result.put(YEAR, year == null ? now.getYear() + "" : year);
+        result.put(MONTH, month == null ? now.get(MONTH_OF_YEAR) + "" : month);
+        result.put(DAY, day == null ? now.getDayOfMonth() + "" : day);
         result.put(AUTHOR, settings.getString("module.author", System.getProperty("user.name")));
         result.put(SERVER_URL, paths.constructURL(Path.parse("/"), updateUrlHttps).toString());
         result.put(CODE_NAME_BASE, getModuleCodeName());

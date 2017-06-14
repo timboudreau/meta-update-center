@@ -11,6 +11,9 @@ import com.mastfrog.bunyan.Logger;
 import com.mastfrog.bunyan.LoggingModule;
 import com.mastfrog.giulius.Dependencies;
 import com.mastfrog.giulius.ShutdownHookRegistry;
+import com.mastfrog.jackson.DurationSerializationMode;
+import com.mastfrog.jackson.JacksonModule;
+import com.mastfrog.jackson.TimeSerializationMode;
 import com.mastfrog.settings.Settings;
 import com.mastfrog.settings.SettingsBuilder;
 import com.mastfrog.url.Path;
@@ -26,6 +29,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.time.ZonedDateTime;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.xml.parsers.DocumentBuilder;
@@ -33,7 +37,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.xpath.XPathExpressionException;
-import org.joda.time.DateTime;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -46,7 +49,7 @@ public class AppTest {
 
     @Test
     public void testDlRex() {
-        Pattern p = Pattern.compile(DownloadPage.DOWNLOAD_REGEX);
+        Pattern p = Pattern.compile(DownloadActeur.DOWNLOAD_REGEX);
         Matcher m = p.matcher("download/com.timboudreau.netbeans.mongodb/fmcer18v7npq1cso8w61m0u8rx18luad5.nbm");
         assertTrue(m.find());
 
@@ -55,9 +58,10 @@ public class AppTest {
     @Test
     public void test() throws SAXException, ParserConfigurationException, IOException, XPathExpressionException, TransformerException {
 
-        System.out.println("NOW: " + DateTime.now().getMillis());
+        System.out.println("NOW: " + System.currentTimeMillis());
         
-        Dependencies deps = new Dependencies(new LoggingModule().bindLogger("x"));
+        Dependencies deps = new Dependencies(new LoggingModule().bindLogger("x"), new JacksonModule().withJavaTimeSerializationMode(TimeSerializationMode.TIME_AS_EPOCH_MILLIS,
+                            DurationSerializationMode.DURATION_AS_MILLIS));
         Logger logger = deps.getInstance(Key.get(Logger.class, Names.named("x")));
 
         File tmp = new File(System.getProperty("java.io.tmpdir"));
@@ -80,7 +84,7 @@ public class AppTest {
         InfoFile moduleInfo = new InfoFile(doc);
 
         assertEquals("org.netbeans.modules.fisheye", moduleInfo.getModuleCodeName());
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = deps.getInstance(ObjectMapper.class);
         mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
 
         ModuleSet set = new ModuleSet(dir, Providers.of(mapper), Providers.of(
@@ -106,7 +110,7 @@ public class AppTest {
         assertNotNull(info);
 
         assertEquals("org.netbeans.modules.fisheye", info.getCodeNameBase());
-        DateTime dt = DateTime.now();
+        ZonedDateTime dt = ZonedDateTime.now();
         assertTrue (dt.isAfter(info.getDownloaded()));
         assertEquals(res.toString(), info.getFrom());
         assertEquals("test-hash", info.getHash());
@@ -126,7 +130,9 @@ public class AppTest {
                 .add("basepath", "121/final/modules")
                 .add("serverDisplayName", "The Foo Collection")
                 .build();
-        UpdateCenterModuleGenerator gen = new UpdateCenterModuleGenerator(set, new ServerInstallId(1), settings, x, new ObjectMapper());
+        Dependencies deps = new Dependencies(settings, new JacksonModule().withJavaTimeSerializationMode(TimeSerializationMode.TIME_AS_EPOCH_MILLIS,
+                            DurationSerializationMode.DURATION_AS_MILLIS));
+        UpdateCenterModuleGenerator gen = new UpdateCenterModuleGenerator(set, new ServerInstallId(1), settings, x, deps.getInstance(ObjectMapper.class));
         gen.version = 6;
 
         File f = new File(new File(System.getProperty("java.io.tmpdir")), "test.nbm");

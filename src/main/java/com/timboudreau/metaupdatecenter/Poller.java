@@ -4,8 +4,8 @@ import com.google.inject.Inject;
 import com.mastfrog.acteur.headers.Headers;
 import com.mastfrog.bunyan.Logger;
 import com.mastfrog.giulius.ShutdownHookRegistry;
-import com.mastfrog.guicy.annotations.Defaults;
-import com.mastfrog.guicy.annotations.Namespace;
+import com.mastfrog.giulius.annotations.Defaults;
+import com.mastfrog.giulius.annotations.Namespace;
 import com.mastfrog.netty.http.client.HttpClient;
 import com.mastfrog.util.ConfigurationError;
 import com.timboudreau.metaupdatecenter.NbmDownloader.DownloadHandler;
@@ -16,11 +16,11 @@ import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import javax.inject.Named;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
-import org.joda.time.DateTime;
-import org.joda.time.Duration;
 import org.openide.util.Exceptions;
 import org.openide.util.RequestProcessor;
 import org.xml.sax.SAXException;
@@ -46,7 +46,7 @@ public class Poller implements Runnable {
             throw new ConfigurationError("Poll interval must be >= 0 but is " + interval);
         }
         this.set = set;
-        this.interval = Duration.standardMinutes(interval);
+        this.interval = Duration.ofMinutes(interval);
         this.client = client;
         registry.add(new Runnable() {
             @Override
@@ -56,13 +56,13 @@ public class Poller implements Runnable {
             }
         });
         this.downloader = downloader;
-        task.schedule((int) Duration.standardMinutes(3).getMillis());
+        task.schedule((int) Duration.ofMinutes(3).toMillis());
         this.pollLogger = pollLogger;
     }
 
     @Override
     public void run() {
-        String msg = "Poll NBMs at " + Headers.toISO2822Date(DateTime.now());
+        String msg = "Poll NBMs at " + Headers.toISO2822Date(ZonedDateTime.now());
         pollLogger.trace("poll").close();
         Thread.currentThread().setName(msg);
         try {
@@ -106,7 +106,7 @@ public class Poller implements Runnable {
                 }
             }
         } finally {
-            task.schedule((int) this.interval.getMillis());
+            task.schedule((int) this.interval.toMillis());
         }
     }
 }

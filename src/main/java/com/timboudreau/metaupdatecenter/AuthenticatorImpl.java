@@ -7,7 +7,7 @@ import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.auth.Authenticator;
 import com.mastfrog.acteur.util.BasicCredentials;
 import com.mastfrog.acteur.util.PasswordHasher;
-import com.mastfrog.guicy.annotations.Namespace;
+import com.mastfrog.giulius.annotations.Namespace;
 import java.io.IOException;
 
 /**

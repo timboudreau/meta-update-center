@@ -26,7 +26,7 @@ class ChunkedFileResponseWriter extends ResponseWriter {
 
     @Override
     public ResponseWriter.Status write(Event<?> evt, ResponseWriter.Output out, int iteration) throws Exception {
-        ByteBuf buf = evt.getChannel().alloc().buffer(DownloadActeur.FILE_CHUNK_SIZE);
+        ByteBuf buf = evt.channel().alloc().buffer(DownloadActeur.FILE_CHUNK_SIZE);
         int bytes = buf.writeBytes(stream, DownloadActeur.FILE_CHUNK_SIZE);
         if (bytes == -1) {
             stream.close();

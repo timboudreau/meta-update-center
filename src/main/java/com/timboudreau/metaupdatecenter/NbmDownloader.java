@@ -29,12 +29,12 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.time.ZonedDateTime;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import org.joda.time.DateTime;
 import org.openide.util.Exceptions;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -68,7 +68,7 @@ public class NbmDownloader {
         }
     }
 
-    public ResponseFuture download(DateTime ifModifiedSince, final String url, final DownloadHandler callback) throws MalformedURLException, URISyntaxException, FileNotFoundException, IOException, SAXException, ParserConfigurationException {
+    public ResponseFuture download(ZonedDateTime ifModifiedSince, final String url, final DownloadHandler callback) throws MalformedURLException, URISyntaxException, FileNotFoundException, IOException, SAXException, ParserConfigurationException {
 
         URL uu = new URL(url);
         if ("file".equals(uu.toURI().getScheme())) {

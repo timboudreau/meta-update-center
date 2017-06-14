@@ -10,7 +10,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import org.joda.time.DateTime;
 
 /**
  *
@@ -50,7 +49,7 @@ public class ServerInstallId {
                 id = Long.parseLong(s);
             }
         } else {
-            id = (DateTime.now().getMillis() - TIME_OFFSET) / (1000 * 60);
+            id = (System.currentTimeMillis() - TIME_OFFSET) / (1000 * 60);
             if (!f.createNewFile()) {
                 throw new IOException("Server working directory not writable: " + f.getAbsolutePath());
             }

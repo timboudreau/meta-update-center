@@ -20,6 +20,7 @@ import com.mastfrog.acteur.preconditions.PathRegex;
 import com.mastfrog.acteur.preconditions.RequiredUrlParameters;
 import com.mastfrog.acteur.util.CacheControl;
 import com.mastfrog.url.URL;
+import com.mastfrog.util.time.TimeUtil;
 import com.timboudreau.metaupdatecenter.NbmDownloader.DownloadHandler;
 import static com.timboudreau.metaupdatecenter.PutModulePage.ADD_PAGE_REGEX;
 import io.netty.channel.ChannelFutureListener;
@@ -29,10 +30,10 @@ import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
 import io.netty.handler.codec.http.LastHttpContent;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.LinkedList;
 import java.util.List;
-import org.joda.time.DateTime;
-import org.joda.time.Duration;
 import org.openide.util.Exceptions;
 
 /**
@@ -53,11 +54,11 @@ public class PutModulePage extends Acteur {
     @Inject
     PutModulePage(ModuleSet set, HttpEvent evt, NbmDownloader downloader, ObjectMapper mapper) throws Exception {
         add(Headers.CONTENT_TYPE, MediaType.PLAIN_TEXT_UTF_8);
-        add(Headers.EXPIRES, DateTime.now().minus(Duration.standardDays(30)));
+        add(Headers.EXPIRES, ZonedDateTime.now().minus(Duration.ofDays(30)));
         add(Headers.CACHE_CONTROL, CacheControl.PRIVATE_NO_CACHE_NO_STORE);
         setChunked(true);
-        String url = evt.getParameter("url");
-        boolean useOriginalUrl = "true".equals(evt.getParameter("useOriginalUrl"));
+        String url = evt.urlParameter("url");
+        boolean useOriginalUrl = "true".equals(evt.urlParameter("useOriginalUrl"));
         add(Headers.CONTENT_TYPE, MediaType.PLAIN_TEXT_UTF_8);
         URL u = URL.parse(url);
         if (!u.isValid()) {
@@ -67,7 +68,7 @@ public class PutModulePage extends Acteur {
         ok();
         Downloader handler = new Downloader(u, set, useOriginalUrl, mapper);
         setResponseWriter(handler);
-        downloader.download(new DateTime(0), url, handler);
+        downloader.download(TimeUtil.fromUnixTimestamp(0), url, handler);
     }
 
     private static class Downloader extends ResponseWriter implements DownloadHandler {

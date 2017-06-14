@@ -17,13 +17,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
-import org.joda.time.DateTime;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -36,7 +36,7 @@ public final class ModuleItem implements Comparable<ModuleItem> {
     private final String codeNameBase;
     private final String hash;
     private final Map<String, Object> metadata;
-    private final DateTime downloaded;
+    private final ZonedDateTime downloaded;
     private final boolean useOriginalURL;
     private final String from;
 
@@ -44,7 +44,7 @@ public final class ModuleItem implements Comparable<ModuleItem> {
     public ModuleItem(@JsonProperty("codeNameBase") String codeNameBase,
             @JsonProperty("hash") String hash,
             @JsonProperty("metadata") Map<String, Object> info,
-            @JsonProperty("downloaded") DateTime downloaded,
+            @JsonProperty("downloaded") ZonedDateTime downloaded,
             @JsonProperty("useOriginalURL") boolean useOriginalURL,
             @JsonProperty("from") String from) {
         this.codeNameBase = codeNameBase;
@@ -73,7 +73,7 @@ public final class ModuleItem implements Comparable<ModuleItem> {
                 .put("version", getVersion()).build();
     }
 
-    public DateTime getDownloaded() {
+    public ZonedDateTime getDownloaded() {
         return downloaded;
     }
 
@@ -91,7 +91,7 @@ public final class ModuleItem implements Comparable<ModuleItem> {
 
     public String toString() {
         return getCodeNameBase() + " " + getVersion() + " downloaded " + 
-                Headers.ISO2822DateFormat.print(getDownloaded()) + " from " + getFrom();
+                Headers.ISO2822DateFormat.format(getDownloaded()) + " from " + getFrom();
     }
 
     public SpecificationVersion getVersion() {

@@ -13,7 +13,6 @@ import com.mastfrog.acteur.Help;
 import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.ImplicitBindings;
 import com.mastfrog.acteur.Page;
-import com.mastfrog.acteur.RequestLogger;
 import com.mastfrog.acteur.annotations.GenericApplication;
 import com.mastfrog.acteur.annotations.HttpCall;
 import com.mastfrog.acteur.auth.Authenticator;
@@ -28,7 +27,6 @@ import com.mastfrog.acteur.server.ServerBuilder;
 import com.mastfrog.acteur.server.ServerModule;
 import static com.mastfrog.acteur.server.ServerModule.HTTP_COMPRESSION;
 import static com.mastfrog.acteur.server.ServerModule.MAX_CONTENT_LENGTH;
-import com.mastfrog.acteur.util.ErrorInterceptor;
 import com.mastfrog.acteur.util.Server;
 import com.mastfrog.bunyan.Log;
 import com.mastfrog.bunyan.Logger;
@@ -36,9 +34,11 @@ import static com.mastfrog.bunyan.LoggingModule.SETTINGS_KEY_ASYNC_LOGGING;
 import static com.mastfrog.bunyan.LoggingModule.SETTINGS_KEY_LOG_FILE;
 import static com.mastfrog.bunyan.LoggingModule.SETTINGS_KEY_LOG_LEVEL;
 import com.mastfrog.giulius.ShutdownHookRegistry;
-import com.mastfrog.guicy.annotations.Defaults;
-import com.mastfrog.guicy.annotations.Namespace;
+import com.mastfrog.giulius.annotations.Defaults;
+import com.mastfrog.giulius.annotations.Namespace;
+import com.mastfrog.jackson.DurationSerializationMode;
 import com.mastfrog.jackson.JacksonModule;
+import com.mastfrog.jackson.TimeSerializationMode;
 import com.mastfrog.netty.http.client.HttpClient;
 import com.mastfrog.settings.MutableSettings;
 import com.mastfrog.settings.Settings;
@@ -72,7 +72,7 @@ import org.xml.sax.SAXException;
 public class UpdateCenterServer extends GenericApplication {
 
     public static final String SETTINGS_KEY_SERVER_VERSION = "serverVersion";
-    public static final int VERSION = 7;
+    public static final int VERSION = 8;
     public static final String STATS_LOGGER = "stats";
     public static final String ERROR_LOGGER = ActeurBunyanModule.ERROR_LOGGER;
     public static final String REQUESTS_LOGGER = ActeurBunyanModule.ACCESS_LOGGER;
@@ -180,7 +180,8 @@ public class UpdateCenterServer extends GenericApplication {
                             .bindLogger(DOWNLOAD_LOGGER))
                     .add(new NbmInfoModule(base))
                     .applicationClass(UpdateCenterServer.class)
-                    .add(new JacksonModule())
+                    .add(new JacksonModule().withJavaTimeSerializationMode(TimeSerializationMode.TIME_AS_EPOCH_MILLIS,
+                            DurationSerializationMode.DURATION_AS_MILLIS))
                     .add(settings)
                     .build();
 

@@ -70,7 +70,7 @@ public class LiveLogPage extends Acteur {
             clos.add(channel);
             ContinuousStringStream strings = new ContinuousStringStream(channel, 1024);
             stream = new ContinuousLineStream(strings, charset.newDecoder(), 1024);
-            Optional<Long> offsetOpt = evt.getLongParameter("offset");
+            Optional<Long> offsetOpt = evt.longUrlParameter("offset");
             if (offsetOpt.isPresent()) {
                 stream.position(Math.min(stream.available(), offsetOpt.get()));
                 // get to the first real line start

@@ -6,6 +6,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.mastfrog.util.ConfigurationError;
 import com.mastfrog.util.Streams;
+import com.mastfrog.util.time.TimeUtil;
 import io.netty.util.internal.ConcurrentSet;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -13,6 +14,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -24,7 +26,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.xml.xpath.XPathExpressionException;
-import org.joda.time.DateTime;
 import org.openide.util.Exceptions;
 
 /**
@@ -103,13 +104,13 @@ public final class ModuleSet implements Iterable<ModuleItem> {
         }
     }
 
-    public DateTime getNewestDownloaded() {
-        List<DateTime> l = new ArrayList<>(items.size());
+    public ZonedDateTime getNewestDownloaded() {
+        List<ZonedDateTime> l = new ArrayList<>(items.size());
         for (ModuleItem item : items) {
             l.add(item.getDownloaded());
         }
         Collections.sort(l);
-        return l.isEmpty() ? new DateTime(0) : l.get(l.size() - 1);
+        return l.isEmpty() ? TimeUtil.fromUnixTimestamp(0) : l.get(l.size() - 1);
     }
 
     public String getCombinedHash() {
@@ -175,7 +176,7 @@ public final class ModuleSet implements Iterable<ModuleItem> {
             metadata.put("downloadsize", Long.toString(nbmFile.length()));
             Map<String, Object> mdInfo = new HashMap<>();
             mdInfo.put("metadata", metadata);
-            mdInfo.put("downloaded", DateTime.now().getMillis());
+            mdInfo.put("downloaded", System.currentTimeMillis());
             mdInfo.put("from", url);
             mdInfo.put("hash", hash);
             mdInfo.put("useOriginalURL", useOrigUrl);
