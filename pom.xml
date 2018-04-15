@@ -3,15 +3,21 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.timboudreau</groupId>
     <artifactId>meta-update-center</artifactId>
-    <version>1.6.0</version>
+    <version>1.7.0</version>
     <packaging>jar</packaging>
     <properties>
-        <mastfrog.version>2.0.0-dev</mastfrog.version>
-        <netbeans.version>RELEASE80</netbeans.version>
+        <mastfrog.version>2.4.0</mastfrog.version>
+        <netbeans.version>RELEASE82</netbeans.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <name>Meta Update Center</name>
     <dependencies>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-util</artifactId>
+            <version>${netbeans.version}</version>
+            <type>jar</type>
+        </dependency>
         <dependency>
             <groupId>com.mastfrog</groupId>
             <artifactId>acteur</artifactId>
@@ -80,7 +86,8 @@
             <plugin>
                 <groupId>com.mastfrog</groupId>
                 <artifactId>maven-merge-configuration</artifactId>
-                <version>${mastfrog.version}</version>
+                <!--<version>${mastfrog.version}</version>-->
+                <version>1.6.0</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -126,7 +133,7 @@
         <repository>
             <id>timboudreau-builds</id>
             <name>timboudreau.com builds</name>
-            <url>http://timboudreau.com/builds/plugin/repository/everything/</url>
+            <url>http://timboudreau.com/maven/</url>
             <releases>
                 <enabled>true</enabled>
                 <updatePolicy>never</updatePolicy>

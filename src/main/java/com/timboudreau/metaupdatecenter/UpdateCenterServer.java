@@ -43,6 +43,7 @@ import com.mastfrog.netty.http.client.HttpClient;
 import com.mastfrog.settings.MutableSettings;
 import com.mastfrog.settings.Settings;
 import com.mastfrog.settings.SettingsBuilder;
+import com.mastfrog.util.Exceptions;
 import com.mastfrog.util.GUIDFactory;
 import static com.timboudreau.metaupdatecenter.UpdateCenterServer.SETTINGS_KEY_ADMIN_USER_NAME;
 import static com.timboudreau.metaupdatecenter.UpdateCenterServer.SETTINGS_NAMESPACE;
@@ -60,7 +61,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import javax.xml.parsers.ParserConfigurationException;
-import org.openide.util.Exceptions;
 import org.xml.sax.SAXException;
 
 @ImplicitBindings(ModuleItem.class)
@@ -72,7 +72,7 @@ import org.xml.sax.SAXException;
 public class UpdateCenterServer extends GenericApplication {
 
     public static final String SETTINGS_KEY_SERVER_VERSION = "serverVersion";
-    public static final int VERSION = 8;
+    public static final int VERSION = 9;
     public static final String STATS_LOGGER = "stats";
     public static final String ERROR_LOGGER = ActeurBunyanModule.ERROR_LOGGER;
     public static final String REQUESTS_LOGGER = ActeurBunyanModule.ACCESS_LOGGER;

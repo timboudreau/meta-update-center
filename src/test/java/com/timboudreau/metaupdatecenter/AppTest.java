@@ -5,12 +5,12 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.inject.Key;
 import com.google.inject.name.Names;
 import com.google.inject.util.Providers;
+import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.server.PathFactory;
 import com.mastfrog.acteur.util.RequestID;
 import com.mastfrog.bunyan.Logger;
 import com.mastfrog.bunyan.LoggingModule;
 import com.mastfrog.giulius.Dependencies;
-import com.mastfrog.giulius.ShutdownHookRegistry;
 import com.mastfrog.jackson.DurationSerializationMode;
 import com.mastfrog.jackson.JacksonModule;
 import com.mastfrog.jackson.TimeSerializationMode;
@@ -184,6 +184,21 @@ public class AppTest {
 
         @Override
         public com.mastfrog.url.URL constructURL(Protocol protocol, Path path, int port) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public com.mastfrog.url.URL constructURL(Path path) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public int portForProtocol(Protocol protocol) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public com.mastfrog.url.URL constructURL(String path, HttpEvent evt) {
             throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
     }

@@ -12,14 +12,13 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.mastfrog.acteur.headers.Headers;
 import com.mastfrog.jackson.JacksonConfigurer;
+import com.mastfrog.util.service.ServiceProvider;
 import com.mastfrog.util.time.TimeUtil;
 import com.timboudreau.metaupdatecenter.borrowed.SpecificationVersion;
 import java.io.IOException;
 import java.time.ZonedDateTime;
-import java.util.regex.Pattern;
-import org.openide.util.lookup.ServiceProvider;
 
-@ServiceProvider(service = JacksonConfigurer.class)
+@ServiceProvider(JacksonConfigurer.class)
 public class JsonConfig implements JacksonConfigurer {
 
     @Override

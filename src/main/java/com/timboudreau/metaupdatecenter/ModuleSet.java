@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.mastfrog.util.ConfigurationError;
+import com.mastfrog.util.Exceptions;
 import com.mastfrog.util.Streams;
 import com.mastfrog.util.time.TimeUtil;
 import io.netty.util.internal.ConcurrentSet;
@@ -26,7 +27,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.xml.xpath.XPathExpressionException;
-import org.openide.util.Exceptions;
 
 /**
  *

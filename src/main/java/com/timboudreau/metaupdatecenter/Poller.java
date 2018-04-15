@@ -8,6 +8,7 @@ import com.mastfrog.giulius.annotations.Defaults;
 import com.mastfrog.giulius.annotations.Namespace;
 import com.mastfrog.netty.http.client.HttpClient;
 import com.mastfrog.util.ConfigurationError;
+import com.mastfrog.util.Exceptions;
 import com.timboudreau.metaupdatecenter.NbmDownloader.DownloadHandler;
 import static com.timboudreau.metaupdatecenter.UpdateCenterServer.SETTINGS_KEY_POLL_INTERVAL_MINUTES;
 import io.netty.handler.codec.http.HttpHeaders;
@@ -21,7 +22,6 @@ import java.time.ZonedDateTime;
 import javax.inject.Named;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
-import org.openide.util.Exceptions;
 import org.openide.util.RequestProcessor;
 import org.xml.sax.SAXException;
 
