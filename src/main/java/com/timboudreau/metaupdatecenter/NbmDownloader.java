@@ -83,29 +83,21 @@ public class NbmDownloader {
         fut.onAnyEvent(new Receiver<State<?>>() {
             @Override
             public void receive(State<?> object) {
-                try {
-                    switch (object.stateType()) {
-                        case Error:
-                            Throwable t = (Throwable) object.get();
-                            callback.onError(t);
-                            break;
-                        case Finished:
-                            DefaultFullHttpResponse resp = (DefaultFullHttpResponse) object.get();
-                            if (!callback.onResponse(resp.status(), resp.headers())) {
-                                return;
-                            }
-                            ByteBuf buf = resp.content();
-                            handleDownloadedNBM(buf, callback, url);
-                            break;
-                        default:
-                            break;
-                    }
-                } catch (IOException ex) {
-                    Exceptions.printStackTrace(ex);
-                } catch (ParserConfigurationException ex) {
-                    Exceptions.printStackTrace(ex);
-                } catch (SAXException ex) {
-                    Exceptions.printStackTrace(ex);
+                switch (object.stateType()) {
+                    case Error:
+                        Throwable t = (Throwable) object.get();
+                        callback.onError(t);
+                        break;
+                    case Finished:
+                        DefaultFullHttpResponse resp = (DefaultFullHttpResponse) object.get();
+                        if (!callback.onResponse(resp.status(), resp.headers())) {
+                            return;
+                        }
+                        ByteBuf buf = resp.content();
+                        handleDownloadedNBM(buf, callback, url);
+                        break;
+                    default:
+                        break;
                 }
             }
         });

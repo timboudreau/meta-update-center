@@ -58,56 +58,53 @@ public class Poller implements Runnable {
         String msg = "Poll NBMs at " + Headers.toISO2822Date(ZonedDateTime.now());
         pollLogger.trace("poll").close();
         Thread.currentThread().setName(msg);
-        try {
-            for (final ModuleItem item : set) {
-                try {
-                    if (UpdateCenterServer.DUMMY_URL.equals(item.getFrom())) {
-                        continue;
-                    }
-                    downloader.download(item.getDownloaded(), item.getFrom(), new DownloadHandler() {
-                        ZonedDateTime lastModified;
-                        @Override
-                        public boolean onResponse(HttpResponseStatus status, HttpHeaders headers) {
-                            if (status.code() > 399) {
-                                pollLogger.warn("downloadFail").add("url", item.getFrom()).add("status", status.code()).close();
-                            }
-                            String lm = headers.get(HttpHeaderNames.LAST_MODIFIED);
-                            if (lm != null) {
-                                try {
-                                    lastModified = Headers.LAST_MODIFIED.toValue(lm);
-                                } catch (Exception ex) {
-                                    pollLogger.error("invalid-last-modified").add("value", lm).add(item.getCodeNameBase());
-                                }
-                            }
-                            return OK.equals(status);
-                        }
-
-                        @Override
-                        public void onModuleDownload(InfoFile module, InputStream bytes, String hash, String url) {
-                            try {
-                                pollLogger.info("newVersionDownloaded")
-                                        .add("cnb", module.getModuleCodeName())
-                                        .add("url", url)
-                                        .add("version", module.getModuleVersion().toString()).close();
-                                set.add(module, bytes, url, hash, item.isUseOriginalURL(), lastModified);
-                            } catch (IOException ex) {
-                                Exceptions.printStackTrace(ex);
-                            } catch (XPathExpressionException ex) {
-                                Exceptions.printStackTrace(ex);
-                            }
-                        }
-
-                        @Override
-                        public void onError(Throwable t) {
-                            pollLogger.error("download").add("url", item.getFrom()).add(t).close();
-                        }
-                    });
-                } catch (IOException | URISyntaxException | SAXException | ParserConfigurationException ex) {
-                    Exceptions.printStackTrace(ex);
+        for (final ModuleItem item : set) {
+            try {
+                if (UpdateCenterServer.DUMMY_URL.equals(item.getFrom())) {
+                    continue;
                 }
+                downloader.download(item.getDownloaded(), item.getFrom(), new DownloadHandler() {
+                    ZonedDateTime lastModified;
+
+                    @Override
+                    public boolean onResponse(HttpResponseStatus status, HttpHeaders headers) {
+                        if (status.code() > 399) {
+                            pollLogger.warn("downloadFail").add("url", item.getFrom()).add("status", status.code()).close();
+                        }
+                        String lm = headers.get(HttpHeaderNames.LAST_MODIFIED);
+                        if (lm != null) {
+                            try {
+                                lastModified = Headers.LAST_MODIFIED.toValue(lm);
+                            } catch (Exception ex) {
+                                pollLogger.error("invalid-last-modified").add("value", lm).add(item.getCodeNameBase());
+                            }
+                        }
+                        return OK.equals(status);
+                    }
+
+                    @Override
+                    public void onModuleDownload(InfoFile module, InputStream bytes, String hash, String url) {
+                        try {
+                            pollLogger.info("newVersionDownloaded")
+                                    .add("cnb", module.getModuleCodeName())
+                                    .add("url", url)
+                                    .add("version", module.getModuleVersion().toString()).close();
+                            set.add(module, bytes, url, hash, item.isUseOriginalURL(), lastModified);
+                        } catch (IOException ex) {
+                            Exceptions.printStackTrace(ex);
+                        } catch (XPathExpressionException ex) {
+                            Exceptions.printStackTrace(ex);
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable t) {
+                        pollLogger.error("download").add("url", item.getFrom()).add(t).close();
+                    }
+                });
+            } catch (IOException | URISyntaxException | SAXException | ParserConfigurationException ex) {
+                Exceptions.printStackTrace(ex);
             }
-        } finally {
-            task.schedule((int) this.interval.toMillis());
         }
     }
 }
