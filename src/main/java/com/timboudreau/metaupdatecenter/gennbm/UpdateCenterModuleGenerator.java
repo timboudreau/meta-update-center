@@ -6,13 +6,13 @@ import com.mastfrog.acteur.server.PathFactory;
 import com.mastfrog.settings.Settings;
 import com.mastfrog.url.Path;
 import com.mastfrog.url.URL;
-import com.mastfrog.util.ConfigurationError;
-import com.mastfrog.util.Streams;
+import com.mastfrog.util.libversion.VersionInfo;
+import com.mastfrog.util.preconditions.ConfigurationError;
+import com.mastfrog.util.preconditions.Exceptions;
+import com.mastfrog.util.streams.Streams;
 import com.mastfrog.util.streams.HashingOutputStream;
 import com.timboudreau.metaupdatecenter.InfoFile;
 import com.timboudreau.metaupdatecenter.ModuleSet;
-import com.timboudreau.metaupdatecenter.UpdateCenterServer;
-import static com.timboudreau.metaupdatecenter.UpdateCenterServer.VERSION;
 import io.netty.util.CharsetUtil;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -31,11 +31,9 @@ import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.regex.Pattern;
-import javax.swing.text.Utilities;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import org.openide.util.Exceptions;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -58,17 +56,17 @@ public final class UpdateCenterModuleGenerator {
     private String month;
     private final boolean updateUrlHttps;
     private final long serverInstallId;
-    private final int serverVersion;
+    private final String serverVersion;
 
     @Inject
-    public UpdateCenterModuleGenerator(ModuleSet modules, ServerInstallId idProvider, Settings settings, PathFactory paths, ObjectMapper mapper) throws IOException {
+    public UpdateCenterModuleGenerator(ModuleSet modules, ServerInstallId idProvider, Settings settings, PathFactory paths, ObjectMapper mapper, VersionInfo version) throws IOException {
         this.modules = modules;
         this.settings = settings;
         this.paths = paths;
         this.mapper = mapper;
         updateUrlHttps = settings.getBoolean("update.url.https", false);
         serverInstallId = idProvider.get();
-        serverVersion = settings.getInt(UpdateCenterServer.SETTINGS_KEY_SERVER_VERSION, VERSION);
+        serverVersion = version.deweyDecimalVersion();
         initTemplates();
         load();
     }

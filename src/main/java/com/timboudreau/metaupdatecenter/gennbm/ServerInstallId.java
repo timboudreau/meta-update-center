@@ -3,7 +3,7 @@ package com.timboudreau.metaupdatecenter.gennbm;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.mastfrog.settings.Settings;
-import com.mastfrog.util.Streams;
+import com.mastfrog.util.streams.Streams;
 import io.netty.util.CharsetUtil;
 import java.io.File;
 import java.io.FileInputStream;

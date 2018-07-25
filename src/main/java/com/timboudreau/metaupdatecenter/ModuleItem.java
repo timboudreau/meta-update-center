@@ -39,6 +39,7 @@ public final class ModuleItem implements Comparable<ModuleItem> {
     private final ZonedDateTime downloaded;
     private final boolean useOriginalURL;
     private final String from;
+    private final ZonedDateTime lastModified;
 
     @JsonCreator
     public ModuleItem(@JsonProperty("codeNameBase") String codeNameBase,
@@ -46,7 +47,9 @@ public final class ModuleItem implements Comparable<ModuleItem> {
             @JsonProperty("metadata") Map<String, Object> info,
             @JsonProperty("downloaded") ZonedDateTime downloaded,
             @JsonProperty("useOriginalURL") boolean useOriginalURL,
+            @JsonProperty("lastModified") ZonedDateTime lastModified,
             @JsonProperty("from") String from) {
+        this.lastModified = lastModified;
         this.codeNameBase = codeNameBase;
         this.hash = hash;
         this.metadata = info;
@@ -71,6 +74,17 @@ public final class ModuleItem implements Comparable<ModuleItem> {
         return new MapBuilder().put("cnb", getCodeNameBase())
                 .put("downloaded", getDownloaded())
                 .put("version", getVersion()).build();
+    }
+
+    public ZonedDateTime getWhen() {
+        if (lastModified != null && lastModified.toInstant().toEpochMilli() != 0L) {
+            return lastModified;
+        }
+        return getDownloaded();
+    }
+
+    public ZonedDateTime getLastModified() {
+        return lastModified;
     }
 
     public ZonedDateTime getDownloaded() {
@@ -100,6 +114,7 @@ public final class ModuleItem implements Comparable<ModuleItem> {
     }
 
     @JsonIgnore
+    @SuppressWarnings("unchecked")
     public Map<String, Object> getManifest() {
         return (Map<String, Object>) getMetadata().get("manifest");
     }

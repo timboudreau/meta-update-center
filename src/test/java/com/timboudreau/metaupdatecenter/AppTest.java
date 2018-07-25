@@ -5,12 +5,12 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.inject.Key;
 import com.google.inject.name.Names;
 import com.google.inject.util.Providers;
+import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.server.PathFactory;
 import com.mastfrog.acteur.util.RequestID;
 import com.mastfrog.bunyan.Logger;
 import com.mastfrog.bunyan.LoggingModule;
 import com.mastfrog.giulius.Dependencies;
-import com.mastfrog.giulius.ShutdownHookRegistry;
 import com.mastfrog.jackson.DurationSerializationMode;
 import com.mastfrog.jackson.JacksonModule;
 import com.mastfrog.jackson.TimeSerializationMode;
@@ -19,8 +19,9 @@ import com.mastfrog.settings.SettingsBuilder;
 import com.mastfrog.url.Path;
 import com.mastfrog.url.PathElement;
 import com.mastfrog.url.Protocol;
-import com.mastfrog.util.AbstractBuilder;
-import com.mastfrog.util.Streams;
+import com.mastfrog.util.builder.AbstractBuilder;
+import com.mastfrog.util.libversion.VersionInfo;
+import com.mastfrog.util.streams.Streams;
 import com.timboudreau.metaupdatecenter.borrowed.SpecificationVersion;
 import com.timboudreau.metaupdatecenter.gennbm.ServerInstallId;
 import com.timboudreau.metaupdatecenter.gennbm.UpdateCenterModuleGenerator;
@@ -132,7 +133,8 @@ public class AppTest {
                 .build();
         Dependencies deps = new Dependencies(settings, new JacksonModule().withJavaTimeSerializationMode(TimeSerializationMode.TIME_AS_EPOCH_MILLIS,
                             DurationSerializationMode.DURATION_AS_MILLIS));
-        UpdateCenterModuleGenerator gen = new UpdateCenterModuleGenerator(set, new ServerInstallId(1), settings, x, deps.getInstance(ObjectMapper.class));
+        UpdateCenterModuleGenerator gen = new UpdateCenterModuleGenerator(set, new ServerInstallId(1), settings, x, deps.getInstance(ObjectMapper.class),
+            VersionInfo.find(UpdateCenterServer.class, "com.timboudreau", "meta-update-center"));
         gen.version = 6;
 
         File f = new File(new File(System.getProperty("java.io.tmpdir")), "test.nbm");
@@ -184,6 +186,21 @@ public class AppTest {
 
         @Override
         public com.mastfrog.url.URL constructURL(Protocol protocol, Path path, int port) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public com.mastfrog.url.URL constructURL(Path path) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public int portForProtocol(Protocol protocol) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public com.mastfrog.url.URL constructURL(String path, HttpEvent evt) {
             throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
     }

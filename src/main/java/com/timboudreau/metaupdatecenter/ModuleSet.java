@@ -4,8 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.mastfrog.util.ConfigurationError;
-import com.mastfrog.util.Streams;
+import com.mastfrog.util.preconditions.ConfigurationError;
+import com.mastfrog.util.preconditions.Exceptions;
+import com.mastfrog.util.streams.Streams;
 import com.mastfrog.util.time.TimeUtil;
 import io.netty.util.internal.ConcurrentSet;
 import java.io.BufferedOutputStream;
@@ -26,7 +27,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.xml.xpath.XPathExpressionException;
-import org.openide.util.Exceptions;
 
 /**
  *
@@ -85,7 +85,7 @@ public final class ModuleSet implements Iterable<ModuleItem> {
         Collections.sort(result);
         return result;
     }
-    
+
     public String toString() {
         return items.toString();
     }
@@ -135,6 +135,10 @@ public final class ModuleSet implements Iterable<ModuleItem> {
     }
 
     public ModuleItem add(InfoFile info, InputStream module, String url, String hash, boolean useOrigUrl) throws IOException {
+        return add(info, module, url, hash, useOrigUrl, null);
+    }
+
+    public ModuleItem add(InfoFile info, InputStream module, String url, String hash, boolean useOrigUrl, ZonedDateTime lastModified) throws IOException {
         String codeName;
         Map<String, Object> metadata;
         try {
@@ -173,6 +177,9 @@ public final class ModuleSet implements Iterable<ModuleItem> {
                     Streams.copy(in, out, COPY_BUFFER_SIZE);
                 }
             }
+            if (lastModified != null && lastModified.toInstant().toEpochMilli() != 0) {
+                nbmFile.setLastModified(TimeUtil.toUnixTimestamp(lastModified));
+            }
             metadata.put("downloadsize", Long.toString(nbmFile.length()));
             Map<String, Object> mdInfo = new HashMap<>();
             mdInfo.put("metadata", metadata);
@@ -181,6 +188,7 @@ public final class ModuleSet implements Iterable<ModuleItem> {
             mdInfo.put("hash", hash);
             mdInfo.put("useOriginalURL", useOrigUrl);
             mdInfo.put("codeNameBase", codeName);
+            mdInfo.put("lastModified", lastModified == null ? 0 : TimeUtil.toUnixTimestamp(lastModified));
             try (OutputStream out = new BufferedOutputStream(new FileOutputStream(mdFile), COPY_BUFFER_SIZE)) {
                 mapper.get().writeValue(out, mdInfo);
             }

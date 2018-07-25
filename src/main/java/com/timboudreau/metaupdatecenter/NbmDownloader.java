@@ -7,7 +7,7 @@ import com.mastfrog.netty.http.client.HttpClient;
 import com.mastfrog.netty.http.client.HttpRequestBuilder;
 import com.mastfrog.netty.http.client.ResponseFuture;
 import com.mastfrog.netty.http.client.State;
-import com.mastfrog.util.Streams;
+import com.mastfrog.util.streams.Streams;
 import com.mastfrog.util.streams.HashingInputStream;
 import com.mastfrog.util.thread.Receiver;
 import io.netty.buffer.ByteBuf;
@@ -35,7 +35,6 @@ import java.util.zip.ZipInputStream;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import org.openide.util.Exceptions;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -84,40 +83,30 @@ public class NbmDownloader {
         fut.onAnyEvent(new Receiver<State<?>>() {
             @Override
             public void receive(State<?> object) {
-                try {
-                    switch (object.stateType()) {
-                        case Error:
-                            Throwable t = (Throwable) object.get();
-                            callback.onError(t);
-                            break;
-                        case Finished:
-                            DefaultFullHttpResponse resp = (DefaultFullHttpResponse) object.get();
-                            if (!callback.onResponse(resp.status(), resp.headers())) {
-                                return;
-                            }
-                            ByteBuf buf = resp.content();
-                            handleDownloadedNBM(buf, callback, url);
-                            break;
-                        default:
-                            break;
-                    }
-                } catch (IOException ex) {
-                    Exceptions.printStackTrace(ex);
-                } catch (ParserConfigurationException ex) {
-                    Exceptions.printStackTrace(ex);
-                } catch (SAXException ex) {
-                    Exceptions.printStackTrace(ex);
+                switch (object.stateType()) {
+                    case Error:
+                        Throwable t = (Throwable) object.get();
+                        callback.onError(t);
+                        break;
+                    case Finished:
+                        DefaultFullHttpResponse resp = (DefaultFullHttpResponse) object.get();
+                        if (!callback.onResponse(resp.status(), resp.headers())) {
+                            return;
+                        }
+                        ByteBuf buf = resp.content();
+                        handleDownloadedNBM(buf, callback, url);
+                        break;
+                    default:
+                        break;
                 }
             }
-
         });
         return fut;
     }
 
-    protected void handleDownloadedNBM(ByteBuf buf, DownloadHandler callback, String url) throws IOException, SAXException, ParserConfigurationException {
+    protected void handleDownloadedNBM(ByteBuf buf, DownloadHandler callback, String url) {
         InfoFile moduleInfo = null;
         try (HashingInputStream stream = HashingInputStream.sha1(new ByteBufInputStream(buf))) {
-
             ZipInputStream in = new ZipInputStream(stream, CharsetUtil.UTF_8);
             for (ZipEntry e = in.getNextEntry(); e != null; e = in.getNextEntry()) {
                 try {
@@ -157,6 +146,9 @@ public class NbmDownloader {
             String hash = stream.getHashAsString();
             buf.resetReaderIndex();
             callback.onModuleDownload(moduleInfo, new ByteBufInputStream(buf), hash, url);
+        } catch (Exception e) {
+            e.printStackTrace();
+            callback.onError(e);
         }
     }
 

@@ -1,12 +1,9 @@
 package com.timboudreau.metaupdatecenter;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import com.mastfrog.acteur.Acteur;
-import com.mastfrog.acteur.ActeurFactory;
 import com.mastfrog.acteur.CheckIfNoneMatchHeader;
 import com.mastfrog.acteur.HttpEvent;
-import com.mastfrog.acteur.Page;
 import com.mastfrog.acteur.annotations.HttpCall;
 import com.mastfrog.acteur.annotations.Precursors;
 import com.mastfrog.acteur.headers.Headers;
@@ -19,14 +16,20 @@ import com.mastfrog.acteur.util.CacheControl;
 import com.mastfrog.settings.Settings;
 import com.mastfrog.url.Path;
 import com.mastfrog.url.URL;
-import static com.mastfrog.util.Strings.charSequencesEqual;
+import com.mastfrog.util.libversion.VersionInfo;
+import static com.mastfrog.util.strings.Strings.charSequencesEqual;
 import com.mastfrog.util.time.TimeUtil;
 import com.timboudreau.metaupdatecenter.IndexResource.EtagGenActeur;
 import com.timboudreau.metaupdatecenter.IndexResource.LogActeur;
 import static io.netty.handler.codec.http.HttpResponseStatus.NOT_MODIFIED;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import static java.time.temporal.ChronoField.DAY_OF_MONTH;
+import static java.time.temporal.ChronoField.HOUR_OF_DAY;
+import static java.time.temporal.ChronoField.MINUTE_OF_HOUR;
 import static java.time.temporal.ChronoField.MONTH_OF_YEAR;
+import static java.time.temporal.ChronoField.YEAR;
 import java.util.Iterator;
 
 /**
@@ -39,6 +42,15 @@ import java.util.Iterator;
 @Description("The home page")
 @Precursors({LogActeur.class, EtagGenActeur.class, CheckIfNoneMatchHeader.class})
 public class IndexResource extends Acteur {
+
+    static DateTimeFormatter FMT;
+
+    static {
+        FMT = new DateTimeFormatterBuilder().appendValue(MONTH_OF_YEAR, 2)
+                .appendLiteral("/").appendValue(DAY_OF_MONTH, 2).appendLiteral("/")
+                .appendValue(YEAR, 4).appendLiteral(" ").appendValue(HOUR_OF_DAY, 2)
+                .appendLiteral(":").appendValue(MINUTE_OF_HOUR, 2).toFormatter();
+    }
 
     static class LogActeur extends Acteur {
 
@@ -73,7 +85,7 @@ public class IndexResource extends Acteur {
             + "click <b>Add</b> (middle right), and enter <code>__URL__</code>.";
 
     @Inject
-    IndexResource(ModuleSet set, PathFactory paths, Settings settings, @Named(UpdateCenterServer.SETTINGS_KEY_SERVER_VERSION) int ver, ZonedDateTime serverStart) {
+    IndexResource(ModuleSet set, PathFactory paths, Settings settings, VersionInfo version, ZonedDateTime serverStart) {
         ok();
         StringBuilder sb = new StringBuilder();
         sb.append("<!doctype html><html><head><title>NetBeans Plugins</title>\n");
@@ -82,24 +94,24 @@ public class IndexResource extends Acteur {
                 + ".table { min-height: 50%; min-width: 100%; width: 100%;} "
                 + "h1, h2, h3, h4{ color: #222222; font-family: 'Montserrat';} "
                 + ".content { margin: 12px; } "
-                + "html{height:100%; font-family:'Montserrat'; color: #444441}\n "
+                + "html{height:100%; font-family:'Montserrat'; color: #644}\n "
                 + "body{ margin: 0px;}\n "
                 + "body{ margin: 0px; font-family: 'Sanchez'}\n "
                 + "td { vertical-align: top;"
                 + "text-align: left;}\n "
                 + "a { text-decoration: none; color: #3333AA; }"
                 + "body > div.content > table > tbody > tr > td > a, body > div.content > table > tbody > tr > td > p > a { margin-top: 5px; text-align: center; min-width: 10em; padding: 0.5em; background-color: #EEEEFF; display: inline-block; border: 1px solid #CCCCCC; border-radius: 1em; }"
-                + ".header {background-color: #EEEEFF; padding: 12px; color: #999991; border-bottom: #AAAAAA solid 1px;}\n "
+                + ".header {background-color: #EFEFFF; padding: 12px; color: #999991; border-bottom: #AAAAAA solid 1px;}\n "
                 + "tr { margin-bottom: 0.5em; border-bottom: 1px solid #CCCCCC; min-height: 5em;}\n "
                 + "code{background-color: #EDEDED; margin: 0.5em; font-size: 1.2em;}\n "
-                + ".odd { background-color: #F5F5F6; }\n"
+                + ".odd { background-color: #e8e8ef; }\n"
                 + ".even { background-color: #FEFEFE; }\n"
                 + " td { border-left: solid 1px #BBBBBB; margin-left: 3px; margin-right: 3px; padding: 5px; }</style>\n");
         sb.append("</head>\n<body>\n");
         String name = settings.getString("server.name", "Update Center Server");
         sb.append("<div class='header'><h1>").append(name).append("</h1>\n");
-        sb.append("<font size='-1'><a target='other' href='https://github.com/timboudreau/meta-update-center'>MetaUpdateServer</a> 1.")
-                .append(ver)
+        sb.append("<font size='-1'><a target='other' href='https://github.com/timboudreau/meta-update-center'>MetaUpdateServer</a> ")
+                .append(version.version)
                 .append(" online since ")
                 .append(serverStart.get(MONTH_OF_YEAR))
                 .append('/')
@@ -145,15 +157,18 @@ public class IndexResource extends Acteur {
             sb.append("<tr style='min-height:5em;'").append(odd ? " class='odd'" : "class='even'").append(">\n<th style='vertical-align: middle; text-align: left'>").append(item.getName()).append("</th>\n");
             sb.append("  <td style='vertical-align: middle; margin: 5px;'>").append(item.getDescription()).append("</td>\n");
             sb.append("  <td style='vertical-align: middle; margin: 5px;'>").append(item.getVersion()).append("</td>\n");
-            sb.append("  <td style='vertical-align: middle; margin: 5px;'>").append(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(item.getDownloaded()).replaceAll(" ", "&nbsp;")).append("</td>\n");
+            sb.append("  <td style='vertical-align: middle; margin: 5px;'>").append(FMT.format(item.getWhen()).replaceAll(" ", "&nbsp;")).append("</td>\n");
             URL u = paths.constructURL(Path.builder().add("download").add(item.getCodeNameBase()).add(item.getHash() + ".nbm").create(), false);
 
             if (!UpdateCenterServer.DUMMY_URL.equals(item.getFrom())) {
                 sb.append("  <td style='vertical-align: middle; margin: 5px;'>")
-                        .append("<a href=\"").append(u).append("\">").append("Download").append("</a>")
-                        .append(" <p/> \n")
-                        .append("<a href=\"").append(item.getFrom()).append("\">").append("Link to Original").append("</a>")
-                        .append("</td></tr>\n");
+                        .append("<a href=\"").append(u).append("\">").append("Download").append("</a>");
+                String from = item.getFrom();
+                if (from != null && !from.isEmpty() && !from.startsWith("file")) {
+                    sb.append(" <p/> \n").append("<a href=\"").append(item.getFrom())
+                            .append("\">").append("Link to Original").append("</a>");
+                }
+                sb.append("</td></tr>\n");
             } else {
                 sb.append("  <td style='vertical-align: middle; margin: 5px;'><p>&nbsp;</p>\n")
                         .append("<a href=\"").append(u).append("\">").append("Download").append("</a>");

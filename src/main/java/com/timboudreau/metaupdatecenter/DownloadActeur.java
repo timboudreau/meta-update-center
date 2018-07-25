@@ -24,7 +24,6 @@ import com.mastfrog.acteur.preconditions.PathRegex;
 import com.mastfrog.url.Path;
 import com.mastfrog.util.time.TimeUtil;
 import static com.timboudreau.metaupdatecenter.DownloadActeur.DOWNLOAD_REGEX;
-import com.timboudreau.metaupdatecenter.borrowed.SpecificationVersion;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.util.AsciiString;
 import java.io.File;

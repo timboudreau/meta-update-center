@@ -10,7 +10,7 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-import com.mastfrog.util.Exceptions;
+import com.mastfrog.util.preconditions.Exceptions;
 import com.timboudreau.metaupdatecenter.borrowed.SpecificationVersion;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

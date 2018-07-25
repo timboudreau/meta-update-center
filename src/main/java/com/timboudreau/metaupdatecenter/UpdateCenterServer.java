@@ -36,6 +36,7 @@ import static com.mastfrog.bunyan.LoggingModule.SETTINGS_KEY_LOG_LEVEL;
 import com.mastfrog.giulius.ShutdownHookRegistry;
 import com.mastfrog.giulius.annotations.Defaults;
 import com.mastfrog.giulius.annotations.Namespace;
+import com.mastfrog.giulius.thread.ThreadModule;
 import com.mastfrog.jackson.DurationSerializationMode;
 import com.mastfrog.jackson.JacksonModule;
 import com.mastfrog.jackson.TimeSerializationMode;
@@ -43,7 +44,10 @@ import com.mastfrog.netty.http.client.HttpClient;
 import com.mastfrog.settings.MutableSettings;
 import com.mastfrog.settings.Settings;
 import com.mastfrog.settings.SettingsBuilder;
-import com.mastfrog.util.GUIDFactory;
+import com.mastfrog.util.libversion.VersionInfo;
+import com.mastfrog.util.preconditions.Exceptions;
+import com.mastfrog.util.strings.Strings;
+import com.mastfrog.util.strings.RandomStrings;
 import static com.timboudreau.metaupdatecenter.UpdateCenterServer.SETTINGS_KEY_ADMIN_USER_NAME;
 import static com.timboudreau.metaupdatecenter.UpdateCenterServer.SETTINGS_NAMESPACE;
 import com.timboudreau.metaupdatecenter.gennbm.ServerInstallId;
@@ -59,8 +63,8 @@ import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 import javax.xml.parsers.ParserConfigurationException;
-import org.openide.util.Exceptions;
 import org.xml.sax.SAXException;
 
 @ImplicitBindings(ModuleItem.class)
@@ -72,12 +76,15 @@ import org.xml.sax.SAXException;
 public class UpdateCenterServer extends GenericApplication {
 
     public static final String SETTINGS_KEY_SERVER_VERSION = "serverVersion";
-    public static final int VERSION = 8;
+    public static final String SETTINGS_KEY_WATCH_DIR = "watch.dir";
+    public static final String SETTINGS_KEY_FILE_NOTIFICATION_PROCESS_DELAY_SECONDS = "watch.delay.seconds";
+    public static final int VERSION = 9;
     public static final String STATS_LOGGER = "stats";
     public static final String ERROR_LOGGER = ActeurBunyanModule.ERROR_LOGGER;
     public static final String REQUESTS_LOGGER = ActeurBunyanModule.ACCESS_LOGGER;
     public static final String DOWNLOAD_LOGGER = "downloads";
     public static final String SYSTEM_LOGGER = "system";
+    public static final String FILE_WATCH_LOGGER = "filewatch";
     public static final String SETTINGS_KEY_NBM_DIR = "nbm.dir";
     public static final String SETTINGS_KEY_PASSWORD = "password";
     public static final String SETTINGS_KEY_ADMIN_USER_NAME = "admin.user.name";
@@ -140,8 +147,8 @@ public class UpdateCenterServer extends GenericApplication {
                     .add(SETTINGS_KEY_LOG_LEVEL, "info")
                     .add(SETTINGS_KEY_LOG_FILE, "nbmserver.log")
                     .add(SETTINGS_KEY_HTTP_LOG_ENABLED, DEFAULT_HTTP_LOG_ENABLED + "")
-                    .add("productionMode", "true")
-                    .add(SETTINGS_KEY_ASYNC_LOGGING, "true")
+                    .add("productionMode", "false")
+                    .add(SETTINGS_KEY_ASYNC_LOGGING, "false")
                     .add(HTTP_COMPRESSION, "true")
                     .add(MAX_CONTENT_LENGTH, "384")
                     .addFilesystemAndClasspathLocations()
@@ -166,7 +173,7 @@ public class UpdateCenterServer extends GenericApplication {
 
             String password = settings.getString(SETTINGS_KEY_PASSWORD);
             if (password == null) {
-                password = GUIDFactory.get().newGUID(1, 12);
+                password = Strings.shuffleAndExtract(ThreadLocalRandom.current(), new RandomStrings().get(36), 18);
                 System.err.println("--" + SETTINGS_KEY_PASSWORD
                         + " not specified on command line or setttings.");
                 System.err.println("Using one-time password '" + password + "'");
@@ -177,8 +184,10 @@ public class UpdateCenterServer extends GenericApplication {
                     .add(new ActeurBunyanModule(true)
                             .bindLogger(STATS_LOGGER)
                             .bindLogger(SYSTEM_LOGGER)
+                            .bindLogger(FILE_WATCH_LOGGER )
                             .bindLogger(DOWNLOAD_LOGGER))
                     .add(new NbmInfoModule(base))
+                    .add(new ThreadModule().builder("poller").daemon().eager().scheduled().bind())
                     .applicationClass(UpdateCenterServer.class)
                     .add(new JacksonModule().withJavaTimeSerializationMode(TimeSerializationMode.TIME_AS_EPOCH_MILLIS,
                             DurationSerializationMode.DURATION_AS_MILLIS))
@@ -228,6 +237,8 @@ public class UpdateCenterServer extends GenericApplication {
             bind(Authenticator.class).to(AuthenticatorImpl.class);
             bind(Poller.class).asEagerSingleton();
             bind(Integer.class).annotatedWith(Names.named(SETTINGS_KEY_SERVER_VERSION)).toInstance(VERSION);
+            bind(WatchDir.class).asEagerSingleton();
+            bind(VersionInfo.class).toInstance(VersionInfo.find(UpdateCenterServer.class, "com.timboudreau", "meta-update-center"));
         }
 
         @Singleton
