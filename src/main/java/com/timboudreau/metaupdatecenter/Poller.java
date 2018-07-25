@@ -107,7 +107,7 @@ public class Poller implements Runnable {
                 }
             }
         } finally {
-//            task.schedule((int) this.interval.toMillis());
+            task.schedule((int) this.interval.toMillis());
         }
     }
 }
