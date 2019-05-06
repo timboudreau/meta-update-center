@@ -9,7 +9,7 @@ import com.mastfrog.acteur.headers.Headers;
 import com.mastfrog.acteur.server.PathFactory;
 import com.mastfrog.url.Path;
 import com.mastfrog.url.URL;
-import com.mastfrog.util.collections.MapBuilder;
+import static com.mastfrog.util.collections.CollectionUtils.map;
 import com.sun.org.apache.xml.internal.serialize.OutputFormat;
 import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
 import com.timboudreau.metaupdatecenter.borrowed.SpecificationVersion;
@@ -71,9 +71,9 @@ public final class ModuleItem implements Comparable<ModuleItem> {
     }
 
     public Map<String, Object> toMap() {
-        return new MapBuilder().put("cnb", getCodeNameBase())
-                .put("downloaded", getDownloaded())
-                .put("version", getVersion()).build();
+        return map("cnb").to(getCodeNameBase())
+                .map("downloaded").to(getDownloaded())
+                .map("version").finallyTo(getVersion());
     }
 
     public ZonedDateTime getWhen() {
