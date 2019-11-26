@@ -10,6 +10,7 @@ import com.mastfrog.netty.http.client.HttpClient;
 import com.mastfrog.util.preconditions.ConfigurationError;
 import com.mastfrog.util.preconditions.Exceptions;
 import com.timboudreau.metaupdatecenter.NbmDownloader.DownloadHandler;
+import static com.timboudreau.metaupdatecenter.UpdateCenterServer.GUICE_BINDING_POLLER_THREAD_POOL;
 import static com.timboudreau.metaupdatecenter.UpdateCenterServer.SETTINGS_KEY_POLL_INTERVAL_MINUTES;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaders;
@@ -41,7 +42,7 @@ public class Poller implements Runnable {
     @Inject
     Poller(ModuleSet set, @Named(SETTINGS_KEY_POLL_INTERVAL_MINUTES) long interval,
             HttpClient client, ShutdownHookRegistry registry, NbmDownloader downloader,
-            @Named("poller") ScheduledExecutorService pollThreadPool,
+            @Named(GUICE_BINDING_POLLER_THREAD_POOL) ScheduledExecutorService pollThreadPool,
             @Named(UpdateCenterServer.SYSTEM_LOGGER) Logger pollLogger) {
         if (interval <= 0) {
             throw new ConfigurationError("Poll interval must be >= 0 but is " + interval);

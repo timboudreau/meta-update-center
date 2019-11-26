@@ -9,7 +9,6 @@ import com.mastfrog.acteur.util.BasicCredentials;
 import com.mastfrog.acteur.util.RequestID;
 import com.mastfrog.bunyan.Log;
 import com.mastfrog.bunyan.Logger;
-import com.mastfrog.giulius.ShutdownHookRegistry;
 import static com.timboudreau.metaupdatecenter.UpdateCenterServer.STATS_LOGGER;
 import java.io.IOException;
 

@@ -3,6 +3,7 @@ package com.timboudreau.metaupdatecenter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
+import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
@@ -64,6 +65,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Function;
 import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
@@ -92,9 +94,10 @@ public class UpdateCenterServer extends GenericApplication {
     public static final String SETTINGS_KEY_HTTP_LOG_ENABLED = "http.log.enabled";
     public static final boolean DEFAULT_HTTP_LOG_ENABLED = true;
     public static final int FILE_CHUNK_SIZE = 768;
-    private static final String SERVER_NAME = " Tim Boudreau's Update Aggregator 1." + VERSION + " - " + "https://github.com/timboudreau/meta-update-center";
+    public static final String SERVER_NAME = " Tim Boudreau's Update Aggregator 1." + VERSION + " - " + "https://github.com/timboudreau/meta-update-center";
     public static final String SETTINGS_NAMESPACE = "nbmserver";
     public static final String DUMMY_URL = "http://GENERATED.MODULE";
+    public static final String GUICE_BINDING_POLLER_THREAD_POOL = "poller";
     private final Stats stats;
 
     @Inject
@@ -141,19 +144,22 @@ public class UpdateCenterServer extends GenericApplication {
         return SERVER_NAME;
     }
 
-    public static void main(String[] args) {
-        try {
-            MutableSettings settings = new SettingsBuilder(SETTINGS_NAMESPACE)
-                    .add(SETTINGS_KEY_LOG_LEVEL, "info")
-                    .add(SETTINGS_KEY_LOG_FILE, "nbmserver.log")
-                    .add(SETTINGS_KEY_HTTP_LOG_ENABLED, DEFAULT_HTTP_LOG_ENABLED + "")
-                    .add("productionMode", "false")
-                    .add(SETTINGS_KEY_ASYNC_LOGGING, "false")
-                    .add(HTTP_COMPRESSION, "true")
-                    .add(MAX_CONTENT_LENGTH, "384")
-                    .addFilesystemAndClasspathLocations()
-                    .parseCommandLineArguments(args).buildMutableSettings();
+    public static void main(String[] args) throws IOException, InterruptedException {
+        MutableSettings settings = new SettingsBuilder(SETTINGS_NAMESPACE)
+                .add(SETTINGS_KEY_LOG_LEVEL, "info")
+                .add(SETTINGS_KEY_LOG_FILE, "nbmserver.log")
+                .add(SETTINGS_KEY_HTTP_LOG_ENABLED, DEFAULT_HTTP_LOG_ENABLED + "")
+                .add("productionMode", "false")
+                .add(SETTINGS_KEY_ASYNC_LOGGING, "false")
+                .add(HTTP_COMPRESSION, "true")
+                .add(MAX_CONTENT_LENGTH, "384")
+                .addFilesystemAndClasspathLocations()
+                .parseCommandLineArguments(args).buildMutableSettings();
+        createServer(settings).start().await();
+    }
 
+    public static Server createServer(MutableSettings settings) {
+        try {
             settings.setString(BYTEBUF_ALLOCATOR_SETTINGS_KEY, POOLED_ALLOCATOR);
             String path = settings.getString(SETTINGS_KEY_NBM_DIR);
             if (path == null) {
@@ -184,22 +190,22 @@ public class UpdateCenterServer extends GenericApplication {
                     .add(new ActeurBunyanModule(true)
                             .bindLogger(STATS_LOGGER)
                             .bindLogger(SYSTEM_LOGGER)
-                            .bindLogger(FILE_WATCH_LOGGER )
+                            .bindLogger(FILE_WATCH_LOGGER)
                             .bindLogger(DOWNLOAD_LOGGER))
-                    .add(new NbmInfoModule(base))
-                    .add(new ThreadModule().builder("poller").daemon().eager().scheduled().bind())
+                    .mergeNamespaces()
+                    .add(MAIN_MODULE.apply(base))
+                    .add(new ThreadModule().builder(GUICE_BINDING_POLLER_THREAD_POOL).daemon().eager().scheduled().bind())
                     .applicationClass(UpdateCenterServer.class)
                     .add(new JacksonModule().withJavaTimeSerializationMode(TimeSerializationMode.TIME_AS_EPOCH_MILLIS,
                             DurationSerializationMode.DURATION_AS_MILLIS))
                     .add(settings)
                     .build();
 
-            server.start().await();
+            return server;
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
             System.exit(1);
-        } catch (InterruptedException ex) {
-            Exceptions.printStackTrace(ex);
+            return null;
         }
     }
 
@@ -221,7 +227,11 @@ public class UpdateCenterServer extends GenericApplication {
         }
     }
 
-    private static class NbmInfoModule extends AbstractModule {
+    // Allows a test to replace NbmInfoModule with its own, or
+    // otherwise intervene in the startup process
+    static Function<File, Module> MAIN_MODULE = NbmInfoModule::new;
+
+    static class NbmInfoModule extends AbstractModule {
 
         private final File base;
 

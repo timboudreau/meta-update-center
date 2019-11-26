@@ -38,11 +38,11 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.xpath.XPathExpressionException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -53,16 +53,12 @@ public class AppTest {
         Pattern p = Pattern.compile(DownloadActeur.DOWNLOAD_REGEX);
         Matcher m = p.matcher("download/com.timboudreau.netbeans.mongodb/fmcer18v7npq1cso8w61m0u8rx18luad5.nbm");
         assertTrue(m.find());
-
     }
 
     @Test
     public void test() throws SAXException, ParserConfigurationException, IOException, XPathExpressionException, TransformerException {
-
-        System.out.println("NOW: " + System.currentTimeMillis());
-        
         Dependencies deps = new Dependencies(new LoggingModule().bindLogger("x"), new JacksonModule().withJavaTimeSerializationMode(TimeSerializationMode.TIME_AS_EPOCH_MILLIS,
-                            DurationSerializationMode.DURATION_AS_MILLIS));
+                DurationSerializationMode.DURATION_AS_MILLIS));
         Logger logger = deps.getInstance(Key.get(Logger.class, Names.named("x")));
 
         File tmp = new File(System.getProperty("java.io.tmpdir"));
@@ -98,11 +94,11 @@ public class AppTest {
         assertTrue(mdir.exists());
         assertTrue(mdir.isDirectory());
         File mfile = new File(mdir, "test-hash.nbm");
-        assertTrue("Non existent: " + mfile,mfile.exists());
+        assertTrue(mfile.exists(), "Non existent: " + mfile);
         assertTrue(mfile.isFile());
         assertFalse(mfile.length() == 0L);
         File meta = new File(mdir, "test-hash.json");
-        assertTrue("Non existent: " + meta, meta.exists());
+        assertTrue(meta.exists(), "Non existent: " + meta);
         assertTrue(meta.isFile());
         assertFalse(meta.length() == 0L);
 
@@ -112,11 +108,9 @@ public class AppTest {
 
         assertEquals("org.netbeans.modules.fisheye", info.getCodeNameBase());
         ZonedDateTime dt = ZonedDateTime.now();
-        assertTrue (dt.isAfter(info.getDownloaded()));
+        assertTrue(dt.isAfter(info.getDownloaded()));
         assertEquals(res.toString(), info.getFrom());
         assertEquals("test-hash", info.getHash());
-
-        System.out.println("-------------XML--------------------");
 
         assertNotNull(info.getVersion());
         assertEquals(new SpecificationVersion("1.3.1"), info.getVersion());
@@ -132,9 +126,9 @@ public class AppTest {
                 .add("serverDisplayName", "The Foo Collection")
                 .build();
         Dependencies deps = new Dependencies(settings, new JacksonModule().withJavaTimeSerializationMode(TimeSerializationMode.TIME_AS_EPOCH_MILLIS,
-                            DurationSerializationMode.DURATION_AS_MILLIS));
+                DurationSerializationMode.DURATION_AS_MILLIS));
         UpdateCenterModuleGenerator gen = new UpdateCenterModuleGenerator(set, new ServerInstallId(1), settings, x, deps.getInstance(ObjectMapper.class),
-            VersionInfo.find(UpdateCenterServer.class, "com.timboudreau", "meta-update-center"));
+                VersionInfo.find(UpdateCenterServer.class, "com.timboudreau", "meta-update-center"));
         gen.version = 6;
 
         File f = new File(new File(System.getProperty("java.io.tmpdir")), "test.nbm");

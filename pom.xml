@@ -6,9 +6,10 @@
     <version>1.9.0</version>
     <packaging>jar</packaging>
     <properties>
-        <mastfrog.version>2.5.0</mastfrog.version>
+        <mastfrog.version>2.6.3</mastfrog.version>
         <netbeans.version>RELEASE82</netbeans.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <new.junit.version>5.5.2</new.junit.version>
     </properties>
     <name>Meta Update Center</name>
     <dependencies>
@@ -59,12 +60,6 @@
             <type>jar</type>
         </dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-            <version>4.12</version>
-        </dependency>
-        <dependency>
             <artifactId>giulius-settings</artifactId>
             <groupId>com.mastfrog</groupId>
             <type>jar</type>
@@ -87,6 +82,24 @@
             <artifactId>acteur-bunyan</artifactId>
             <version>${mastfrog.version}</version>
             <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>${new.junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${new.junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>${new.junit.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
     <build>
