@@ -2,6 +2,12 @@ stats.log
 nbmserver.log.*
 .serverid
 nbmserver.log
+
+meta-update-server/stats.log
+meta-update-server/nbmserver.log.*
+meta-update-server/.serverid
+meta-update-server/nbmserver.log
+
 *.class
 
 # Package Files #

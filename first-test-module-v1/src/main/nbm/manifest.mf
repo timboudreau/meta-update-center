@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+OpenIDE-Module: com.mastfrog.first.test
+OpenIDE-Module-Specification-Version: 1.0.0
+OpenIDE-Module-Implementation-Version: v1
+OpenIDE-Module-Build-Version: 201911260000
+OpenIDE-Module-Provides: woohoo
+OpenIDE-Module-Install: com/mastfrog/first/Installer.class
+OpenIDE-Module-Localizing-Bundle: com/mastfrog/first/Bundle.properties
+
