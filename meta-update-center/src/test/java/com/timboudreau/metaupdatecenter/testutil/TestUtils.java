@@ -160,6 +160,7 @@ public class TestUtils {
                 + key + " in " + search);
     }
 
+    @SuppressWarnings("unchecked")
     public static Object fetchMapValue(String key, Object search) {
         Object orig = search;
         LinkedList<String> parts = new LinkedList<>(Arrays.asList(key.split("\\.")));

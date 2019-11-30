@@ -7,7 +7,6 @@ import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.google.inject.name.Names;
 import com.mastfrog.acteur.ActeurFactory;
 import com.mastfrog.acteur.Event;
 import com.mastfrog.acteur.Help;
@@ -35,8 +34,6 @@ import static com.mastfrog.bunyan.LoggingModule.SETTINGS_KEY_ASYNC_LOGGING;
 import static com.mastfrog.bunyan.LoggingModule.SETTINGS_KEY_LOG_FILE;
 import static com.mastfrog.bunyan.LoggingModule.SETTINGS_KEY_LOG_LEVEL;
 import com.mastfrog.giulius.ShutdownHookRegistry;
-import com.mastfrog.giulius.annotations.Defaults;
-import com.mastfrog.giulius.annotations.Namespace;
 import com.mastfrog.giulius.thread.ThreadModule;
 import com.mastfrog.jackson.DurationSerializationMode;
 import com.mastfrog.jackson.JacksonModule;
@@ -54,7 +51,6 @@ import static com.timboudreau.metaupdatecenter.UpdateCenterServer.SETTINGS_NAMES
 import com.timboudreau.metaupdatecenter.gennbm.ServerInstallId;
 import com.timboudreau.metaupdatecenter.gennbm.UpdateCenterModuleGenerator;
 import io.netty.buffer.ByteBufAllocator;
-import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -70,17 +66,11 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 @ImplicitBindings(ModuleItem.class)
-@Defaults(namespace = @Namespace(SETTINGS_NAMESPACE), value = {
-    SETTINGS_KEY_ADMIN_USER_NAME + "=admin",
-    "realm=NbmServerAdmin"
-})
 @Help
 public class UpdateCenterServer extends GenericApplication {
 
-    public static final String SETTINGS_KEY_SERVER_VERSION = "serverVersion";
     public static final String SETTINGS_KEY_WATCH_DIR = "watch.dir";
     public static final String SETTINGS_KEY_FILE_NOTIFICATION_PROCESS_DELAY_SECONDS = "watch.delay.seconds";
-    public static final int VERSION = 9;
     public static final String STATS_LOGGER = "stats";
     public static final String ERROR_LOGGER = ActeurBunyanModule.ERROR_LOGGER;
     public static final String REQUESTS_LOGGER = ActeurBunyanModule.ACCESS_LOGGER;
@@ -94,16 +84,26 @@ public class UpdateCenterServer extends GenericApplication {
     public static final String SETTINGS_KEY_POLL_INTERVAL_MINUTES = "poll.interval.minutes";
     public static final String SETTINGS_KEY_POLL_INITIAL_DELAY_MINUTES = "poll.initial.delay.minutes";
     public static final String SETTINGS_KEY_HTTP_LOG_ENABLED = "http.log.enabled";
+    public static final String SETTINGS_KEY_TAG = "server.tag";
+    public static final String SETTINGS_KEY_DOWNLOAD_THREADS = "download.threads";
+    public static final String SETTINGS_KEY_GEN_MODULE_AUTHOR = "gen.module.author";
+    public static final String DEFAULT_MODULE_AUTHOR = "Tim Boudreau";
+    public static final String SETTINGS_KEY_INFO_PARA = "home.page.info";
+    public static final String SETTINGS_KEY_DISPLAY_NAME = "home.page.display.name";
+    public static final String SETTINGS_KEY_NB_UI_DISPLAY_NAME = "nb.ui.display.name";
     public static final boolean DEFAULT_HTTP_LOG_ENABLED = true;
     public static final int FILE_CHUNK_SIZE = 768;
-    public static final String SERVER_NAME = " Tim Boudreau's Update Aggregator 1." + VERSION + " - " + "https://github.com/timboudreau/meta-update-center";
     public static final String SETTINGS_NAMESPACE = "nbmserver";
     public static final String DUMMY_URL = "http://GENERATED.MODULE";
     public static final String GUICE_BINDING_POLLER_THREAD_POOL = "poller";
+    public static final String SYS_PROP_SETTINGS_FILE_NAMESPACE = "settings.file.name";
+    public static final String SETTINGS_KEY_SETTINGS_NAMESPACE = SYS_PROP_SETTINGS_FILE_NAMESPACE;
     private final Stats stats;
+    private final String serverName;
 
     @Inject
-    UpdateCenterServer(ModuleSet set, UpdateCenterModuleGenerator gen, Stats stats, @Named(SYSTEM_LOGGER) final Logger systemLogger, Settings settings, ServerInstallId serverId, ShutdownHookRegistry shutdown) throws IOException, ParserConfigurationException, SAXException {
+    UpdateCenterServer(ModuleSet set, UpdateCenterModuleGenerator gen, Stats stats, @Named(SYSTEM_LOGGER) final Logger systemLogger, Settings settings, ServerInstallId serverId, ShutdownHookRegistry shutdown, VersionInfo ver) throws IOException, ParserConfigurationException, SAXException {
+        serverName = settings.getString(SETTINGS_KEY_DISPLAY_NAME) + " " + ver.deweyDecimalVersion();
         try {
             set.scan();
         } catch (Exception e) {
@@ -125,7 +125,10 @@ public class UpdateCenterServer extends GenericApplication {
         try (Log<?> log = systemLogger.info("startup")) {
             log.addIfNotNull(SETTINGS_KEY_NBM_DIR, settings.getString(SETTINGS_KEY_NBM_DIR))
                     .add("serverId", serverId.get())
-                    .add("version", VERSION)
+                    .add("version", ver.deweyDecimalVersion())
+                    .add("git-hash", ver.shortCommitHash)
+                    .add("git-date", ver.commitDate)
+                    .add("git-dirty", ver.dirty)
                     .add("modules", logInfo)
                     .addIfNotNull("pollInterval", settings.getInt(SETTINGS_KEY_POLL_INTERVAL_MINUTES))
                     .addIfNotNull(ServerModule.PORT, settings.getInt(ServerModule.PORT))
@@ -133,21 +136,29 @@ public class UpdateCenterServer extends GenericApplication {
                     .addIfNotNull(ServerModule.BYTEBUF_ALLOCATOR_SETTINGS_KEY, settings.getString(ServerModule.BYTEBUF_ALLOCATOR_SETTINGS_KEY))
                     .addIfNotNull(SETTINGS_KEY_LOG_LEVEL, settings.getString(SETTINGS_KEY_LOG_LEVEL));
         }
-        shutdown.add(new Runnable() {
-            @Override
-            public void run() {
-                systemLogger.info("shutdown").close();
-            }
+        shutdown.add((Runnable) () -> {
+            systemLogger.info("shutdown").close();
         });
     }
 
     @Override
     public String getName() {
-        return SERVER_NAME;
+        return serverName;
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        MutableSettings settings = new SettingsBuilder(SETTINGS_NAMESPACE)
+        // The system property can be used to cause an alternate configuration file
+        // to be loaded - useful if more than one copy of this server is running on
+        // one system
+
+        String ns = System.getProperty(SYS_PROP_SETTINGS_FILE_NAMESPACE, SETTINGS_NAMESPACE);
+        MutableSettings settings = new SettingsBuilder(ns)
+                .add(SETTINGS_KEY_POLL_INTERVAL_MINUTES, 10)
+                .add(SETTINGS_KEY_POLL_INITIAL_DELAY_MINUTES, 3)
+                .add(SETTINGS_KEY_SETTINGS_NAMESPACE, ns)
+                .add("realm", "NbmServerAdmin")
+                .add(BYTEBUF_ALLOCATOR_SETTINGS_KEY, POOLED_ALLOCATOR)
+                .add(SETTINGS_KEY_ADMIN_USER_NAME, "admin")
                 .add(SETTINGS_KEY_LOG_LEVEL, "info")
                 .add(SETTINGS_KEY_LOG_FILE, "nbmserver.log")
                 .add(SETTINGS_KEY_HTTP_LOG_ENABLED, DEFAULT_HTTP_LOG_ENABLED + "")
@@ -196,7 +207,7 @@ public class UpdateCenterServer extends GenericApplication {
                             .bindLogger(AUTH_LOGGER)
                             .bindLogger(FILE_WATCH_LOGGER)
                             .bindLogger(DOWNLOAD_LOGGER))
-//                    .mergeNamespaces()
+                    .mergeNamespaces()
                     .add(MAIN_MODULE.apply(base))
                     .add(new ThreadModule().builder(GUICE_BINDING_POLLER_THREAD_POOL).daemon().eager().scheduled().bind())
                     .applicationClass(UpdateCenterServer.class)
@@ -250,7 +261,6 @@ public class UpdateCenterServer extends GenericApplication {
             bind(HttpClient.class).toProvider(HttpClientProvider.class);
             bind(Authenticator.class).to(AuthenticatorImpl.class);
             bind(Poller.class).asEagerSingleton();
-            bind(Integer.class).annotatedWith(Names.named(SETTINGS_KEY_SERVER_VERSION)).toInstance(VERSION);
             bind(WatchDir.class).asEagerSingleton();
             bind(VersionInfo.class).toInstance(VersionInfo.find(UpdateCenterServer.class, "com.mastfrog", "meta-update-server"));
         }
@@ -261,12 +271,13 @@ public class UpdateCenterServer extends GenericApplication {
             private final HttpClient client;
 
             @Inject
-            HttpClientProvider(ByteBufAllocator alloc, Settings settings) {
-                int downloadThreads = settings.getInt("download.threads", 4);
+            HttpClientProvider(ByteBufAllocator alloc, Settings settings, VersionInfo info) {
+                String ver = "nbmserver-" + info.deweyDecimalVersion() + " - https://github.com/timboudreau/meta-update-center";
+                int downloadThreads = settings.getInt(SETTINGS_KEY_DOWNLOAD_THREADS, 4);
                 client = HttpClient.builder()
-                        .setUserAgent(SERVER_NAME)
+                        .setUserAgent(ver)
                         .followRedirects()
-                        .setChannelOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
+                        .setChannelOption(ChannelOption.ALLOCATOR, alloc)
                         .threadCount(downloadThreads)
                         .maxChunkSize(32768).build();
             }

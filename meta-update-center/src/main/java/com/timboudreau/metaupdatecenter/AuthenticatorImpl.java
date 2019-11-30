@@ -18,7 +18,6 @@ import java.io.IOException;
  *
  * @author Tim Boudreau
  */
-//@Namespace(value = "nbmserver")
 @Singleton
 class AuthenticatorImpl implements Authenticator {
 

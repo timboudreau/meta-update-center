@@ -138,6 +138,7 @@ public final class NbmServerLauncher {
         });
 
         MutableSettings settings = new SettingsBuilder(SETTINGS_NAMESPACE)
+                .add("realm", "whatevs")
                 .add(SETTINGS_KEY_NBM_DIR, nbmsDir.toString())
                 .add(SETTINGS_KEY_LOG_LEVEL, "trace")
                 .add(SETTINGS_KEY_LOG_TO_CONSOLE, true)

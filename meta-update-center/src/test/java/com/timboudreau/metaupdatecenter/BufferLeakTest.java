@@ -72,7 +72,7 @@ public class BufferLeakTest {
             gc();
         }
         // should be
-        // genmodule.properties, com.timboudreau.nbmserver.localhost, com.mastfrog.first.test
+        // genmodule.json, com.timboudreau.nbmserver.localhost, com.mastfrog.first.test
         serv.assertNbmsDirFileCount(3);
 
         // Now replace the module the dummy server is serving with

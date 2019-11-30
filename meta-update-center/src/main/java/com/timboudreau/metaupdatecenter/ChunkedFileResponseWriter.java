@@ -26,10 +26,13 @@ class ChunkedFileResponseWriter extends ResponseWriter {
 
     @Override
     public ResponseWriter.Status write(Event<?> evt, ResponseWriter.Output out, int iteration) throws Exception {
+        // XXX could probably reuse a single buffer here rather than allocate
+        // on each iteration
         ByteBuf buf = evt.channel().alloc().buffer(DownloadActeur.FILE_CHUNK_SIZE);
         int bytes = buf.writeBytes(stream, DownloadActeur.FILE_CHUNK_SIZE);
         if (bytes == -1) {
             stream.close();
+            buf.release();
             return ResponseWriter.Status.DONE;
         }
         out.write(buf);

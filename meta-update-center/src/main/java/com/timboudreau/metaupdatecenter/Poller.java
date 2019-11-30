@@ -5,8 +5,6 @@ import com.google.inject.Inject;
 import com.mastfrog.acteur.headers.Headers;
 import com.mastfrog.bunyan.Logger;
 import com.mastfrog.giulius.ShutdownHookRegistry;
-import com.mastfrog.giulius.annotations.Defaults;
-import com.mastfrog.giulius.annotations.Namespace;
 import com.mastfrog.netty.http.client.HttpClient;
 import com.mastfrog.util.preconditions.ConfigurationError;
 import com.mastfrog.util.preconditions.Exceptions;
@@ -35,11 +33,6 @@ import org.xml.sax.SAXException;
  *
  * @author Tim Boudreau
  */
-@Namespace("nbmserver")
-@Defaults(namespace = @Namespace("nbmserver"), value
-        = {SETTINGS_KEY_POLL_INTERVAL_MINUTES + "=10",
-            SETTINGS_KEY_POLL_INITIAL_DELAY_MINUTES + "=3"
-        })
 public class Poller implements Runnable {
 
     private final ModuleSet set;

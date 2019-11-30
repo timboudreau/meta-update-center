@@ -21,6 +21,8 @@ import static com.mastfrog.util.strings.Strings.charSequencesEqual;
 import com.mastfrog.util.time.TimeUtil;
 import com.timboudreau.metaupdatecenter.IndexResource.EtagGenActeur;
 import com.timboudreau.metaupdatecenter.IndexResource.LogActeur;
+import static com.timboudreau.metaupdatecenter.UpdateCenterServer.SETTINGS_KEY_DISPLAY_NAME;
+import static com.timboudreau.metaupdatecenter.UpdateCenterServer.SETTINGS_KEY_INFO_PARA;
 import io.netty.handler.codec.http.HttpRequest;
 import static io.netty.handler.codec.http.HttpResponseStatus.NOT_MODIFIED;
 import io.netty.util.ReferenceCounted;
@@ -92,7 +94,11 @@ public class IndexResource extends Acteur {
     IndexResource(ModuleSet set, PathFactory paths, Settings settings, VersionInfo version, ZonedDateTime serverStart, HttpEvent evt) {
         ok();
         StringBuilder sb = new StringBuilder();
-        sb.append("<!doctype html><html><head><title>NetBeans Plugins</title>\n");
+        String name = settings.getString("server.name", "NetBeans Plugins");
+        String displayName = settings.getString(SETTINGS_KEY_DISPLAY_NAME, name);
+        sb.append("<!doctype html><html><head><title>")
+                .append(displayName)
+                .append("</title>\n");
         sb.append("<style>@import url(//fonts.googleapis.com/css?family=Sanchez|Montserrat);"
                 + ".tophead { font-size: 1.3em; border-top: 1px #AAAAAA solid; border-bottom: 1px #AAAAAA solid; margin-top: 2.5em;} "
                 + ".table { min-height: 50%; min-width: 100%; width: 100%;} "
@@ -112,8 +118,7 @@ public class IndexResource extends Acteur {
                 + ".even { background-color: #FEFEFE; }\n"
                 + " td { border-left: solid 1px #BBBBBB; margin-left: 3px; margin-right: 3px; padding: 5px; }</style>\n");
         sb.append("</head>\n<body>\n");
-        String name = settings.getString("server.name", "Update Center Server");
-        sb.append("<div class='header'><h1>").append(name).append("</h1>\n");
+        sb.append("<div class='header'><h1>").append(displayName).append("</h1>\n");
         sb.append("<font size='-1'><a target='other' href='https://github.com/timboudreau/meta-update-center'>MetaUpdateServer</a> ")
                 .append(version.version)
                 .append(" online since ")
@@ -150,6 +155,10 @@ public class IndexResource extends Acteur {
             sb.append("To access it from NetBeans, open <b>Tools | Plugins</b>.  On the settings tab, \n"
                     + "                + \"click <b>Add</b> (middle right), and enter \n");
             sb.append("<code>").append(paths.constructURL(Path.parse("modules"), false)).append("</code> (or just download the update center plugin below, and add that on the <b>Downloaded</b> tab).\n");
+        }
+        String info = settings.getString(SETTINGS_KEY_INFO_PARA);
+        if (info != null) {
+            sb.append("\n<p>").append(info).append("</p>\n");
         }
 
         sb.append("<table class='table'><tr><th class='tophead'>Name</th><th class='tophead'>Description</th><th class='tophead'>Version</th><th class='tophead'>Updated</th><th class='tophead'>Download</th></tr>\n");

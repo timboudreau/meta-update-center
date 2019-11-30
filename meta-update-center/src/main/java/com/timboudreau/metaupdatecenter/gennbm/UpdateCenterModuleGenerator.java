@@ -1,5 +1,6 @@
 package com.timboudreau.metaupdatecenter.gennbm;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.mastfrog.acteur.server.PathFactory;
@@ -7,6 +8,7 @@ import com.mastfrog.acteur.server.ServerModule;
 import com.mastfrog.settings.Settings;
 import com.mastfrog.url.Path;
 import com.mastfrog.url.URL;
+import com.mastfrog.util.collections.StringObjectMap;
 import com.mastfrog.util.libversion.VersionInfo;
 import com.mastfrog.util.preconditions.ConfigurationError;
 import com.mastfrog.util.preconditions.Exceptions;
@@ -14,6 +16,10 @@ import com.mastfrog.util.streams.Streams;
 import com.mastfrog.util.streams.HashingOutputStream;
 import com.timboudreau.metaupdatecenter.InfoFile;
 import com.timboudreau.metaupdatecenter.ModuleSet;
+import com.timboudreau.metaupdatecenter.UpdateCenterServer;
+import static com.timboudreau.metaupdatecenter.UpdateCenterServer.SETTINGS_KEY_GEN_MODULE_AUTHOR;
+import static com.timboudreau.metaupdatecenter.UpdateCenterServer.SETTINGS_KEY_INFO_PARA;
+import static com.timboudreau.metaupdatecenter.UpdateCenterServer.SETTINGS_KEY_TAG;
 import io.netty.util.CharsetUtil;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -58,6 +64,7 @@ public final class UpdateCenterModuleGenerator {
     private final boolean updateUrlHttps;
     private final long serverInstallId;
     private final String serverVersion;
+    private final String tag;
 
     @Inject
     public UpdateCenterModuleGenerator(ModuleSet modules, ServerInstallId idProvider, Settings settings, PathFactory paths, ObjectMapper mapper, VersionInfo version) throws IOException {
@@ -67,7 +74,7 @@ public final class UpdateCenterModuleGenerator {
         this.mapper = mapper;
         updateUrlHttps = settings.getBoolean("update.url.https", false);
         serverInstallId = idProvider.get();
-        System.out.println("VERSION " + version);
+        tag = settings.getString(SETTINGS_KEY_TAG);
         serverVersion = version.deweyDecimalVersion();
         initTemplates();
         load();
@@ -87,12 +94,13 @@ public final class UpdateCenterModuleGenerator {
         addJarTemplate(FileTemplate.of("layer.xml", substs.get(CODE_NAME_SLASHES) + "/layer.xml"));
     }
 
+    private static final TypeReference<StringObjectMap> REF = new TypeReference<StringObjectMap>(){};
     private void load() throws IOException {
         File dir = modules.getStorageDir();
-        File f = new File(dir, "genmodule.properties");
+        File f = new File(dir, "genmodule.json");
         ZonedDateTime now = ZonedDateTime.now();
         if (f.exists()) {
-            Map<String, Object> m = mapper.readValue(f, Map.class);
+            Map<String, Object> m = mapper.readValue(f, REF);
             Number num = (Number) m.get("version");
             if (num != null) {
                 version = num.intValue();
@@ -186,6 +194,10 @@ public final class UpdateCenterModuleGenerator {
     }
 
     private String getServerDisplayName() {
+        String result = settings.getString(UpdateCenterServer.SETTINGS_KEY_NB_UI_DISPLAY_NAME);
+        if (result != null) {
+            return result;
+        }
         String mungedHostName = hostName().replace('.', ' ');
         StringBuilder sb = new StringBuilder();
         for (String word : mungedHostName.split(" ")) {
@@ -217,6 +229,8 @@ public final class UpdateCenterModuleGenerator {
                 case "Sk":
                 case "Ua":
                 case "It":
+                case "Biz":
+                case "Info":
                 case "Name":
                 case "Br":
                 case "Es":
@@ -239,6 +253,9 @@ public final class UpdateCenterModuleGenerator {
     private String getModuleCodeName() {
         String host = hostName();
         String result = "com.timboudreau.nbmserver." + host;
+        if (tag != null) {
+            result += "." + tag;
+        }
         // Incorporate the server path if present, so if there are two instances
         // both running on foo.com, they do not both get the same packages and names
         String basePath = settings.getString(ServerModule.SETTINGS_KEY_BASE_PATH);
@@ -271,12 +288,15 @@ public final class UpdateCenterModuleGenerator {
             return substs;
         }
         Map<String, String> result = new HashMap<>();
+        String info = settings.getString(SETTINGS_KEY_INFO_PARA);
+        String author = settings.getString(SETTINGS_KEY_GEN_MODULE_AUTHOR);
         // author, year, serverUrl
         ZonedDateTime now = ZonedDateTime.now();
         result.put(YEAR, year == null ? now.getYear() + "" : year);
         result.put(MONTH, month == null ? now.get(MONTH_OF_YEAR) + "" : month);
         result.put(DAY, day == null ? now.getDayOfMonth() + "" : day);
-        result.put(AUTHOR, settings.getString("module.author", System.getProperty("user.name")));
+        result.put(AUTHOR, settings.getString("module.author", author == null
+                ? System.getProperty("user.name") : author));
         result.put(SERVER_URL, paths.constructURL(Path.parse("/"), updateUrlHttps).toString());
         result.put(CODE_NAME_BASE, getModuleCodeName());
         result.put(CODE_NAME_SLASHES, getModuleCodeName().replace('.', '/'));
@@ -286,7 +306,8 @@ public final class UpdateCenterModuleGenerator {
         result.put(JAR_PATH, "netbeans/modules/" + result.get(JAR_NAME));
         result.put(SERVER_DISPLAY_NAME, getServerDisplayName());
         result.put(MODULE_DISPLAY_NAME, "Update Center for " + getServerDisplayName() + " (" + hostName() + ")");
-        result.put(MODULE_DESCRIPTION, "Adds modules from " + getServerDisplayName() + " (" + hostName() + ") to Tools | Plugins");
+        result.put(MODULE_DESCRIPTION, "Adds modules from " + getServerDisplayName() + " (" + hostName() + ") to Tools | Plugins."
+                + (info == null ? "" : " " + info + "\n"));
         result.put(UPDATE_URL, getUpdatesURL());
         result.put(SPECIFICATION_VERSION, serverVersion + "." + serverInstallId + "." + version);
         result.put(IMPLEMENTATION_VERSION, getImplementationVersion(result));
