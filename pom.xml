@@ -2,18 +2,19 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <version>1.9.3</version>
+    <version>1.9.4</version>
     <groupId>com.mastfrog</groupId>
     <artifactId>meta-update-server-parent</artifactId>
     <properties>
-        <jackson.version>2.10.1</jackson.version>
-        <mastfrog.version>2.6.6</mastfrog.version>
+        <jackson.version>2.12.2</jackson.version>
+        <mastfrog.version>2.7.1</mastfrog.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <surefire.version>3.0.0-M4</surefire.version>
         <netbeans.version>RELEASE112</netbeans.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <new.junit.version>5.5.2</new.junit.version>
+        <new.junit.version>5.7.0</new.junit.version>
+        <obsolete.bunyan-java.version>2.6.13</obsolete.bunyan-java.version>
     </properties>
     <scm>
         <url>git@github.com:timboudreau/meta-update-server.git</url>
@@ -91,7 +92,7 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>acteur-bunyan</artifactId>
-                <version>${mastfrog.version}</version>
+                <version>${obsolete.bunyan-java.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
@@ -101,7 +102,7 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>bunyan-java</artifactId>
-                <version>${mastfrog.version}</version>
+                <version>${obsolete.bunyan-java.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
@@ -161,12 +162,12 @@
             <dependency>
                 <groupId>com.google.inject</groupId>
                 <artifactId>guice</artifactId>
-                <version>4.2.2</version>
+                <version>4.2.3</version>
             </dependency>
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>4.12</version>
+                <version>4.13</version>
             </dependency>
             <dependency>
                 <groupId>org.junit.jupiter</groupId>

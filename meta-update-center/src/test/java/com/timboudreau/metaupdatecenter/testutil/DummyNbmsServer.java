@@ -81,7 +81,7 @@ final class DummyNbmsServer extends Application {
                 }).build();
         Server server = deps.getInstance(Server.class);
         DummyNbmsServer app = (DummyNbmsServer) deps.getInstance(Application.class);
-        c.apply(server, deps, nbmsServed, app);
+        c.accept(server, deps, nbmsServed, app);
         return port;
     }
 
