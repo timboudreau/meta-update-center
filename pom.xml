@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <version>1.9.3</version>
+    <version>1.9.4</version>
     <groupId>com.mastfrog</groupId>
     <artifactId>meta-update-server-parent</artifactId>
     <properties>
@@ -219,7 +219,7 @@
                 <plugin>
                     <groupId>com.mastfrog</groupId>
                     <artifactId>revision-info-plugin</artifactId>
-                    <version>0.14</version>
+                    <version>0.19</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -229,7 +229,7 @@
                 <plugin>
                     <groupId>org.apache.netbeans.utilities</groupId>
                     <artifactId>nbm-maven-plugin</artifactId>
-                    <version>4.3</version>
+                    <version>4.5</version>
                     <extensions>true</extensions>
                     <configuration>
                         <cluster>muctest</cluster>
