@@ -8,9 +8,10 @@ import com.google.inject.util.Providers;
 import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.server.PathFactory;
 import com.mastfrog.acteur.util.RequestID;
-import com.mastfrog.bunyan.Logger;
-import com.mastfrog.bunyan.LoggingModule;
+import com.mastfrog.bunyan.java.v2.Log;
+import com.mastfrog.bunyan.java.v2.Logs;
 import com.mastfrog.giulius.Dependencies;
+import com.mastfrog.giulius.bunyan.java.v2.LoggingModule;
 import com.mastfrog.jackson.DurationSerializationMode;
 import com.mastfrog.jackson.JacksonModule;
 import com.mastfrog.jackson.TimeSerializationMode;
@@ -62,7 +63,7 @@ public class AppTest {
 
         Class<?> x = com.google.common.base.Preconditions.class;
 
-        Logger logger = deps.getInstance(Key.get(Logger.class, Names.named("x")));
+        Logs logger = deps.getInstance(Key.get(Logs.class, Names.named("x")));
 
         File tmp = new File(System.getProperty("java.io.tmpdir"));
         assertTrue(tmp.isDirectory());

@@ -25,7 +25,7 @@ package com.timboudreau.metaupdatecenter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import static com.mastfrog.acteur.server.ServerModule.SETTINGS_KEY_URLS_HOST_NAME;
-import static com.mastfrog.bunyan.LoggingModule.SETTINGS_KEY_LOG_HOSTNAME;
+import static com.mastfrog.giulius.bunyan.java.v2.LoggingModule.SETTINGS_KEY_LOG_HOSTNAME;
 import com.mastfrog.settings.MutableSettings;
 import com.mastfrog.util.collections.StringObjectMap;
 import static com.timboudreau.metaupdatecenter.UpdateCenterServer.SETTINGS_KEY_DISPLAY_NAME;

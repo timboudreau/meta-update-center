@@ -35,7 +35,15 @@
         </dependency>
         <dependency>
             <groupId>com.mastfrog</groupId>
-            <artifactId>bunyan-java</artifactId>
+            <artifactId>util-collections</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.mastfrog</groupId>
+            <artifactId>bunyan-java-v2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>giulius-bunyan-java-v2</artifactId>
         </dependency>
         <dependency>
             <groupId>com.mastfrog</groupId>
@@ -75,7 +83,7 @@
         </dependency>
         <dependency>
             <groupId>com.mastfrog</groupId>
-            <artifactId>acteur-bunyan</artifactId>
+            <artifactId>acteur-bunyan-v2</artifactId>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>

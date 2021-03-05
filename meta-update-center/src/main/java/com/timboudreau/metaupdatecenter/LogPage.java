@@ -13,7 +13,7 @@ import com.mastfrog.acteur.preconditions.Authenticated;
 import com.mastfrog.acteur.preconditions.Description;
 import com.mastfrog.acteur.preconditions.Methods;
 import com.mastfrog.acteur.preconditions.Path;
-import com.mastfrog.bunyan.LoggingModule;
+import static com.mastfrog.giulius.bunyan.java.v2.LoggingModule.SETTINGS_KEY_LOG_FILE;
 import com.timboudreau.metaupdatecenter.LogPage.CheckLogEnabled;
 import com.timboudreau.metaupdatecenter.LogPage.CheckLogFileReadable;
 import static com.timboudreau.metaupdatecenter.UpdateCenterServer.SETTINGS_KEY_HTTP_LOG_ENABLED;
@@ -56,7 +56,7 @@ public class LogPage extends Acteur {
     @Description("Check that the server is configured to log to a file")
     static class CheckLogFileReadable extends Acteur {
         @Inject
-        CheckLogFileReadable(@Named(LoggingModule.SETTINGS_KEY_LOG_FILE) String logFile) {
+        CheckLogFileReadable(@Named(SETTINGS_KEY_LOG_FILE) String logFile) {
             File f = new File(logFile);
             if (!f.exists() || !f.isFile() || !f.canRead()) {
                 super.notFound(f.getAbsolutePath());

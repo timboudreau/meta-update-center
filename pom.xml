@@ -91,8 +91,18 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>acteur-bunyan</artifactId>
-                <version>${obsolete.bunyan-java.version}</version>
+                <artifactId>acteur-bunyan-v2</artifactId>
+                <version>${mastfrog.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>giulius-bunyan-java-v2</artifactId>
+                <version>${mastfrog.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.mastfrog</groupId>
+                <artifactId>util-collections</artifactId>
+                <version>2.7.1.4</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
@@ -101,8 +111,8 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>bunyan-java</artifactId>
-                <version>${obsolete.bunyan-java.version}</version>
+                <artifactId>bunyan-java-v2</artifactId>
+                <version>${mastfrog.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
@@ -204,7 +214,7 @@
                     <configuration>
                         <source>1.8</source>
                         <target>1.8</target>
-                    </configuration>                    
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -236,7 +246,7 @@
                         <cluster>muctest</cluster>
                         <encoding>UTF-8</encoding>
                     </configuration>
-                </plugin>                
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>

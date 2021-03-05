@@ -1,16 +1,9 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.timboudreau.metaupdatecenter;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import com.mastfrog.bunyan.Log;
-import com.mastfrog.bunyan.Logger;
-import com.mastfrog.bunyan.type.Debug;
-import com.mastfrog.bunyan.type.Info;
+import com.mastfrog.bunyan.java.v2.Log;
+import com.mastfrog.bunyan.java.v2.Logs;
 import com.mastfrog.giulius.ShutdownHookRegistry;
 import com.mastfrog.settings.Settings;
 import com.mastfrog.util.streams.Streams;
@@ -63,12 +56,12 @@ final class WatchDir implements Runnable {
     private final WatchService watchService;
     private final DelayQueue<DelayKey> queue;
     private final Duration delay;
-    private final Logger logger;
+    private final Logs logger;
     private final ModuleSet set;
 
     @Inject
     public WatchDir(Settings settings, ShutdownHookRegistry reg, NbmDownloader processor,
-            ByteBufAllocator alloc, Thread.UncaughtExceptionHandler ueh, @Named(FILE_WATCH_LOGGER) Logger logger,
+            ByteBufAllocator alloc, Thread.UncaughtExceptionHandler ueh, @Named(FILE_WATCH_LOGGER) Logs logger,
             ModuleSet set) throws IOException {
         this.processor = processor;
         this.alloc = alloc;
@@ -81,7 +74,7 @@ final class WatchDir implements Runnable {
         WatchService watchService = null;
         DelayQueue<DelayKey> queue = null;
         Path path = null;
-        try (Log<Info> log = logger.info("startup")) {
+        try (Log log = logger.info("startup")) {
             if (pth != null) {
                 try {
                     path = Paths.get(pth).normalize().toAbsolutePath();
@@ -134,7 +127,7 @@ final class WatchDir implements Runnable {
                 Files.walk(path, FileVisitOption.FOLLOW_LINKS).filter(child -> {
                     return child.getFileName().toString().endsWith(".nbm");
                 }).forEach(child -> {
-                    try (Log<Info> log = logger.info("initial-scan")) {
+                    try (Log log = logger.info("initial-scan")) {
                         log.add("path", child.toString());
                         try {
                             if (processingFailed(child)) {
@@ -223,7 +216,7 @@ final class WatchDir implements Runnable {
                                 .add("duplicate", true).add("success", false).close();
                         return;
                     }
-                    try (Log<Info> log = logger.info("module-processed")) {
+                    try (Log log = logger.info("module-processed")) {
                         log.add("origPath", path.toString())
                                 .add("cnb", module.getModuleCodeName())
                                 .add("specVersion", module.getModuleVersion().toString())
@@ -273,7 +266,7 @@ final class WatchDir implements Runnable {
                 try {
                     key = watchService.take();
                     for (WatchEvent<?> event : key.pollEvents()) {
-                        try (Log<Debug> log = logger.debug("watch")) {
+                        try (Log log = logger.debug("watch")) {
                             Path path = (Path) event.context();
                             path = dir.resolve(path);
                             if (path.toString().endsWith("nbm")) {
@@ -321,7 +314,7 @@ final class WatchDir implements Runnable {
                 try {
                     key = queue.take();
                     if (key != null) {
-                        try (Log<Info> log = logger.info("process")) {
+                        try (Log log = logger.info("process")) {
                             log.add("path", key.pth.toString());
                             if (!key.isValid()) {
                                 log.add("valid", false);

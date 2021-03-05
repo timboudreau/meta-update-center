@@ -23,7 +23,7 @@
  */
 package com.timboudreau.metaupdatecenter;
 
-import com.mastfrog.bunyan.LoggingModule;
+import com.mastfrog.giulius.bunyan.java.v2.LoggingModule;
 import com.timboudreau.metaupdatecenter.testutil.LaunchedNbmServer;
 import com.timboudreau.metaupdatecenter.testutil.NbmServerLauncher;
 import com.timboudreau.metaupdatecenter.testutil.PollCycleWatcher;
@@ -99,9 +99,9 @@ public class BasePathTest {
         serv = new NbmServerLauncher(TEST_BASE_PATH)
 //                .instrumentEventLoop()
                 .setInitialNbms(MODULE_A_v1)
-                .onCreateSettings(s -> {
-                    s.setInt(LoggingModule.SETTINGS_KEY_STREAM_BUFFER_SIZE, 32);
-                })
+//                .onCreateSettings(s -> {
+//                    s.setInt(SETTINGS_KEY_STREAM_BUFFER_SIZE, 32);
+//                })
                 .launch();
     }
 

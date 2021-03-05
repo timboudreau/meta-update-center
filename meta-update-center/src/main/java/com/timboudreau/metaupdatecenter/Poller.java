@@ -3,7 +3,7 @@ package com.timboudreau.metaupdatecenter;
 import com.google.inject.ImplementedBy;
 import com.google.inject.Inject;
 import com.mastfrog.acteur.headers.Headers;
-import com.mastfrog.bunyan.Logger;
+import com.mastfrog.bunyan.java.v2.Logs;
 import com.mastfrog.giulius.ShutdownHookRegistry;
 import com.mastfrog.netty.http.client.HttpClient;
 import com.mastfrog.util.preconditions.ConfigurationError;
@@ -37,7 +37,7 @@ public class Poller implements Runnable {
 
     private final ModuleSet set;
     private final NbmDownloader downloader;
-    private final Logger pollLogger;
+    private final Logs pollLogger;
     private final PollerProbe probe;
 
     @Inject
@@ -45,7 +45,7 @@ public class Poller implements Runnable {
             @Named(SETTINGS_KEY_POLL_INITIAL_DELAY_MINUTES) long initialDelay,
             HttpClient client, ShutdownHookRegistry registry, NbmDownloader downloader,
             @Named(GUICE_BINDING_POLLER_THREAD_POOL) ScheduledExecutorService pollThreadPool,
-            @Named(UpdateCenterServer.SYSTEM_LOGGER) Logger pollLogger,
+            @Named(UpdateCenterServer.SYSTEM_LOGGER) Logs pollLogger,
             PollerProbe probe) {
         if (interval <= 0) {
             throw new ConfigurationError("Poll interval must be > 0 but is " + interval);

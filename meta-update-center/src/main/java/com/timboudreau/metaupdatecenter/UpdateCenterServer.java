@@ -28,12 +28,12 @@ import com.mastfrog.acteur.server.ServerModule;
 import static com.mastfrog.acteur.server.ServerModule.HTTP_COMPRESSION;
 import static com.mastfrog.acteur.server.ServerModule.MAX_CONTENT_LENGTH;
 import com.mastfrog.acteur.util.Server;
-import com.mastfrog.bunyan.Log;
-import com.mastfrog.bunyan.Logger;
-import static com.mastfrog.bunyan.LoggingModule.SETTINGS_KEY_ASYNC_LOGGING;
-import static com.mastfrog.bunyan.LoggingModule.SETTINGS_KEY_LOG_FILE;
-import static com.mastfrog.bunyan.LoggingModule.SETTINGS_KEY_LOG_LEVEL;
+import com.mastfrog.bunyan.java.v2.Log;
+import com.mastfrog.bunyan.java.v2.Logs;
 import com.mastfrog.giulius.ShutdownHookRegistry;
+import static com.mastfrog.giulius.bunyan.java.v2.LoggingModule.SETTINGS_KEY_ASYNC_LOGGING;
+import static com.mastfrog.giulius.bunyan.java.v2.LoggingModule.SETTINGS_KEY_LOG_FILE;
+import static com.mastfrog.giulius.bunyan.java.v2.LoggingModule.SETTINGS_KEY_LOG_LEVEL;
 import com.mastfrog.giulius.thread.ThreadModule;
 import com.mastfrog.jackson.DurationSerializationMode;
 import com.mastfrog.jackson.JacksonModule;
@@ -101,8 +101,10 @@ public class UpdateCenterServer extends GenericApplication {
     private final Stats stats;
     private final String serverName;
 
+    private static final Logs SYSLOG = Logs.named(UpdateCenterServer.class.getName());
+
     @Inject
-    UpdateCenterServer(ModuleSet set, UpdateCenterModuleGenerator gen, Stats stats, @Named(SYSTEM_LOGGER) final Logger systemLogger, Settings settings, ServerInstallId serverId, ShutdownHookRegistry shutdown, VersionInfo ver) throws IOException, ParserConfigurationException, SAXException {
+    UpdateCenterServer(ModuleSet set, UpdateCenterModuleGenerator gen, Stats stats, Settings settings, ServerInstallId serverId, ShutdownHookRegistry shutdown, VersionInfo ver) throws IOException, ParserConfigurationException, SAXException {
         serverName = settings.getString(SETTINGS_KEY_DISPLAY_NAME) + " " + ver.deweyDecimalVersion();
         try {
             set.scan();
@@ -122,7 +124,7 @@ public class UpdateCenterServer extends GenericApplication {
             logInfo.add(i.toMap());
         }
         this.stats = stats;
-        try (Log<?> log = systemLogger.info("startup")) {
+        try (Log log = SYSLOG.info("startup")) {
             log.addIfNotNull(SETTINGS_KEY_NBM_DIR, settings.getString(SETTINGS_KEY_NBM_DIR))
                     .add("serverId", serverId.get())
                     .add("version", ver.deweyDecimalVersion())
@@ -137,7 +139,7 @@ public class UpdateCenterServer extends GenericApplication {
                     .addIfNotNull(SETTINGS_KEY_LOG_LEVEL, settings.getString(SETTINGS_KEY_LOG_LEVEL));
         }
         shutdown.add((Runnable) () -> {
-            systemLogger.info("shutdown").close();
+            SYSLOG.info("shutdown").close();
         });
     }
 
