@@ -106,6 +106,7 @@
             <plugin>
                 <groupId>com.mastfrog</groupId>
                 <artifactId>maven-merge-configuration</artifactId>
+                <version>2.7.1.2</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -118,7 +119,38 @@
                 <configuration>
                     <mainClass>com.timboudreau.metaupdatecenter.UpdateCenterServer</mainClass>
                     <jarName>meta-update-center-standalone</jarName>
-                    <skipMavenMetadata>false</skipMavenMetadata>
+                    <skipMavenMetadata>true</skipMavenMetadata>
+                    <index>true</index>
+                    <omitModuleInfo>true</omitModuleInfo>
+                    <skipLicenseFiles>true</skipLicenseFiles>
+                    <zerodates>true</zerodates>
+                    <!-- Remove some stuff that will not be touched by 
+                         any classloader - this may need revisiting with
+                         library updates
+                    -->
+                    <exclude>
+                        com.mastfrog.graal.injection.processor
+                        com.mastfrog.thread.util
+                        com.mastfrog.graal.annotation
+                        com.mastfrog.util.multivariate
+                        com.mastfrog.util.streams.stdio
+                        org.checkerframework
+                    </exclude>
+                    <exludePatterns>
+                        com/mastfrog/java/**
+                        com/mastfrog/annotation/processor
+                        com/mastfrog/annotation/validation
+                        com/mastfrog/annotation/registries
+                        com/mastfrog/util/cache
+                        com/mastfrog/predicates/pattern
+                        com/mastfrog/predicates/string
+                        io/netty/handler/codec/spdy
+                        io/netty/handler/codec/rtsp
+                        com/google/common/eventbus
+                        com/google/common/html
+                        com/google/common/xml
+                        com/google/common/escape
+                    </exludePatterns>
                 </configuration>
             </plugin>
             <plugin>
@@ -161,47 +193,4 @@
             </plugin>
         </plugins>
     </build>
-    <pluginRepositories>
-        <pluginRepository>
-            <id>timboudreau-plugins</id>
-            <name>timboudreau.com plugins</name>
-            <url>http://timboudreau.com/maven/</url>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>never</updatePolicy>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>never</updatePolicy>
-            </snapshots>
-        </pluginRepository>
-    </pluginRepositories>
-    <repositories>
-        <repository>
-            <id>timboudreau-builds</id>
-            <name>timboudreau.com builds</name>
-            <url>http://timboudreau.com/maven/</url>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>never</updatePolicy>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>never</updatePolicy>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>netbeans</id>
-            <name>NetBeans</name>
-            <url>http://bits.netbeans.org/maven2/</url>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>never</updatePolicy>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>never</updatePolicy>
-            </snapshots>
-        </repository>
-    </repositories>
 </project>
