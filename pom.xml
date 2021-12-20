@@ -2,16 +2,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <version>1.9.4</version>
+    <version>1.9.5</version>
     <groupId>com.mastfrog</groupId>
     <artifactId>meta-update-server-parent</artifactId>
     <properties>
-        <jackson.version>2.12.2</jackson.version>
-        <mastfrog.version>2.7.2</mastfrog.version>
+        <jackson.version>2.13.0</jackson.version>
+        <mastfrog.version>2.8.0</mastfrog.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <surefire.version>3.0.0-M4</surefire.version>
-        <netbeans.version>RELEASE112</netbeans.version>
+        <surefire.version>3.0.0-M5</surefire.version>
+        <netbeans.version>RELEASE125</netbeans.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <new.junit.version>5.7.0</new.junit.version>
         <obsolete.bunyan-java.version>2.6.13</obsolete.bunyan-java.version>
@@ -172,7 +172,7 @@
             <dependency>
                 <groupId>com.google.inject</groupId>
                 <artifactId>guice</artifactId>
-                <version>4.2.3</version>
+                <version>5.0.1</version>
             </dependency>
             <dependency>
                 <groupId>junit</groupId>
@@ -230,7 +230,7 @@
                 <plugin>
                     <groupId>com.mastfrog</groupId>
                     <artifactId>revision-info-plugin</artifactId>
-                    <version>0.19</version>
+                    <version>0.21</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
