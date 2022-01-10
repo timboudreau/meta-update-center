@@ -166,7 +166,7 @@ public class UpdateCenterServer extends GenericApplication {
                 .add(SETTINGS_KEY_LOG_LEVEL, "info")
                 .add(SETTINGS_KEY_LOG_FILE, "nbmserver.log")
                 .add(SETTINGS_KEY_HTTP_LOG_ENABLED, DEFAULT_HTTP_LOG_ENABLED + "")
-                .add("productionMode", "true")
+                .add("productionMode", "false")
                 .add(SETTINGS_KEY_ASYNC_LOGGING, "false")
                 .add(HTTP_COMPRESSION, "true")
                 .add(MAX_CONTENT_LENGTH, "384")
