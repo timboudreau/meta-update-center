@@ -6,7 +6,6 @@ import com.google.inject.Inject;
 import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 import com.mastfrog.acteur.ActeurFactory;
 import com.mastfrog.acteur.Event;
 import com.mastfrog.acteur.Help;
@@ -154,17 +153,20 @@ public class UpdateCenterServer extends GenericApplication {
         // one system
 
         String ns = System.getProperty(SYS_PROP_SETTINGS_FILE_NAMESPACE, SETTINGS_NAMESPACE);
+        String defaultTickleToken = new RandomStrings().randomChars(32);
+        System.out.println("Fallback tickle token: '" + defaultTickleToken + "'");
         MutableSettings settings = new SettingsBuilder(ns)
                 .add(SETTINGS_KEY_POLL_INTERVAL_MINUTES, 10)
                 .add(SETTINGS_KEY_POLL_INITIAL_DELAY_MINUTES, 3)
                 .add(SETTINGS_KEY_SETTINGS_NAMESPACE, ns)
+                .add("tickleToken", defaultTickleToken)
                 .add("realm", "NbmServerAdmin")
                 .add(BYTEBUF_ALLOCATOR_SETTINGS_KEY, POOLED_ALLOCATOR)
                 .add(SETTINGS_KEY_ADMIN_USER_NAME, "admin")
                 .add(SETTINGS_KEY_LOG_LEVEL, "info")
                 .add(SETTINGS_KEY_LOG_FILE, "nbmserver.log")
                 .add(SETTINGS_KEY_HTTP_LOG_ENABLED, DEFAULT_HTTP_LOG_ENABLED + "")
-                .add("productionMode", "false")
+                .add("productionMode", "true")
                 .add(SETTINGS_KEY_ASYNC_LOGGING, "false")
                 .add(HTTP_COMPRESSION, "true")
                 .add(MAX_CONTENT_LENGTH, "384")

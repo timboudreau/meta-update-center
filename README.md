@@ -250,6 +250,15 @@ The salient details of what this does:
 we don't want to ask normal users to connet over port 8859)
 
 
+### Forcing Updates
+
+The URL path `/tickle?token=...` can be used to stop the refresh interval timer,
+force an immediate update attempt on all modules being served, and then restart
+the timer.  The passed token can either be set on the command-line or in Settings
+using the key `tickleToken`, or by default it is set to a random string which is
+logged to system out (not the log file, which can be read online) on startup.
+
+
 Internals
 ---------
 

@@ -10,8 +10,11 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
             </goals>
             <properties>
-                <exec.args>-classpath %classpath com.timboudreau.metaupdatecenter.UpdateCenterServer --password testit --salt wheedle  --hostname localhost --port 8959 --external.port 8959 --nbm.dir /tmp/meta-update-center-test --server.name "This here thing" --watch.dir /tmp/nbms --log.console --log.async false --log.level trace --gen.module.author 'Joe Schmoe' --home.page.display.name 'Things that are things' --nb.ui.display.name 'Some Stuff' --home.page.info 'And now learn how to make the perfect souffle!'</exec.args>
+                <exec.args>${exec.vmArgs} -classpath %classpath ${exec.mainClass} ${exec.appArgs}</exec.args>
                 <exec.executable>java</exec.executable>
+                <exec.appArgs>--password testit --salt wheedle  --hostname localhost --port 8959 --external.port 8959 --nbm.dir /tmp/meta-update-center-test --watch.dir /tmp/nbms --log.console --log.async false --log.level trace</exec.appArgs>
+                <exec.vmArgs></exec.vmArgs>
+                <exec.mainClass>com.timboudreau.metaupdatecenter.UpdateCenterServer</exec.mainClass>
             </properties>
         </action>
         <action>
@@ -24,9 +27,12 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
             </goals>
             <properties>
-                <exec.args>-agentlib:jdwp=transport=dt_socket,server=n,address=${jpda.address} -classpath %classpath com.timboudreau.metaupdatecenter.UpdateCenterServer --password testit --salt wheedle  --hostname localhost --port 8959 --external.port 8959 --nbm.dir /tmp/meta-update-center-test --server.name "This here thing" --watch.dir /tmp/nbms --log.console --log.async false --log.level trace --gen.module.author 'Joe Schmoe' --home.page.display.name 'Things that are things' --nb.ui.display.name 'Some Stuff' --home.page.info 'And now learn how to make the perfect souffle!'</exec.args>
+                <exec.args>${exec.vmArgs} -classpath %classpath ${exec.mainClass} ${exec.appArgs}</exec.args>
                 <exec.executable>java</exec.executable>
                 <jpda.listen>true</jpda.listen>
+                <exec.appArgs>--password testit --salt wheedle  --hostname localhost --port 8959 --external.port 8959 --nbm.dir /tmp/meta-update-center-test --watch.dir /tmp/nbms --log.console --log.async false --log.level trace</exec.appArgs>
+                <exec.vmArgs>-agentlib:jdwp=transport=dt_socket,server=n,address=${jpda.address}</exec.vmArgs>
+                <exec.mainClass>com.timboudreau.metaupdatecenter.UpdateCenterServer</exec.mainClass>
             </properties>
         </action>
         <action>
@@ -39,8 +45,11 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
             </goals>
             <properties>
-                <exec.args>-classpath %classpath com.timboudreau.metaupdatecenter.UpdateCenterServer --password testit --salt wheedle  --hostname localhost --port 8959 --external.port 8959 --nbm.dir /tmp/meta-update-center-test --server.name "This here thing" --watch.dir /tmp/nbms --log.console --log.async false --log.level trace --gen.module.author 'Joe Schmoe' --home.page.display.name 'Things that are things' --nb.ui.display.name 'Some Stuff' --home.page.info 'And now learn how to make the perfect souffle!'</exec.args>
+                <exec.args>${exec.vmArgs} -classpath %classpath ${exec.mainClass} ${exec.appArgs}</exec.args>
                 <exec.executable>${profiler.java}</exec.executable>
+                <exec.appArgs>--password testit --salt wheedle  --hostname localhost --port 8959 --external.port 8959 --nbm.dir /tmp/meta-update-center-test --watch.dir /tmp/nbms --log.console --log.async false --log.level trace</exec.appArgs>
+                <exec.vmArgs></exec.vmArgs>
+                <exec.mainClass>com.timboudreau.metaupdatecenter.UpdateCenterServer</exec.mainClass>
             </properties>
         </action>
     </actions>
