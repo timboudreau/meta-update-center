@@ -1,13 +1,18 @@
 package com.timboudreau.metaupdatecenter;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
+import com.mastfrog.bunyan.java.v2.Log;
+import com.mastfrog.bunyan.java.v2.Logs;
 import com.mastfrog.util.preconditions.ConfigurationError;
 import com.mastfrog.util.preconditions.Exceptions;
 import com.mastfrog.util.streams.Streams;
 import com.mastfrog.util.time.TimeUtil;
+import static com.timboudreau.metaupdatecenter.UpdateCenterServer.SYSTEM_LOGGER;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -38,6 +43,7 @@ public final class ModuleSet implements Iterable<ModuleItem> {
     private final File dir;
     private final Provider<ObjectMapper> mapper;
     private final Set<ModuleItem> items = ConcurrentHashMap.newKeySet(96);
+    private final Provider<Logs> logs;
 
     public File getStorageDir() {
         return dir;
@@ -69,14 +75,24 @@ public final class ModuleSet implements Iterable<ModuleItem> {
                 }
             }
         }
-        File f = new File(new File(dir, codeName), hash + ".nbm");
+        File f = new File(new File(dir, codeName), hash + ".json");
         if (f.exists()) {
             try {
                 return ModuleItem.fromFile(f, mapper.get());
+            } catch (JsonParseException ex) {
+                logs.get().error("Failed to parse JSON").add("file", f.getAbsolutePath())
+                        .add(ex).close();
+                System.out.println("failed parsing JSON " + f);
+                Exceptions.printStackTrace(ex);
             } catch (IOException ex) {
+                logs.get().error("Error reading JSON").add("file", f.getAbsolutePath())
+                        .add(ex).close();
+                System.out.println("failed reading " + f);
                 Exceptions.printStackTrace(ex);
             }
         }
+        logs.get().warn("No module").add("codeName", codeName)
+                .add("hash", hash).add("file", f.getPath()).close();
         return null;
     }
 
@@ -93,7 +109,8 @@ public final class ModuleSet implements Iterable<ModuleItem> {
     private final Provider<Stats> stats;
 
     @Inject
-    ModuleSet(File dir, Provider<ObjectMapper> mapper, Provider<Stats> stats) {
+    ModuleSet(File dir, Provider<ObjectMapper> mapper, Provider<Stats> stats, @Named(SYSTEM_LOGGER) Provider<Logs> logs) {
+        this.logs = logs;
         this.dir = dir;
         this.mapper = mapper;
         this.stats = stats;
@@ -207,16 +224,21 @@ public final class ModuleSet implements Iterable<ModuleItem> {
             stats.get().logIngest(item);
             return item;
         } catch (Exception e) {
-            if (mdFile.exists()) {
-                mdFile.delete();
+                try (Log log = logs.get().error("unpackModuleError")) {
+                log.add("url", url).add("hash", hash)
+                        .add("useOriginalUrl", useOrigUrl)
+                        .add(e);
+                if (mdFile.exists()) {
+                    mdFile.delete();
+                }
+                if (nbmFile.exists()) {
+                    nbmFile.delete();
+                }
+                if (moduleDir.list().length == 0) {
+                    moduleDir.delete();
+                }
+                throw e instanceof IOException ? ((IOException) e) : new IOException(e);
             }
-            if (nbmFile.exists()) {
-                nbmFile.delete();
-            }
-            if (moduleDir.list().length == 0) {
-                moduleDir.delete();
-            }
-            throw e instanceof IOException ? ((IOException) e) : new IOException(e);
         }
     }
 

@@ -8,7 +8,6 @@ import com.google.inject.util.Providers;
 import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.server.PathFactory;
 import com.mastfrog.acteur.util.RequestID;
-import com.mastfrog.bunyan.java.v2.Log;
 import com.mastfrog.bunyan.java.v2.Logs;
 import com.mastfrog.giulius.Dependencies;
 import com.mastfrog.giulius.bunyan.java.v2.LoggingModule;
@@ -89,7 +88,8 @@ public class AppTest {
         mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
 
         ModuleSet set = new ModuleSet(dir, Providers.of(mapper), Providers.of(
-                new Stats(logger, logger, logger, Providers.of(new RequestID.Factory().next()))));
+                new Stats(logger, logger, logger, Providers.of(new RequestID.Factory().next()))),
+                () -> null);
 
         URL res = AppTest.class.getResource("org-netbeans-modules-fisheye.nbm");
         set.add(moduleInfo, nbmIn, res.toString(), "test-hash", false);

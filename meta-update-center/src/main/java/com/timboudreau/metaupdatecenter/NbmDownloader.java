@@ -3,6 +3,7 @@ package com.timboudreau.metaupdatecenter;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.mastfrog.acteur.headers.Headers;
+import com.mastfrog.bunyan.java.v2.Logs;
 import com.mastfrog.netty.http.client.HttpClient;
 import com.mastfrog.netty.http.client.HttpRequestBuilder;
 import com.mastfrog.netty.http.client.ResponseFuture;
@@ -33,6 +34,7 @@ import java.net.URL;
 import java.time.ZonedDateTime;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import javax.inject.Named;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -47,10 +49,12 @@ import org.xml.sax.SAXException;
 public class NbmDownloader {
 
     private final HttpClient client;
+    private final Logs logs;
 
     @Inject
-    public NbmDownloader(HttpClient client) {
+    public NbmDownloader(HttpClient client, @Named(UpdateCenterServer.DOWNLOAD_LOGGER) Logs logs) {
         this.client = client;
+        this.logs = logs;
     }
 
     private void handleFileDownload(URL url, DownloadHandler callback) throws URISyntaxException, FileNotFoundException, IOException, SAXException, ParserConfigurationException {
@@ -69,7 +73,10 @@ public class NbmDownloader {
     }
 
     public ResponseFuture download(ZonedDateTime ifModifiedSince, final String url, final DownloadHandler callback) throws MalformedURLException, URISyntaxException, FileNotFoundException, IOException, SAXException, ParserConfigurationException {
-
+        logs.trace("initDownload").add("url", url)
+                .add("ifModifiedSince", ifModifiedSince)
+                .add("client", client.toString())
+                .close();
         URL uu = new URL(url);
         if ("file".equals(uu.toURI().getScheme())) {
             handleFileDownload(uu, callback);
@@ -87,16 +94,19 @@ public class NbmDownloader {
                 switch (object.stateType()) {
                     case Error:
                         Throwable t = (Throwable) object.get();
+                        logs.trace("dlError").add("url", url).add(t).close();
                         callback.onError(t);
                         break;
                     case HeadersReceived:
                         HttpResponse hdrs = (HttpResponse) object.get();
+                        logs.trace("dlHeadersReceived").add("url", url).add("status", hdrs.status().toString()).close();
                         if (!callback.onResponse(hdrs.status(), hdrs.headers())) {
                             fut.cancel();
                         }
                         break;
                     case Finished:
                         DefaultFullHttpResponse resp = (DefaultFullHttpResponse) object.get();
+                        logs.trace("dlFinished").add("url", url).add("status", resp.status().toString()).close();
                         resp.touch("nbm-downloader-finished");
                         if (!callback.onResponse(resp.status(), resp.headers())) {
                             return;

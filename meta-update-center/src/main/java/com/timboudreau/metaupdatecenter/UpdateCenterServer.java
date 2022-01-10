@@ -3,9 +3,12 @@ package com.timboudreau.metaupdatecenter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
+import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.google.inject.TypeLiteral;
+import com.google.inject.name.Names;
 import com.mastfrog.acteur.ActeurFactory;
 import com.mastfrog.acteur.Event;
 import com.mastfrog.acteur.Help;
@@ -14,6 +17,7 @@ import com.mastfrog.acteur.ImplicitBindings;
 import com.mastfrog.acteur.Page;
 import com.mastfrog.acteur.annotations.GenericApplication;
 import com.mastfrog.acteur.annotations.HttpCall;
+import com.mastfrog.acteur.auth.AuthenticationActeur;
 import com.mastfrog.acteur.auth.Authenticator;
 import com.mastfrog.acteur.bunyan.ActeurBunyanModule;
 import static com.mastfrog.acteur.server.ServerModule.BYTEBUF_ALLOCATOR_SETTINGS_KEY;
@@ -77,6 +81,7 @@ public class UpdateCenterServer extends GenericApplication {
     public static final String SYSTEM_LOGGER = "system";
     public static final String AUTH_LOGGER = "auth";
     public static final String FILE_WATCH_LOGGER = "filewatch";
+    public static final String SETTINGS_KEY_TICKLE_TOKEN = "tickleToken";
     public static final String SETTINGS_KEY_NBM_DIR = "nbm.dir";
     public static final String SETTINGS_KEY_PASSWORD = "password";
     public static final String SETTINGS_KEY_ADMIN_USER_NAME = "admin.user.name";
@@ -153,24 +158,21 @@ public class UpdateCenterServer extends GenericApplication {
         // one system
 
         String ns = System.getProperty(SYS_PROP_SETTINGS_FILE_NAMESPACE, SETTINGS_NAMESPACE);
-        String defaultTickleToken = new RandomStrings().randomChars(32);
-        System.out.println("Fallback tickle token: '" + defaultTickleToken + "'");
         MutableSettings settings = new SettingsBuilder(ns)
                 .add(SETTINGS_KEY_POLL_INTERVAL_MINUTES, 10)
-                .add(SETTINGS_KEY_POLL_INITIAL_DELAY_MINUTES, 3)
                 .add(SETTINGS_KEY_SETTINGS_NAMESPACE, ns)
-                .add("tickleToken", defaultTickleToken)
                 .add("realm", "NbmServerAdmin")
                 .add(BYTEBUF_ALLOCATOR_SETTINGS_KEY, POOLED_ALLOCATOR)
                 .add(SETTINGS_KEY_ADMIN_USER_NAME, "admin")
                 .add(SETTINGS_KEY_LOG_LEVEL, "info")
                 .add(SETTINGS_KEY_LOG_FILE, "nbmserver.log")
-                .add(SETTINGS_KEY_HTTP_LOG_ENABLED, DEFAULT_HTTP_LOG_ENABLED + "")
-                .add("productionMode", "false")
+                .add(SETTINGS_KEY_HTTP_LOG_ENABLED, DEFAULT_HTTP_LOG_ENABLED)
+                .add("productionMode", "true")
+                .add("salt", "as098df7u0aQ#3,0cH!")
                 .add(SETTINGS_KEY_ASYNC_LOGGING, "false")
                 .add(HTTP_COMPRESSION, "true")
                 .add(MAX_CONTENT_LENGTH, "384")
-                .add(SETTINGS_KEY_POLL_INITIAL_DELAY_MINUTES, 3)
+                .add(SETTINGS_KEY_POLL_INITIAL_DELAY_MINUTES, 2)
                 .addFilesystemAndClasspathLocations()
                 .parseCommandLineArguments(args).buildMutableSettings();
         createServer(settings).start().await();
@@ -204,6 +206,13 @@ public class UpdateCenterServer extends GenericApplication {
                 settings.setString(SETTINGS_KEY_PASSWORD, password);
             }
 
+            String tickleToken = settings.getString(SETTINGS_KEY_TICKLE_TOKEN);
+            if (tickleToken == null) {
+                String defaultTickleToken = new RandomStrings().randomChars(32);
+                System.out.println("Fallback tickle token: '" + defaultTickleToken + "'");
+                settings.setString(SETTINGS_KEY_TICKLE_TOKEN, defaultTickleToken);
+            }
+
             Server server = new ServerBuilder(SETTINGS_NAMESPACE)
                     .add(new ActeurBunyanModule(true)
                             .bindLogger(STATS_LOGGER)
@@ -213,7 +222,10 @@ public class UpdateCenterServer extends GenericApplication {
                             .bindLogger(DOWNLOAD_LOGGER))
                     .mergeNamespaces()
                     .add(MAIN_MODULE.apply(base))
-                    .add(new ThreadModule().builder(GUICE_BINDING_POLLER_THREAD_POOL).daemon().eager().scheduled().bind())
+                    .add(new ThreadModule().builder(GUICE_BINDING_POLLER_THREAD_POOL).daemon().eager()
+                            .scheduled()
+                            .withDefaultThreadCount(3)
+                            .bind())
                     .applicationClass(UpdateCenterServer.class)
                     .add(new JacksonModule().withJavaTimeSerializationMode(TimeSerializationMode.TIME_AS_EPOCH_MILLIS,
                             DurationSerializationMode.DURATION_AS_MILLIS))
@@ -260,7 +272,8 @@ public class UpdateCenterServer extends GenericApplication {
 
         @Override
         protected void configure() {
-            ModuleSet set = new ModuleSet(base, binder().getProvider(ObjectMapper.class), binder().getProvider(Stats.class));
+            Provider<Logs> logs = binder().getProvider(Key.get(new TypeLiteral<Logs>(){}, Names.named(SYSTEM_LOGGER)));
+            ModuleSet set = new ModuleSet(base, binder().getProvider(ObjectMapper.class), binder().getProvider(Stats.class), logs);
             bind(ModuleSet.class).toInstance(set);
             bind(HttpClient.class).toProvider(HttpClientProvider.class);
             bind(Authenticator.class).to(AuthenticatorImpl.class);
@@ -277,7 +290,7 @@ public class UpdateCenterServer extends GenericApplication {
             @Inject
             HttpClientProvider(ByteBufAllocator alloc, Settings settings, VersionInfo info) {
                 String ver = "nbmserver-" + info.deweyDecimalVersion() + " - https://github.com/timboudreau/meta-update-center";
-                int downloadThreads = settings.getInt(SETTINGS_KEY_DOWNLOAD_THREADS, 4);
+                int downloadThreads = settings.getInt(SETTINGS_KEY_DOWNLOAD_THREADS, 16);
                 client = HttpClient.builder()
                         .setUserAgent(ver)
                         .followRedirects()

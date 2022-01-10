@@ -33,6 +33,7 @@ import com.mastfrog.acteur.preconditions.Methods;
 import com.mastfrog.acteur.preconditions.Path;
 import com.mastfrog.acteur.preconditions.RequiredUrlParameters;
 import com.mastfrog.settings.Settings;
+import static com.timboudreau.metaupdatecenter.UpdateCenterServer.SETTINGS_KEY_TICKLE_TOKEN;
 import static io.netty.handler.codec.http.HttpResponseStatus.NOT_FOUND;
 import static io.netty.handler.codec.http.HttpResponseStatus.TOO_MANY_REQUESTS;
 import java.util.Objects;
@@ -50,9 +51,9 @@ public class TicklePage extends Acteur {
 
     @Inject
     TicklePage(HttpEvent evt, Settings settings, Poller poller) {
-        String token = settings.getString("tickleToken");
+        String token = settings.getString(SETTINGS_KEY_TICKLE_TOKEN);
         if (token == null) {
-            reply(NOT_FOUND, "Tickle not enabled");
+            reply(NOT_FOUND, "Tickle not enabled.\n");
         } else {
             String received = evt.urlParameter("token");
             if (!Objects.equals(token, received)) {
