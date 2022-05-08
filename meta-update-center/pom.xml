@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>com.mastfrog</groupId>
         <artifactId>meta-update-server-parent</artifactId>
-        <version>1.9.6</version>
+        <version>1.9.7</version>
     </parent>
     <artifactId>meta-update-server</artifactId>
     <name>Meta Update Center</name>
@@ -102,6 +105,7 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
     <build>
         <plugins>
             <plugin>
@@ -125,20 +129,17 @@
                     <omitModuleInfo>true</omitModuleInfo>
                     <skipLicenseFiles>true</skipLicenseFiles>
                     <zerodates>true</zerodates>
-                    <!-- Remove some stuff that will not be touched by 
+<!-- Remove some stuff that will not be touched by
                          any classloader - this may need revisiting with
                          library updates
                     -->
-                    <exclude>
-                        com.mastfrog.graal.injection.processor
+                    <exclude>com.mastfrog.graal.injection.processor
                         com.mastfrog.thread.util
                         com.mastfrog.graal.annotation
                         com.mastfrog.util.multivariate
                         com.mastfrog.util.streams.stdio
-                        org.checkerframework
-                    </exclude>
-                    <exludePatterns>
-                        com/mastfrog/java/**
+                        org.checkerframework</exclude>
+                    <exludePatterns>com/mastfrog/java/**
                         com/mastfrog/annotation/processor
                         com/mastfrog/annotation/validation
                         com/mastfrog/annotation/registries
@@ -150,8 +151,7 @@
                         com/google/common/eventbus
                         com/google/common/html
                         com/google/common/xml
-                        com/google/common/escape
-                    </exludePatterns>
+                        com/google/common/escape</exludePatterns>
                 </configuration>
             </plugin>
             <plugin>
@@ -189,7 +189,7 @@
                 </executions>
                 <configuration>
                     <revisionClass>com.timboudreau.metaupdatecenter.CurrentVersion</revisionClass>
-                    <!--<auto>false</auto>-->
+<!-- <auto>false</auto> -->
                 </configuration>
             </plugin>
         </plugins>
