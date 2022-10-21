@@ -8,7 +8,7 @@
     <parent>
         <groupId>com.mastfrog</groupId>
         <artifactId>meta-update-server-parent</artifactId>
-        <version>1.9.7</version>
+        <version>1.9.8</version>
     </parent>
     <artifactId>first-test-module-v1</artifactId>
     <packaging>nbm</packaging>
