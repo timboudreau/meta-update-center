@@ -22,7 +22,7 @@ Features
  * It processes metadata in the downloaded NBM files and uses that to figure out the rest.
  * It periodically checks for new versions and updates what it is serving automatically.
  * Automatically generates and serves a NetBeans plugin which registers your server as an update server - your users install that, and from then on the IDE/application will automatically check your server for updates
- * Logs hit and download statistics using in easily analyzed [bunyan-compatible JSON](https://github.com/trentm/node-bunyan) using [bunyan-java](https://github.com/timboudreau/bunyan-java)
+ * Logs hit and download statistics using in easily analyzed [bunyan-compatible JSON](https://github.com/trentm/node-bunyan) using [bunyan-java](https://github.com/timboudreau/bunyan-java-v2)
 
 Usage fairly self-explanatory - start it and navigate to it in a browser.  Try the [demo server](http://timboudreau.com/modules) to see what it does.
 
