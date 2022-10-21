@@ -2,7 +2,6 @@ package com.timboudreau.metaupdatecenter;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.net.MediaType;
 import com.google.inject.Inject;
 import com.mastfrog.acteur.Acteur;
 import com.mastfrog.acteur.CheckIfNoneMatchHeader;
@@ -23,10 +22,11 @@ import com.mastfrog.acteur.headers.Method;
 import com.mastfrog.acteur.preconditions.Description;
 import com.mastfrog.acteur.preconditions.Methods;
 import com.mastfrog.acteur.preconditions.PathRegex;
-import com.mastfrog.acteur.util.CacheControl;
-import static com.mastfrog.acteur.util.CacheControlTypes.Public;
-import static com.mastfrog.acteur.util.CacheControlTypes.max_age;
-import static com.mastfrog.acteur.util.CacheControlTypes.must_revalidate;
+import com.mastfrog.acteur.header.entities.CacheControl;
+import static com.mastfrog.acteur.header.entities.CacheControlTypes.Public;
+import static com.mastfrog.acteur.header.entities.CacheControlTypes.max_age;
+import static com.mastfrog.acteur.header.entities.CacheControlTypes.must_revalidate;
+import com.mastfrog.mime.MimeType;
 import static com.timboudreau.metaupdatecenter.ModuleCatalogPage.MODULE_PAGE_REGEX;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.util.ReferenceCounted;
@@ -60,7 +60,7 @@ public class ModuleCatalogPage extends Page {
         @Inject
         SetupLastModified(ModuleSet set, HttpEvent evt, Stats stats) {
             add(LAST_MODIFIED, set.getNewestDownloaded());
-            MediaType contentType = "true".equals(evt.urlParameter("json")) ? MediaType.JSON_UTF_8 : MediaType.XML_UTF_8;
+            MimeType contentType = "true".equals(evt.urlParameter("json")) ? MimeType.JSON_UTF_8 : MimeType.XML_UTF_8;
             add(CONTENT_TYPE, contentType);
             add(CACHE_CONTROL, new CacheControl(Public, must_revalidate).add(max_age, Duration.ofHours(1)));
             add(VARY, new HeaderValueType<?>[]{CONTENT_ENCODING});

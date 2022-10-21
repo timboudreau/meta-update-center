@@ -2,7 +2,6 @@ package com.timboudreau.metaupdatecenter;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.net.MediaType;
 import com.google.inject.Inject;
 import com.mastfrog.acteur.Acteur;
 import com.mastfrog.acteur.Event;
@@ -18,7 +17,8 @@ import com.mastfrog.acteur.preconditions.Description;
 import com.mastfrog.acteur.preconditions.Methods;
 import com.mastfrog.acteur.preconditions.PathRegex;
 import com.mastfrog.acteur.preconditions.RequiredUrlParameters;
-import com.mastfrog.acteur.util.CacheControl;
+import com.mastfrog.acteur.header.entities.CacheControl;
+import com.mastfrog.mime.MimeType;
 import com.mastfrog.url.URL;
 import com.mastfrog.util.preconditions.Exceptions;
 import com.mastfrog.util.time.TimeUtil;
@@ -56,13 +56,12 @@ public class PutModulePage extends Acteur {
 
     @Inject
     PutModulePage(ModuleSet set, HttpEvent evt, NbmDownloader downloader, ObjectMapper mapper) throws Exception {
-        add(Headers.CONTENT_TYPE, MediaType.PLAIN_TEXT_UTF_8);
+        add(Headers.CONTENT_TYPE, MimeType.PLAIN_TEXT_UTF_8);
         add(Headers.EXPIRES, ZonedDateTime.now().minus(Duration.ofDays(30)));
         add(Headers.CACHE_CONTROL, CacheControl.PRIVATE_NO_CACHE_NO_STORE);
         setChunked(true);
         String url = evt.urlParameter("url");
         boolean useOriginalUrl = "true".equals(evt.urlParameter("useOriginalUrl"));
-        add(Headers.CONTENT_TYPE, MediaType.PLAIN_TEXT_UTF_8);
         URL u = URL.parse(url);
         if (!u.isValid()) {
             setState(new RespondWith(BAD_REQUEST, "URL " + u + " has problems: " + u.getProblems()));

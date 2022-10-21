@@ -12,7 +12,7 @@ import com.mastfrog.acteur.server.PathFactory;
 import static com.mastfrog.acteur.headers.Method.GET;
 import com.mastfrog.acteur.preconditions.Description;
 import com.mastfrog.acteur.preconditions.Methods;
-import com.mastfrog.acteur.util.CacheControl;
+import com.mastfrog.acteur.header.entities.CacheControl;
 import com.mastfrog.settings.Settings;
 import com.mastfrog.url.Path;
 import com.mastfrog.url.URL;

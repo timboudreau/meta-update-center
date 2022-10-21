@@ -6,7 +6,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.auth.Authenticator;
-import com.mastfrog.acteur.util.BasicCredentials;
+import com.mastfrog.acteur.header.entities.BasicCredentials;
 import com.mastfrog.acteur.util.PasswordHasher;
 import com.mastfrog.bunyan.java.v2.Log;
 import com.mastfrog.bunyan.java.v2.Logs;

@@ -4,8 +4,8 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.mastfrog.bunyan.java.v2.Log;
 import com.mastfrog.bunyan.java.v2.Logs;
-import com.mastfrog.giulius.ShutdownHookRegistry;
 import com.mastfrog.settings.Settings;
+import com.mastfrog.shutdown.hooks.ShutdownHookRegistry;
 import com.mastfrog.util.streams.Streams;
 import com.mastfrog.util.time.TimeUtil;
 import com.timboudreau.metaupdatecenter.NbmDownloader.DownloadHandler;
@@ -84,7 +84,7 @@ final class WatchDir implements Runnable {
                         watchService = FileSystems.getDefault().newWatchService();
                         long seconds = settings.getLong(SETTINGS_KEY_FILE_NOTIFICATION_PROCESS_DELAY_SECONDS, 10);
                         delay = Duration.ofSeconds(seconds);
-                        reg.add(watchService);
+                        reg.addResource(watchService);
                         path.register(watchService, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_MODIFY);
                         queue = new DelayQueue<>();
                         threadPool = Executors.newFixedThreadPool(3);

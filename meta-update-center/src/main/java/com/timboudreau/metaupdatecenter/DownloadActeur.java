@@ -1,6 +1,5 @@
 package com.timboudreau.metaupdatecenter;
 
-import com.google.common.net.MediaType;
 import com.google.inject.Inject;
 import com.mastfrog.acteur.Acteur;
 import com.mastfrog.acteur.CheckIfModifiedSinceHeader;
@@ -21,6 +20,7 @@ import static com.mastfrog.acteur.headers.Method.HEAD;
 import com.mastfrog.acteur.preconditions.Description;
 import com.mastfrog.acteur.preconditions.Methods;
 import com.mastfrog.acteur.preconditions.PathRegex;
+import com.mastfrog.mime.MimeType;
 import com.mastfrog.url.Path;
 import com.mastfrog.util.time.TimeUtil;
 import static com.timboudreau.metaupdatecenter.DownloadActeur.DOWNLOAD_REGEX;
@@ -64,7 +64,7 @@ class DownloadActeur extends Acteur {
             notFound("No such file " + file);
         } else {
             setChunked(true);
-            add(CONTENT_TYPE, MediaType.OCTET_STREAM);
+            add(CONTENT_TYPE, MimeType.OCTET_STREAM);
             add(LAST_MODIFIED, TimeUtil.fromUnixTimestamp(file.lastModified()));
             add(ETAG, new AsciiString(hash));
             ok();

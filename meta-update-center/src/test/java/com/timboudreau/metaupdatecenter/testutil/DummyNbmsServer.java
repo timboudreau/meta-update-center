@@ -15,12 +15,13 @@ import com.mastfrog.acteur.headers.Headers;
 import com.mastfrog.acteur.server.ServerModule;
 import static com.mastfrog.acteur.server.ServerModule.HTTP_COMPRESSION;
 import static com.mastfrog.acteur.server.ServerModule.PORT;
-import com.mastfrog.acteur.util.CacheControl;
-import com.mastfrog.acteur.util.CacheControlTypes;
+import com.mastfrog.acteur.header.entities.CacheControl;
+import com.mastfrog.acteur.header.entities.CacheControlTypes;
 import com.mastfrog.acteur.util.Server;
 import com.mastfrog.function.throwing.ThrowingQuadConsumer;
 import com.mastfrog.giulius.Dependencies;
 import com.mastfrog.giulius.bunyan.java.v2.LoggingModule;
+import com.mastfrog.mime.MimeType;
 import com.mastfrog.settings.Settings;
 import com.mastfrog.url.Path;
 import com.mastfrog.util.net.PortFinder;
@@ -113,7 +114,7 @@ final class DummyNbmsServer extends Application {
         buf.writeBytes(msg.toString().getBytes(UTF_8));
         DefaultFullHttpResponse resp = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
                 HttpResponseStatus.NOT_FOUND, buf);
-        Headers.write(Headers.CONTENT_TYPE, MediaType.HTML_UTF_8.withCharset(UTF_8), resp);
+        Headers.write(Headers.CONTENT_TYPE, MimeType.HTML_UTF_8, resp);
         Headers.write(Headers.CONTENT_LENGTH, buf.writerIndex(), resp);
         Headers.write(Headers.CONTENT_LANGUAGE, Locale.ENGLISH, resp);
         Headers.write(Headers.CACHE_CONTROL, new CacheControl(CacheControlTypes.no_cache), resp);
@@ -170,7 +171,7 @@ final class DummyNbmsServer extends Application {
         DlHeadersActeur(TestProjectNBMs target, HttpEvent evt) {
             add(Headers.ETAG, target.name());
             add(Headers.LAST_MODIFIED, target.lastModified());
-            add(Headers.CONTENT_TYPE, MediaType.OCTET_STREAM);
+            add(Headers.CONTENT_TYPE, MimeType.OCTET_STREAM);
             add(Headers.stringHeader("x-module-rev"), "" + target.rev());
             add(Headers.stringHeader("x-module-id"), "" + target.name());
             ZonedDateTime ims = evt.header(Headers.IF_MODIFIED_SINCE);

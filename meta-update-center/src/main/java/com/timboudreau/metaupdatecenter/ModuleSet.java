@@ -82,12 +82,12 @@ public final class ModuleSet implements Iterable<ModuleItem> {
             } catch (JsonParseException ex) {
                 logs.get().error("Failed to parse JSON").add("file", f.getAbsolutePath())
                         .add(ex).close();
-                System.out.println("failed parsing JSON " + f);
+                System.err.println("failed parsing JSON " + f);
                 Exceptions.printStackTrace(ex);
             } catch (IOException ex) {
                 logs.get().error("Error reading JSON").add("file", f.getAbsolutePath())
                         .add(ex).close();
-                System.out.println("failed reading " + f);
+                System.err.println("failed reading " + f);
                 Exceptions.printStackTrace(ex);
             }
         }

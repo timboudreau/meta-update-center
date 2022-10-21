@@ -11,7 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.mastfrog.acteur.headers.Headers;
-import com.mastfrog.jackson.JacksonConfigurer;
+import com.mastfrog.jackson.configuration.JacksonConfigurer;
 import com.mastfrog.util.service.ServiceProvider;
 import com.mastfrog.util.time.TimeUtil;
 import com.timboudreau.metaupdatecenter.borrowed.SpecificationVersion;

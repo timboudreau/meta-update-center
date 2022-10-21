@@ -1,9 +1,6 @@
 package com.timboudreau.metaupdatecenter;
 
-import com.google.common.base.Optional;
-import com.google.common.net.MediaType;
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import com.mastfrog.acteur.Acteur;
 import com.mastfrog.acteur.Closables;
 import com.mastfrog.acteur.HttpEvent;
@@ -17,9 +14,9 @@ import com.mastfrog.acteur.preconditions.Methods;
 import com.mastfrog.acteur.preconditions.ParametersMustBeNumbersIfPresent;
 import com.mastfrog.acteur.preconditions.Path;
 import com.mastfrog.acteur.spi.ApplicationControl;
+import com.mastfrog.mime.MimeType;
 import com.mastfrog.util.streams.ContinuousLineStream;
 import com.mastfrog.util.streams.ContinuousStringStream;
-import static com.timboudreau.metaupdatecenter.UpdateCenterServer.SETTINGS_KEY_HTTP_LOG_ENABLED;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.Channel;
@@ -31,6 +28,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
+import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -54,7 +52,7 @@ public class LiveLogPage extends Acteur {
     LiveLogPage() {
         setChunked(true);
         ok();
-        add(CONTENT_TYPE, MediaType.JSON_UTF_8);
+        add(CONTENT_TYPE, MimeType.JSON_UTF_8);
         setResponseBodyWriter(LiveResponseWriter.class);
     }
 
@@ -72,7 +70,7 @@ public class LiveLogPage extends Acteur {
             clos.add(channel);
             ContinuousStringStream strings = new ContinuousStringStream(channel, 1024);
             stream = new ContinuousLineStream(strings, charset.newDecoder(), 1024);
-            Optional<Long> offsetOpt = evt.longUrlParameter("offset");
+            Optional<Long> offsetOpt = evt.uriQueryParameter("offset", Long.class);
             if (offsetOpt.isPresent()) {
                 stream.position(Math.min(stream.available(), offsetOpt.get()));
                 // get to the first real line start

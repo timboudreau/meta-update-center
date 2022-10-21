@@ -5,7 +5,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.mastfrog.acteur.HttpEvent;
-import com.mastfrog.acteur.util.BasicCredentials;
+import com.mastfrog.acteur.header.entities.BasicCredentials;
 import com.mastfrog.acteur.util.RequestID;
 import com.mastfrog.bunyan.java.v2.Log;
 import com.mastfrog.bunyan.java.v2.Logs;

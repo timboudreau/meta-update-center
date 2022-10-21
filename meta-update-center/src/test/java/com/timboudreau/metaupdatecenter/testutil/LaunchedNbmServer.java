@@ -120,7 +120,6 @@ public final class LaunchedNbmServer {
 
     public LaunchedNbmServer clearPollResults() {
         interceptor.clear();
-        ;
         return this;
     }
 

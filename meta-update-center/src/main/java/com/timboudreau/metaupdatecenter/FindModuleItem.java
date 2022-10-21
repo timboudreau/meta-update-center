@@ -12,8 +12,8 @@ import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.Page;
 import com.mastfrog.acteur.headers.Headers;
 import com.mastfrog.acteur.preconditions.Description;
-import com.mastfrog.acteur.util.CacheControl;
-import com.mastfrog.acteur.util.CacheControlTypes;
+import com.mastfrog.acteur.header.entities.CacheControl;
+import com.mastfrog.acteur.header.entities.CacheControlTypes;
 import com.mastfrog.url.Path;
 import java.time.Duration;
 

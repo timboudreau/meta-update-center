@@ -1,6 +1,5 @@
 package com.timboudreau.metaupdatecenter;
 
-import com.google.common.net.MediaType;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.mastfrog.acteur.Acteur;
@@ -14,6 +13,7 @@ import com.mastfrog.acteur.preconditions.Description;
 import com.mastfrog.acteur.preconditions.Methods;
 import com.mastfrog.acteur.preconditions.Path;
 import static com.mastfrog.giulius.bunyan.java.v2.LoggingModule.SETTINGS_KEY_LOG_FILE;
+import com.mastfrog.mime.MimeType;
 import com.timboudreau.metaupdatecenter.LogPage.CheckLogEnabled;
 import com.timboudreau.metaupdatecenter.LogPage.CheckLogFileReadable;
 import static com.timboudreau.metaupdatecenter.UpdateCenterServer.SETTINGS_KEY_HTTP_LOG_ENABLED;
@@ -36,7 +36,7 @@ public class LogPage extends Acteur {
     LogPage(Closables clos, @Named(SETTINGS_KEY_HTTP_LOG_ENABLED) boolean enabled) throws FileNotFoundException {
         setChunked(true);
         ok();
-        add(CONTENT_TYPE, MediaType.JSON_UTF_8);
+        add(CONTENT_TYPE, MimeType.JSON_UTF_8);
         setResponseWriter(ChunkedFileResponseWriter.class);
     }
 

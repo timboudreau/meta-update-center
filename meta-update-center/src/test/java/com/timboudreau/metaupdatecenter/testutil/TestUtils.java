@@ -25,7 +25,7 @@ package com.timboudreau.metaupdatecenter.testutil;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mastfrog.acteur.util.BasicCredentials;
+import com.mastfrog.acteur.header.entities.BasicCredentials;
 import com.mastfrog.util.collections.StringObjectMap;
 import com.mastfrog.util.streams.Streams;
 import static com.mastfrog.util.streams.Streams.readUTF8String;
@@ -206,7 +206,7 @@ public class TestUtils {
         return null;
     }
 
-    List<Map<String, Object>> getCatalog(int port) throws Throwable {
+    public List<Map<String, Object>> getCatalog(int port) throws Throwable {
         URL catalogUrl = nbmServerUrl(port, "modules", "json=true");
         HttpURLConnection conn = (HttpURLConnection) catalogUrl.openConnection();
         try {
